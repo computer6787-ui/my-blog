@@ -2,7 +2,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const name=document.getElementById("username")
     const email = document.getElementById("email");
     const password = document.getElementById("password");
-    
+    const API_URL =
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost"
+        ? "http://127.0.0.1:8000"
+        : "https://my-blog-yi3h.onrender.com";
 
   const userForm = document.getElementById("register");
     
@@ -16,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const userEmail = email.value;
         const userPassword = password.value;
         try {
-            const response = await fetch("http://127.0.0.1:8000/user", {
+            const response = await fetch(`${API_URL}/user`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

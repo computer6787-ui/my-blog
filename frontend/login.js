@@ -1,4 +1,10 @@
 console.log('Login script loaded');
+const API_URL =
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost"
+        ? "http://127.0.0.1:8000"
+        : "https://my-blog-yi3h.onrender.com";
+
 document.addEventListener('DOMContentLoaded', function() {
     const loginform = document.getElementById('login_form');
     loginform.addEventListener('submit',async function(event) {
@@ -7,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;   
 
-        const response =await fetch('http://127.0.0.1:8000/login',{
+        const response =await fetch(`${API_URL}/login`,{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

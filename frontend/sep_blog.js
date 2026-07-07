@@ -1,10 +1,15 @@
 const parts = window.location.pathname.split("/");
 const id = parts[parts.length - 1];
+const API_URL =
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost"
+        ? "http://127.0.0.1:8000"
+        : "https://my-blog-yi3h.onrender.com";
 
 async function loadBlog() {
     const token = localStorage.getItem("token");
 
-    const response = await fetch(`http://127.0.0.1:8000/blog/${id}`, {
+    const response = await fetch(`${API_URL}/blog/${id}`, {
         headers: {
             "Authorization": `Bearer ${token}`
         }

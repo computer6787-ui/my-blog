@@ -25,9 +25,14 @@ autoResize();
         const blogTitle = title.value;
         const blogBody = body.value;
         const token = localStorage.getItem("token");
+        const API_URL =
+        window.location.hostname === "127.0.0.1" ||
+        window.location.hostname === "localhost"
+        ? "http://127.0.0.1:8000"
+        : "https://my-blog-yi3h.onrender.com";
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/blog", {
+            const response = await fetch(`${API_URL}/blog`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
