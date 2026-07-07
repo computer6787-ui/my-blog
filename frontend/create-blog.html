@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/frontend/style.css">
+
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="/frontend/bloglogo.png"  alt="Logo">
+        </div>
+          
+        <nav class="nav">
+        <ul>
+            <li><a class="nav_link" href="/frontend/index.html">Home</a></li>
+            <li><a class="nav_button" id="auth" href="/frontend/login.html">Login</a></li>
+        </ul>
+        </nav>
+    </header>
+
+    <main>
+        <center>
+            <form id="blog_form" method="post">
+            <h2>Create Blog</h2>
+            <input type="text" id="title" name="title" class="title" placeholder="Title" required><br><hr><br>
+            <textarea id="body" name="body" class="body" placeholder="Write your blog here..." required></textarea><br><br>
+            <button type="submit" id="publish-button">Publish</button>
+            </form>
+        </center>
+    </main>
+    <script src="/frontend/create-blog.js" ></script>
+    </body>
+</html>

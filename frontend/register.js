@@ -1,0 +1,43 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const name=document.getElementById("username")
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    
+
+  const userForm = document.getElementById("register");
+    
+
+    userForm.addEventListener("submit", createUser);
+
+    async function createUser(event) {
+      
+        event.preventDefault(); 
+        const userName=name.value;
+        const userEmail = email.value;
+        const userPassword = password.value;
+        try {
+            const response = await fetch("http://127.0.0.1:8000/user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: userName,
+                    email: userEmail,
+                    password:userPassword
+                })
+            });
+
+            if (response.ok) {
+                alert("You have been registered!")
+                 window.location.href = "/frontend/login.html";
+            
+            }else {
+                alert("Something went wrong")
+            }
+
+        } catch (error) {
+            console.error("Network error:", error);
+        }
+    }
+});

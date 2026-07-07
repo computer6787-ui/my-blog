@@ -1,0 +1,122 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+.logo img {
+    width: 230px;
+    border-radius: 50px;
+}
+
+.header {
+    background-color: #b9b2d2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.header nav ul {
+    display: flex;
+    list-style: none;
+    gap: 15px;
+}
+
+.nav_link {
+    text-decoration: none;
+    color: azure;
+
+    padding: 10px 5px;
+    background-color: #4b3b6b;
+    border-radius: 5px;
+    
+}
+.nav_button {
+    text-decoration: none;
+    color: azure;
+    padding: 10px 5px;
+    background-color: #4b3b6b;
+    border-radius: 5px;
+    transition: transform 0.3s ease;
+}
+.nav_button:hover {
+    background-color: #3a2b5b;
+    transform: scale(1.05);
+}
+.hero {
+    background-color: #d7d5dc;
+    padding: 20px ;
+}
+.blog-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+}
+.blog-card {
+    background-color: #e0dfe3;
+    padding: 18px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+.readmore_button {
+    text-decoration: none;
+    border:none;
+    opacity: 0.6;
+    font-weight:lighter;
+    transition: opacity 0.3s ease;
+}
+.readmore_button:hover {
+    opacity: 1;
+}
+
+.blog-header {
+    text-decoration: none;
+    background-color: #d7d5dc;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.blog-header h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+    color:rgb(66, 24, 66);
+}
+.blog-header b {
+    font-size: 1em;
+    color:rgb(100, 65, 100);
+}
+.blog-content {
+    padding: 20px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.title {
+   
+    width:100%;
+    border:none;
+    outline:none;
+
+    font-size:3rem;
+    font-weight:bold;
+
+    background:transparent;
+}
+
+.body {
+    border: none;
+    outline: none;
+    width: 100%;
+    min-height: 200px;
+    resize: none;
+    overflow-y: hidden;
+    box-sizing: border-box;
+
+}
