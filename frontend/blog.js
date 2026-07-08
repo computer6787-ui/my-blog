@@ -28,7 +28,7 @@ const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}`);
         article.innerHTML = `
             <hr>
             <h2>${blog.title}</h2>
-            <p>${blog.body.slice(0, 100)}...</p>
+            <p>${blog.body.slice(0, 70)}...</p>
 
             <button class="readmore_button" onclick="readMore(${blog.id})">
                 Read More...

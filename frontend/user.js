@@ -26,7 +26,7 @@ async function loadUser() {
     const user = await response.json();
 const container = document.getElementById("published-blogs");
 
-user.blogs.forEach(blog => {
+user.blogs.reverse().forEach(blog => {
     const card = document.createElement("div");
     card.className = "personalBlog-card";
 
@@ -34,7 +34,7 @@ user.blogs.forEach(blog => {
     card.innerHTML = `
         <hr>
         <h2>${blog.title}</h2>
-        <p>${blog.body.slice(0,100)}...</p>
+        <p>${blog.body.slice(0,70)}...</p>
         <button class="dict_button" onclick="edit_blog(${blog.id})">Edit</button>
                <button class="dict_button" onclick="delete_blog(${blog.id})">
               Delete

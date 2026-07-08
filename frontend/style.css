@@ -55,6 +55,7 @@
     padding: 20px;
 }
 .blog-card {
+    width: 100%;
     background-color: #e0dfe3;
     padding: 18px;
     border-radius: 5px;
@@ -124,6 +125,7 @@
 
 }
 .personalBlog-card {
+    width: 100%;
     background-color: #e0dfe3;
     padding: 18px;
     border-radius: 5px;
