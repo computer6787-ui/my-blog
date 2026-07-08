@@ -67,31 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 checkLogin()
-
-    writeBlogButton.addEventListener('click', async function() {
-    const token = localStorage.getItem("token");
-    if (token){
-        window.location.href= "/frontend/create-blog.html";
-    }else{
-        await Swal.fire({
-             icon: "warning",
-             title: "Login Required",
-             text: "Please log in to write a blog."
-});
-        window.location.href= "/frontend/login.html"
-    }
 });
 
 
 
-
-
-
-
-readBlogsButton.addEventListener('click', function() {
-     blogSection.scrollIntoView({ behavior: 'smooth' });
-
-
-})
-
-});
