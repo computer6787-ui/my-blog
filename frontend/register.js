@@ -33,11 +33,19 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (response.ok) {
-                alert("You have been registered!")
+                await Swal.fire({
+    icon: "success",
+    title: "Success!",
+    text: "Account created successfully."
+});
                  window.location.href = "/frontend/login.html";
             
             }else {
-                alert("Something went wrong")
+               await Swal.fire({
+    icon: "error",
+    title: "Oops!",
+    text: "Something went wrong."
+});
             }
 
         } catch (error) {

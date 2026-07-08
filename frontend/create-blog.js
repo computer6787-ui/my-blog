@@ -45,13 +45,25 @@ autoResize();
             });
 
             if (response.ok) {
-                alert("Blog published!")
+                await Swal.fire({
+                   icon: "success",
+                   title: "Success!",
+                   text: "Blog created successfully."
+});
                  window.location.href = "/frontend/index.html";
             } else if(response.status==401){
-                alert("Please log in first");
+                await Swal.fire({
+                 icon: "warning",
+                  title: "Login Required",
+                     text: "Please log in to write a blog."
+});
                  window.location.href = "/frontend/login.html";
             }else {
-                alert("Something went wrong")
+                await Swal.fire({
+                 icon: "error",
+                    title: "Oops!",
+                         text: "Something went wrong"
+});
             }
 
         } catch (error) {

@@ -120,3 +120,35 @@
     box-sizing: border-box;
 
 }
+.personalBlog-card {
+    background-color: #e0dfe3;
+    padding: 18px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.personalBlog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.user-profile{
+    padding: 18px;
+    background-color: aliceblue;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.dict_button {
+    background-color:aliceblue;
+    padding: 1px;
+    border-radius:5px;
+
+}
+.publish-button {
+    background-color:#3a2b5b;
+    padding: 1px;
+    border-radius:5px;
+    color:azure;
+}

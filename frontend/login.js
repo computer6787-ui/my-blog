@@ -1,4 +1,3 @@
-console.log('Login script loaded');
 const API_URL =
     window.location.hostname === "127.0.0.1" ||
     window.location.hostname === "localhost"
@@ -26,9 +25,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = await response.json();
         localStorage.setItem('token', data.access_token);
         const token = localStorage.getItem("token")
-        alert("Login successful!");
-        window.location.href = "/frontend/index.html";
+        if(response.status==200){
+            await Swal.fire({
+            icon: "success",
+            title: "Success!",
+             text: "You have been logged in successfully."
+});
+            window.location.href = "/frontend/index.html";
+        }
         
+        if(response.status==404 || response.status==400){
+            await Swal.fire({
+    icon: "error",
+    title: "Invalid request",
+    text: "You have entered your Password or Gmail wrong"
+});
+            localStorage.removeItem("token")
+            window.location.reload();
+        }
 
     });
 });  

@@ -4,26 +4,94 @@ document.addEventListener('DOMContentLoaded', function() {
     const blogSection = document.getElementById('blog_section');
     const authLink=document.getElementById("auth");
     const token=localStorage.getItem("token");
+    
+    const API_URL =
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost"
+        ? "http://127.0.0.1:8000"
+        : "https://my-blog-yi3h.onrender.com";
+    
+    function showLogin() { authLink.textContent = "Login"; } 
+    function showLogout() { authLink.textContent = "Logout"; authLink.href="#" }
+    async function checkLogin() {
+    const token = localStorage.getItem("token");
 
-    readBlogsButton.addEventListener('click', function() {
-        blogSection.scrollIntoView({ behavior: 'smooth' });
+    if (!token) {
+        showLogin();
+        return;
+    }
 
-});
-    writeBlogButton.addEventListener('click', function() {
-        window.location.href= "/frontend/create-blog.html";
-});
-    if (token) {
-    authLink.textContent = "Logout";
-    authLink.href = "#";
+    try {
+        const response = await fetch(`${API_URL}/user/me`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
 
-    authLink.addEventListener("click", function (event) {
-        event.preventDefault();
+        if (response.ok) {
+            showLogout();
+        } else {
+            localStorage.removeItem("token");
+            showLogin();
+        }
+    } catch (error) {
+        console.error(error);
+        showLogin();
+    }
 
-        localStorage.removeItem("token");
-        alert("You have been logged out")
 
-        window.location.href = "/frontend/index.html";
-    });
+
 }
 
+
+  authLink.addEventListener("click", async function (e) {
+
+    if (authLink.textContent === "Logout") {
+    const result = await Swal.fire({
+    title: "You want to logout?",
+    text: "You cannot access blogs while logged out.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Confirm",
+    cancelButtonText: "Cancel"
+});
+    if (!result.isConfirmed) return;
+
+        e.preventDefault();
+        localStorage.removeItem("token");
+        window.location.reload();
+    }
+});
+
+
+
+
+checkLogin()
+
+    writeBlogButton.addEventListener('click', async function() {
+    const token = localStorage.getItem("token");
+    if (token){
+        window.location.href= "/frontend/create-blog.html";
+    }else{
+        await Swal.fire({
+             icon: "warning",
+             title: "Login Required",
+             text: "Please log in to write a blog."
+});
+        window.location.href= "/frontend/login.html"
+    }
+});
+
+
+
+
+
+
+
+readBlogsButton.addEventListener('click', function() {
+     blogSection.scrollIntoView({ behavior: 'smooth' });
+
+
 })
+
+});

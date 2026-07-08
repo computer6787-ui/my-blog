@@ -11,7 +11,11 @@ const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}`);
     const blogs = await response.json();
 
     if (blogs.length === 0) {
-        alert("No more blogs to load.");
+        await Swal.fire({
+        icon: "warning",
+        title: "No more blogs",
+        text: "No more blogs to fetch,maybe write some?"
+});
         return;
     }
 
@@ -44,11 +48,15 @@ async function loadMore() {
     await loadBlogs();
 }
 
-function readMore(id) {
+async function readMore(id) {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        alert("Please log in to read the full blog.");
+        await Swal.fire({
+    icon: "warning",
+    title: "Login Required",
+    text: "Please log in to see the blog."
+});
 
         window.location.href = "/frontend/login.html"; 
         return;

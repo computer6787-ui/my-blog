@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
-    
 <head>
-    <title>Blog</title>
+    <title>My Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="/frontend/style.css">
@@ -18,24 +17,25 @@
         <ul>
             <li><a class="nav_link" href="/frontend/index.html">Home</a></li>
             <li><a class="nav_button" id="auth" href="/frontend/login.html">Login</a></li>
-            
-
         </ul>
         </nav>
     </header>
+ <main>
+    <article class="user-profile">
+        <h3>User Profile</h3> 
+        <h5>Name:<span id="name" class="name"> </span></h5>
+        <h5>Email:<span id="email" class="email"> </span></h5>
+    </article>
+    <article id="published-blogs">
+        <hr>
+        <h4>Blogs:<span></span></h4>
+        <br>
+        <br>
+        <hr>
+    </article>
+ </main>
+<script src="/frontend/user.js"></script> 
+<script src="/frontend/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-   <center> <section class="blog-header">
-        <h1 id="title"></h1>
-        <b>Written by✍️: <span id="author"></span></b>
-    </section>
-
-    <hr>
-
-    <article id="body" class="blog-content"></article></center>
-
-    <script src="/frontend/sep_blog.js"></script>
-    <script src="/frontend/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-</body>
-</html>
+ </body>

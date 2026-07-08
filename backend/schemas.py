@@ -12,6 +12,15 @@ class Blog(BaseModel):
         
      model_config = ConfigDict(from_attributes=True)
 
+class BlogSummary(BaseModel):
+    id: int
+    title: str
+    body: str
+    published: bool
+
+    class Config:
+        orm_mode = True
+
 
 
 class User(BaseModel):
@@ -22,7 +31,7 @@ class User(BaseModel):
 class Show_user(BaseModel):
     name:str
     email:str
-    blogs:list[Blog]=[]
+    blogs:list[BlogSummary]=[]
 
     class Config():
         orm_mode=True

@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
-    
 <head>
-    <title>Blog</title>
+    <title>Edit Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="/frontend/style.css">
@@ -18,24 +17,24 @@
         <ul>
             <li><a class="nav_link" href="/frontend/index.html">Home</a></li>
             <li><a class="nav_button" id="auth" href="/frontend/login.html">Login</a></li>
-            
-
         </ul>
         </nav>
     </header>
 
-   <center> <section class="blog-header">
-        <h1 id="title"></h1>
-        <b>Written by✍️: <span id="author"></span></b>
-    </section>
-
-    <hr>
-
-    <article id="body" class="blog-content"></article></center>
-
-    <script src="/frontend/sep_blog.js"></script>
-    <script src="/frontend/index.js"></script>
+    <main>
+        <center>
+            <form id="edit-form">
+            <h2>Edit Blog</h2>
+            <input type="text" id="title" name="title" class="title" placeholder="Title" required><br><hr><br>
+            <textarea id="body" name="body" class="body" placeholder="Write your blog here..." required></textarea><br><br>
+            <button type="submit" class="publish-button">Publish</button>
+            </form>
+        </center>
+    </main>
+    <script src="/frontend/edit-blog.js" ></script>
+    <script src="/frontend/index.js" ></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-</body>
+
+    </body>
 </html>

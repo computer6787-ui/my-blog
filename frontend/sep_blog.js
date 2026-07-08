@@ -16,18 +16,30 @@ async function loadBlog() {
     });
 
     if (response.status === 401) {
-        alert("Please log in to read the full blog.");
+        await Swal.fire({
+    icon: "warning",
+    title: "Login Required",
+    text: "Please log in to write a blog."
+});
         window.location.href = "/frontend/login.html";
         return;
     }
 
     if (response.status === 404) {
-        alert("Blog not found.");
+        await Swal.fire({
+    icon: "error",
+    title: "No blog found",
+    text: "No blogs found with this ID."
+});
         return;
     }
 
     if (!response.ok) {
-        alert("Something went wrong.");
+        await Swal.fire({
+    icon: "error",
+    title: "Oops!",
+    text: "Something went wrong."
+});
         return;
     }
 
