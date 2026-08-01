@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+ <main>
+    <article class="user-profile">
+        <h3>User Profile</h3> 
+        <h5>Name:<span id="name" class="name"> </span></h5>
+        <h5>Email:<span id="email" class="email"> </span></h5>
+    </article>
+    <article id="published-blogs">
+        <hr>
+        <h4>Blogs:<span></span></h4>
+        <br>
+        <br>
+        <hr>
+    </article>
+ </main>
+<script type="module"  src="{{ url_for('static', path='js/user.js') }}"></script> 
+<script type="module" src="{{ url_for('static', path='js/index.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}
