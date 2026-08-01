@@ -1,8 +1,4 @@
-const API_URL =
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "localhost"
-        ? "http://127.0.0.1:8000"
-        : "https://my-blog-yi3h.onrender.com";
+import { API_URL,ROUTES } from "./config.js";
 
 document.addEventListener('DOMContentLoaded', function() {
     const loginform = document.getElementById('login_form');
@@ -31,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
             title: "Success!",
              text: "You have been logged in successfully."
 });
-            window.location.href = "/frontend/index.html";
+            window.location.href = ROUTES.HOME;
         }
         
         if(response.status==404 || response.status==400){

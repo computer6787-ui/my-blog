@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
@@ -36,6 +38,16 @@ class Show_user(BaseModel):
     class Config():
         orm_mode=True
 
+class PendingUser(BaseModel):
+    name: str
+    email: str
+    hashed_password: str
+    verification_code: str
+    expires_at: datetime
+
+    class Config:
+        orm_mode = True
+
 
 
 class ShowBlog(BaseModel):
@@ -58,3 +70,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class VerifyUser(BaseModel):
+    email: str
+    verification_code: str

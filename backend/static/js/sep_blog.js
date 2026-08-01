@@ -1,10 +1,6 @@
 const parts = window.location.pathname.split("/");
 const id = parts[parts.length - 1];
-const API_URL =
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "localhost"
-        ? "http://127.0.0.1:8000"
-        : "https://my-blog-yi3h.onrender.com";
+import { API_URL,ROUTES } from "./config.js";
 
 async function loadBlog() {
     const token = localStorage.getItem("token");
@@ -21,7 +17,7 @@ async function loadBlog() {
     title: "Login Required",
     text: "Please log in to write a blog."
 });
-        window.location.href = "/frontend/login.html";
+        window.location.href =ROUTES.LOGIN;
         return;
     }
 

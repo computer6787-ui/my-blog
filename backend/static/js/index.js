@@ -1,15 +1,12 @@
-document.addEventListener('DOMContentLoaded', function() {
+    import { API_URL } from "./config.js";
+    document.addEventListener('DOMContentLoaded', function() {
     const readBlogsButton = document.getElementById('read_blogs');
     const writeBlogButton = document.getElementById('write_blog');
     const blogSection = document.getElementById('blog_section');
     const authLink=document.getElementById("auth");
     const token=localStorage.getItem("token");
-    
-    const API_URL =
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "localhost"
-        ? "http://127.0.0.1:8000"
-        : "https://my-blog-yi3h.onrender.com";
+
+
     
     function showLogin() { authLink.textContent = "Login"; } 
     function showLogout() { authLink.textContent = "Logout"; authLink.href="#" }

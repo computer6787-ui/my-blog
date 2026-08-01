@@ -1,10 +1,8 @@
+
+
 let skip = 0;
 const limit = 4;
-const API_URL =
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "localhost"
-        ? "http://127.0.0.1:8000"
-        : "https://my-blog-yi3h.onrender.com";
+import { API_URL,ROUTES } from "./config.js";
 async function loadBlogs() {
 const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}`);
 
@@ -58,9 +56,11 @@ async function readMore(id) {
     text: "Please log in to see the blog."
 });
 
-        window.location.href = "/frontend/login.html"; 
+        window.location.href = ROUTES.LOGIN; 
         return;
     }
 
     window.location.href = `/blogs/${id}`;
 }
+window.loadMore = loadMore;
+window.readMore = readMore;

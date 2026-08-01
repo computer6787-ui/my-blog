@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
-from backend import models
+from backend.app import models
 from . import token
 from .database import get_db
 

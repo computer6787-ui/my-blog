@@ -1,3 +1,5 @@
+import { ROUTES } from './config.js';
+
 document.addEventListener('DOMContentLoaded', function() {
     const readBlogsButton = document.getElementById('read_blogs');
     const writeBlogButton = document.getElementById('write_blog');
@@ -14,14 +16,14 @@ readBlogsButton.addEventListener('click', function() {
         console.log
     const token = localStorage.getItem("token");
     if (token){
-        window.location.href= "/frontend/create-blog.html";
+        window.location.href= ROUTES.CREATE_BLOG;
     }else{
         await Swal.fire({
              icon: "warning",
              title: "Login Required",
              text: "Please log in to write a blog."
 });
-        window.location.href= "/frontend/login.html"
+        window.location.href= ROUTES.LOGIN
     }
 });
 

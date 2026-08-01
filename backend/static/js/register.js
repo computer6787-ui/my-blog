@@ -1,12 +1,9 @@
+import { API_URL,ROUTES } from "./config.js";
 document.addEventListener('DOMContentLoaded', function() {
     const name=document.getElementById("username")
     const email = document.getElementById("email");
     const password = document.getElementById("password");
-    const API_URL =
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "localhost"
-        ? "http://127.0.0.1:8000"
-        : "https://my-blog-yi3h.onrender.com";
+
 
   const userForm = document.getElementById("register");
     
@@ -20,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const userEmail = email.value;
         const userPassword = password.value;
         try {
-            const response = await fetch(`${API_URL}/user`, {
+            const response = await fetch(`${API_URL}/user/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -28,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     name: userName,
                     email: userEmail,
-                    password:userPassword
+                    password: userPassword
                 })
             });
 
@@ -36,9 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 await Swal.fire({
     icon: "success",
     title: "Success!",
-    text: "Account created successfully."
+    text: "Verification code sent to your email."
 });
-                 window.location.href = "/frontend/login.html";
+                localStorage.setItem("pending_email", userEmail);
+                window.location.href = "/verify";;
             
             }else {
                await Swal.fire({

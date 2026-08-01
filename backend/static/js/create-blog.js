@@ -1,3 +1,4 @@
+import { API_URL,ROUTES } from "./config.js";
 document.addEventListener('DOMContentLoaded', function() {
     const title = document.getElementById("title");
     const body = document.getElementById("body");
@@ -25,11 +26,8 @@ autoResize();
         const blogTitle = title.value;
         const blogBody = body.value;
         const token = localStorage.getItem("token");
-        const API_URL =
-        window.location.hostname === "127.0.0.1" ||
-        window.location.hostname === "localhost"
-        ? "http://127.0.0.1:8000"
-        : "https://my-blog-yi3h.onrender.com";
+        
+
 
         try {
             const response = await fetch(`${API_URL}/blog`, {
@@ -50,14 +48,14 @@ autoResize();
                    title: "Success!",
                    text: "Blog created successfully."
 });
-                 window.location.href = "/frontend/index.html";
+                 window.location.href = ROUTES.HOME;
             } else if(response.status==401){
                 await Swal.fire({
                  icon: "warning",
                   title: "Login Required",
                      text: "Please log in to write a blog."
 });
-                 window.location.href = "/frontend/login.html";
+                 window.location.href = ROUTES.LOGIN;
             }else {
                 await Swal.fire({
                  icon: "error",

@@ -1,6 +1,7 @@
-
+import { API_URL,ROUTES } from "./config.js";
 const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+const id = window.location.pathname.split("/").pop();
+
 document.addEventListener("DOMContentLoaded",function(){
     const editForm = document.getElementById("edit-form");
     function autoResize() {
@@ -11,16 +12,12 @@ document.addEventListener("DOMContentLoaded",function(){
     body.addEventListener("input", autoResize);
 
 
-    const API_URL =
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "localhost"
-        ? "http://127.0.0.1:8000"
-        : "https://my-blog-yi3h.onrender.com";
+
 async function loadblog() {
     
 
 const token = localStorage.getItem("token")
-const  response = await fetch(`${API_URL}/blog/${id}`, {
+const  response = await fetch(`${API_URL}/blog/${id}`, {  
     headers: {
         Authorization: `Bearer ${token}`
     }
@@ -80,7 +77,7 @@ document.getElementById("edit-form").addEventListener("submit", async function (
     });
 
     // Redirect here
-    window.location.href = "/frontend/user.html";
+    window.location.href = ROUTES.PROFILE;
 });
 
 

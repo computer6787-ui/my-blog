@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+
+    <main>
+        <center>
+            <form id="edit-form">
+            <h2>Edit Blog</h2>
+            <input type="text" id="title" name="title" class="title" placeholder="Title" required><br><hr><br>
+            <textarea id="body" name="body" class="body" placeholder="Write your blog here..." required></textarea><br><br>
+            <button type="submit" class="publish-button">Publish</button>
+            </form>
+        </center>
+    </main>
+    <script type="module" src="{{ url_for('static', path='js/edit-blog.js') }}" ></script>
+    <script type="module" src="{{ url_for('static', path='js/index.js') }}" ></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

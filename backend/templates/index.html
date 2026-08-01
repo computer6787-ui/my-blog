@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <h2>Welcome to My Blog</h2>
+
+    <p>
+        Ideas become words. Words become stories.
+        Stories become memories.
+        Somewhere between the lines, you may just
+        find a piece of yourself.
+    </p>
+
+    <br>
+
+    <center>
+        <button id="read_blogs" class="nav_button">Read Blogs</button>
+
+        <button id="write_blog" class="nav_button">
+            Write Blog
+        </button>
+    </center>
+
+    <br>
+
+</section>
+
+<h1>Latest Blogs</h1>
+
+<section id="blog_section" class="blog-posts">
+
+</section>
+
+<center>
+
+<button id="load_more"
+class="nav_button"
+onclick="loadMore()">
+
+Load More
+
+</button>
+
+</center>
+
+
+<script type="module"  src="{{ url_for('static', path='js/blog.js') }}"></script>
+<script type="module"  src="{{ url_for('static', path='js/index.js') }}"></script>
+<script type="module"  src="{{ url_for('static', path='js/home.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

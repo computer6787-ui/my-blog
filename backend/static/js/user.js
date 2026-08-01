@@ -1,10 +1,6 @@
-
+import { API_URL,ROUTES } from "./config.js";
 document.addEventListener("DOMContentLoaded", async function(){
-    const API_URL =
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "localhost"
-        ? "http://127.0.0.1:8000"
-        : "https://my-blog-yi3h.onrender.com";
+
 
 const token = localStorage.getItem("token")
 if(!token){
@@ -13,7 +9,7 @@ if(!token){
     title: "Login Required",
     text: "Please log in to write a blog."
 });
-    window.location.href="/frontend/login.html"
+    window.location.href=ROUTES.LOGIN;
 }
 
 async function loadUser() {
@@ -99,6 +95,6 @@ window.delete_blog = async function(id) {
     }
 }
 window.edit_blog=async function(id) {
-    window.location.href = `edit-blog.html?id=${id}`;
+    window.location.href = `edit-blog/${id}`;
 }
 })

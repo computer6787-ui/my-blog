@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Account</title>
+</head>
+<body>
+
+    <h1>Verify Your Account</h1>
+
+    <p>Enter the 6-digit verification code sent to your email.</p>
+
+    <form id="verifyForm">
+
+        <input
+            type="text"
+            id="code"
+            maxlength="6"
+            placeholder="Verification Code"
+            required
+        >
+
+        <button type="submit">Verify</button>
+
+    </form>
+
+    <p id="message"></p>
+
+    <p>Didn't receive the code?</p>
+    <button id="resendBtn">Resend Code</button>
+
+    <script type="module" src="/static/js/verify.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+</html>
