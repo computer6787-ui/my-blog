@@ -12,4 +12,4 @@ router=APIRouter(
 
 @router.post("/verify")
 async def verify_user(request: schemas.VerifyUser, db: session = Depends(get_db)):
-    return await user_repository.verify_pending_user(request, db)
+    return await user_repository.verify_pending_user(request, db) 

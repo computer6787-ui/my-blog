@@ -14,14 +14,18 @@
 
 <body>
 
-    {% include "partials/navbar.html" %}
+    <header>
+        {% include "partials/navbar.html" %}
+    </header>
 
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    {% include "partials/footer.html" %}
+    <footer>
+        {% include "partials/footer.html" %}
+    </footer>
 
     {% block scripts %}
     {% endblock %}

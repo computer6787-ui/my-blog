@@ -4,14 +4,14 @@
 
 {% block content %}
     <main>
-        <center>
+        <div class="auth-container">
             <form id="blog_form" method="post">
             <h2>Create Blog</h2>
             <input type="text" id="title" name="title" class="title" placeholder="Title" required><br><hr><br>
             <textarea id="body" name="body" class="body" placeholder="Write your blog here..." required></textarea><br><br>
             <button type="submit" id="publish-button" class="publish-button">Publish</button>
             </form>
-        </center>
+        </div>
     </main>
     <script type="module" src="{{ url_for('static', path='js/create-blog.js') }}" ></script>
     <script type="module" src="{{ url_for('static', path='js/index.js') }}" ></script>

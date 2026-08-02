@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Account</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 </head>
-<body>
+<body class="verify-body">
 
     <h1>Verify Your Account</h1>
 
     <p>Enter the 6-digit verification code sent to your email.</p>
 
-    <form id="verifyForm">
+    <form class="verify_form" id="verifyForm">
 
         <input
             type="text"
@@ -30,8 +31,8 @@
     <p>Didn't receive the code?</p>
     <button id="resendBtn">Resend Code</button>
 
-    <script type="module" src="/static/js/verify.js"></script>
+    <script type="module" src="{{ url_for('static', path='js/verify.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    
 </body>
 </html>

@@ -1,159 +1,420 @@
+/* =========================
+   RESET
+========================= */
+
 *{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-
-}
-.logo img {
-    width: 150px;
-    border-radius: 50px;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-.header {
-    background-color: #b9b2d2;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-.header nav ul {
-    display: flex;
-    list-style: none;
-    gap: 15px;
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:#f5f6fb;
+    color:#333;
+    line-height:1.6;
 }
 
-.nav_link {
-    text-decoration: none;
-    color: azure;
+/* =========================
+   HEADER
+========================= */
 
-    padding: 10px 5px;
-    background-color: #4b3b6b;
-    border-radius: 5px;
-    
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 40px;
+    background:#b9b2d2;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
-.nav_button {
-    text-decoration: none;
-    color: azure;
-    padding: 10px 5px;
-    background-color: #4b3b6b;
-    border-radius: 5px;
-    transition: transform 0.3s ease;
+
+.auth-container{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:stretch;
+    width:fit-content;
 }
-.nav_button:hover {
-    background-color: #3a2b5b;
-    transform: scale(1.05);
+
+.auth-container .nav_button{
+    width:100%;
+    min-width:180px;
+    text-align:center;
 }
-.hero {
-    background-color: #d7d5dc;
-    padding: 20px ;
+
+.logo img{
+    width:150px;
+    border-radius:50px;
 }
-.blog-posts {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 20px;
+
+.header nav ul{
+    display:flex;
+    gap:15px;
+    list-style:none;
 }
-.blog-card {
-    width: 100%;
-    background-color: #e0dfe3;
-    padding: 18px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+.nav_link,
+.nav_button{
+    text-decoration:none;
+    color:white;
+    background:#4b3b6b;
+    padding:10px 16px;
+    border-radius:8px;
+    transition:.25s;
 }
-.blog-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+.nav_link:hover,
+.nav_button:hover{
+    background:#35274d;
+    transform:translateY(-2px);
 }
-.readmore_button {
-    text-decoration: none;
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    background:#dedbe8;
+    padding:70px 30px;
+    border-radius:14px;
+}
+.hero nav{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:stretch;
+    width:fit-content;
+}
+
+.hero h1{
+    font-size:3rem;
+    color:#402d63;
+    margin-bottom:15px;
+}
+
+.hero p{
+    color:#666;
+    font-size:18px;
+}
+
+/* =========================
+   BLOG LIST
+========================= */
+
+.blog-posts{
+    width:100%;
+    max-width:1000px;
+    margin:40px auto;
+    padding:0 20px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.blog-card,
+.personalBlog-card{
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transition:.25s;
+}
+
+.blog-card:hover,
+.personalBlog-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 25px rgba(0,0,0,.15);
+}
+
+.blog-card h2{
+    margin-bottom:10px;
+    color:#3a2b5b;
+}
+
+.blog-card p{
+    color:#666;
+}
+
+.readmore_button{
+    margin-top:15px;
     border:none;
-    opacity: 0.6;
-    font-weight:lighter;
-    transition: opacity 0.3s ease;
-}
-.readmore_button:hover {
-    opacity: 1;
+    background:none;
+    color:#5d49c5;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
 }
 
-.blog-header {
-    text-decoration: none;
-    background-color: #d7d5dc;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.readmore_button:hover{
+    color:#3a2b5b;
 }
-.blog-header h1 {
-    font-size: 2em;
-    margin-bottom: 10px;
-    color:rgb(66, 24, 66);
+
+/* =========================
+   BLOG PAGE
+========================= */
+
+.blog-header{
+    background:#dedbe8;
+    padding:40px 20px;
+    text-align:center;
 }
-.blog-header b {
-    font-size: 1em;
-    color:rgb(100, 65, 100);
+
+.blog-header h1{
+    color:#3a2b5b;
+    margin-bottom:10px;
 }
-.blog-content {
-    padding: 20px;
-    line-height: 1.6;
-    color: #333;
-    padding-left: 10px;
+
+.blog-header b{
+    color:#777;
+}
+
+.blog-content{
+    max-width:900px;
+    margin:auto;
+    padding:35px;
     white-space:pre-wrap;
+    line-height:1.8;
 }
 
-.title {
-   
+/* =========================
+   EDITOR
+========================= */
+
+.title{
     width:100%;
     border:none;
     outline:none;
-
     font-size:3rem;
     font-weight:bold;
+    background:transparent;
+    margin-bottom:20px;
+}
 
+.body{
+    width:100%;
+    min-height:350px;
+    border:none;
+    outline:none;
+    resize:none;
+    overflow:hidden;
+    font-size:17px;
+    line-height:1.8;
     background:transparent;
 }
 
-.body {
-    border: none;
-    outline: none;
-    width: 100%;
-    min-height: 200px;
-    resize: none;
-    overflow-y: hidden;
-    box-sizing: border-box;
-
-}
-.personalBlog-card {
-    width: 100%;
-    background-color: #e0dfe3;
-    padding: 18px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.personalBlog-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
+/* =========================
+   PROFILE
+========================= */
 
 .user-profile{
-    padding: 18px;
-    background-color: aliceblue;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    width:200%;
+    background:white;
+    padding:30px;
+    border-radius:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
 }
-.dict_button {
-    background-color:aliceblue;
-    padding: 1px;
-    border-radius:5px;
+.user-profile h3{
+    font-size:45px;
+    margin-bottom:20px;
+    color:#3a2b5b;
+    text-align:center;
 
 }
-.publish-button {
-    background-color:#3a2b5b;
-    padding: 1px;
-    border-radius:5px;
-    color:azure;
+
+.publish-button{
+    background:#4b3b6b;
+    color:white;
+    border:none;
+    padding:12px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.publish-button:hover{
+    background:#35274d;
+}
+
+.dict_button{
+    padding:12px 18px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.dict_button:hover{
+    background:#efefef;
+}
+
+/* =========================
+   AUTH PAGES
+========================= */
+
+main{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:85vh;
+    padding:20px;
+}
+
+#login_form,
+#register,
+.verify_form{
+    width:100%;
+    max-width:420px;
+    background:white;
+    padding:40px;
+    border-radius:18px;
+    box-shadow:0 12px 30px rgba(0,0,0,.12);
+    animation:fadeIn .35s ease;
+}
+
+#login_form h2,
+#register h2,
+.verify_form h2{
+    text-align:center;
+    margin-bottom:25px;
+    color:#3a2b5b;
+}
+
+/* Inputs */
+
+#login_form input,
+#register input[type="text"],
+#register input[type="email"],
+#register input[type="password"],
+.verify_form input{
+    width:100%;
+    padding:14px;
+    margin-bottom:18px;
+    border:1px solid #d4d4d4;
+    border-radius:10px;
+    font-size:16px;
+    transition:.2s;
+}
+
+.verify_form input{
+    text-align:center;
+    letter-spacing:8px;
+    font-size:22px;
+}
+
+#login_form input:focus,
+#register input:focus,
+.verify_form input:focus{
+    outline:none;
+    border-color:#6b5cff;
+    box-shadow:0 0 0 3px rgba(107,92,255,.15);
+}
+
+/* Buttons */
+
+#login_button,
+#register input[type="submit"],
+.verify_form button,
+#resendBtn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#5d49c5;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:.25s;
+}
+
+#login_button:hover,
+#register input[type="submit"]:hover,
+.verify_form button:hover,
+#resendBtn:hover{
+    background:#4330aa;
+}
+
+.auth-links{
+    text-align:center;
+    margin-top:20px;
+}
+
+.auth-links a{
+    text-decoration:none;
+    color:#5d49c5;
+    font-weight:bold;
+}
+
+.auth-links a:hover{
+    text-decoration:underline;
+}
+
+#message{
+    text-align:center;
+    margin:15px 0;
+    color:#d32f2f;
+    font-weight:bold;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width:768px){
+
+    .header{
+        flex-direction:column;
+        gap:20px;
+        padding:20px;
+    }
+
+    .header nav ul{
+        flex-wrap:wrap;
+        justify-content:center;
+    }
+
+    .hero{
+        padding:50px 20px;
+    }
+
+    .hero h1{
+        font-size:2.2rem;
+    }
+
+    .blog-card,
+    .personalBlog-card{
+        padding:20px;
+    }
+
+    .title{
+        font-size:2rem;
+    }
+
+    #login_form,
+    #register,
+    .verify_form{
+        padding:30px;
+    }
+}
+
+.footer{
+    text-align:center;
+    padding:20px;
+    background:#b9b2d2;
+    color:white;
+    margin-top:40px;
 }
