@@ -7,6 +7,11 @@
     padding:0;
     box-sizing:border-box;
 }
+main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
 
 body{
     font-family:Arial, Helvetica, sans-serif;
@@ -154,9 +159,12 @@ body{
 ========================= */
 
 .blog-header{
+    width:100%;
     background:#dedbe8;
-    padding:40px 20px;
+    padding:25px 20px;
     text-align:center;
+    margin-bottom:30px;
+
 }
 
 .blog-header h1{
@@ -207,7 +215,7 @@ body{
 ========================= */
 
 .user-profile{
-    width:200%;
+    width: 100%;
     background:white;
     padding:30px;
     border-radius:14px;

@@ -24,16 +24,20 @@ async def create_pending_user(request, db):
         expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)
     )
 
-    db.add(new_pending_user)
-    db.commit()
-    db.refresh(new_pending_user)
+    try:
+        await send_verification_email(
+            request.email,
+            verification_code
+        )
 
-    await send_verification_email(
-        request.email,
-        verification_code
-    )
+        db.add(new_pending_user)
+        db.commit()
+        db.refresh(new_pending_user)
+        return new_pending_user
 
-    return new_pending_user
+    except Exception:
+        db.rollback()
+        raise
 
 def show_user(id:int,db):
     user=db.query(models.User).filter(models.User.id==id).first()
