@@ -7,7 +7,7 @@ if(!token){
     await Swal.fire({
     icon: "warning",
     title: "Login Required",
-    text: "Please log in to write a blog."
+    text: "Please log in to visit your profile."
 });
     window.location.href=ROUTES.LOGIN;
 }

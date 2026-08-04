@@ -5,12 +5,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const writeBlogButton = document.getElementById('write_blog');
     const blogSection = document.getElementById('blog_section');
 
-
 readBlogsButton.addEventListener('click', function() {
      blogSection.scrollIntoView({ behavior: 'smooth' });
 
 
-})
+});
 
     writeBlogButton.addEventListener('click', async function() {
         console.log
@@ -26,6 +25,7 @@ readBlogsButton.addEventListener('click', function() {
         window.location.href= ROUTES.LOGIN
     }
 });
+
 
 
 })

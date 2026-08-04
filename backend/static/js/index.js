@@ -1,9 +1,6 @@
     import { API_URL } from "./config.js";
     document.addEventListener('DOMContentLoaded', function() {
-    const readBlogsButton = document.getElementById('read_blogs');
-    const writeBlogButton = document.getElementById('write_blog');
-    const blogSection = document.getElementById('blog_section');
-    const authLink=document.getElementById("auth");
+    const authLink=document.getElementById("auth-link");
     const token=localStorage.getItem("token");
 
 

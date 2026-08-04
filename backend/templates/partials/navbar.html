@@ -5,11 +5,26 @@
     </div>
 
     <nav class="nav">
-        <ul>
-            <li><a class="nav_button" href="/">Home</a></li>
-            <li><a class="nav_button" id="auth" href="/login">Login</a></li>
-            <li><a class="nav_button" id="profile" href="/user">Profile</a></li>
-        </ul>
-    </nav>
+            <a class="nav_button" href="/">Home</a>
+            <button class="menu-btn" id="menu-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+            </button>
 
+        
+    </nav>
 </header>
+<div class="overlay"></div>
+
+<aside class="drawer" id="drawer">
+    <h2>Menu</h2>
+    <hr>
+
+    <a href="/user">Profile</a>
+    <a href="/user">My Blogs</a>
+    <a id="auth-link" href="/login">Login</a>
+</aside>
+
+
+<script type="module" src="{{ url_for('static', path='js/navbar.js') }}"></script>
