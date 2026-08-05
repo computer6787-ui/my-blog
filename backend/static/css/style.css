@@ -441,17 +441,26 @@ main{
     flex-direction:column;
     justify-content:center;
     gap:6px;
+    margin: 6px;
+    transition: all .35s cubic-bezier(.68,-0.55,.27,1.55);
+}
 
-    cursor:pointer;
+.menu-btn:hover{
+        transform:scale(1.5);
+        transition: .35s cubic-bezier(.68,-0.55,.27,1.55);
+}
+.menu-btn:hover span{
+    background:#333;
 }
 
 .menu-btn span{
     width:28px;
     height:3px;
-    background:#333;
+    background:#4b3b6b;
     border-radius:3px;
     transition: .35s cubic-bezier(.68,-0.55,.27,1.55);
 }
+
 
 .menu-btn.open span:nth-child(1){
     transform:translateY(9px) rotate(45deg);

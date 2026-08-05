@@ -15,11 +15,6 @@ conf = ConnectionConfig(
     USE_CREDENTIALS=True,
     VALIDATE_CERTS=True
 )
-print(conf.MAIL_USERNAME)
-print(conf.MAIL_SERVER)
-print(conf.MAIL_PORT)
-print(conf.MAIL_STARTTLS)
-print(conf.MAIL_SSL_TLS)
 
 
 async def send_verification_email(user_email, code):
