@@ -28,7 +28,7 @@ const blog = await response.json();
 document.getElementById("title").value = blog.title;
 document.getElementById("body").value = blog.body;
 }
-loadblog();
+loadblog(); 
 
 
 

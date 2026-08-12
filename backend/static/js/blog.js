@@ -1,10 +1,9 @@
-
-
 let skip = 0;
 const limit = 4;
+let currentSearch = "";
 import { API_URL,ROUTES } from "./config.js";
-async function loadBlogs() {
-const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}`);
+async function loadBlogs(search = "") {
+const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}&q=${encodeURIComponent(search)}`);
 
     const blogs = await response.json();
 
@@ -40,10 +39,34 @@ const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}`);
     skip += limit;
 }
 
-document.addEventListener("DOMContentLoaded", loadBlogs);
+document.getElementById("search_button").addEventListener("click", performSearch);
+document.getElementById("search_bar").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        performSearch();
+    }
+});
+async function performSearch() {
+    
+
+    // Get user's search
+    currentSearch = document.getElementById("search_bar").value.trim();
+
+    // Start from the first search result
+    skip = 0;
+
+    // Remove currently displayed blogs
+    const section = document.getElementById("blog_section");
+    section.innerHTML = "";
+
+    // Ask backend for matching blogs
+    await loadBlogs(currentSearch);
+}
+
+
+document.addEventListener("DOMContentLoaded", loadBlogs());
 
 async function loadMore() {
-    await loadBlogs();
+    await loadBlogs(currentSearch);
 }
 
 async function readMore(id) {
