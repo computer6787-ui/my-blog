@@ -17,6 +17,14 @@ async function loadblog() {
     
 
 const token = localStorage.getItem("token")
+    Swal.fire({
+    title: "Please Wait...",
+    body: "Loading The Edit Page",
+    allowOutsideClick: false,
+    didOpen: () => {
+    Swal.showLoading();
+        }
+    });
 const  response = await fetch(`${API_URL}/blog/${id}`, {  
     headers: {
         Authorization: `Bearer ${token}`
@@ -24,6 +32,7 @@ const  response = await fetch(`${API_URL}/blog/${id}`, {
 });
 
 const blog = await response.json();
+swal.close()
 
 document.getElementById("title").value = blog.title;
 document.getElementById("body").value = blog.body;
