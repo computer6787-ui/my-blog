@@ -13,6 +13,13 @@ if(!token){
 }
 
 async function loadUser() {
+    Swal.fire({
+    title: "Loading...",
+    allowOutsideClick: false,
+    didOpen: () => {
+    Swal.showLoading();
+        }
+    });
     const response = await fetch(`${API_URL}/user/me`, {
         method:"GET",
         headers: {
@@ -20,6 +27,7 @@ async function loadUser() {
         }
     });
     const user = await response.json();
+    swal.close();
 const container = document.getElementById("published-blogs");
 
 user.blogs.reverse().forEach(blog => {

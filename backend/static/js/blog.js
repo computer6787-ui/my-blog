@@ -1,23 +1,46 @@
 let skip = 0;
 const limit = 4;
 let currentSearch = "";
-import { API_URL,ROUTES } from "./config.js";
+
+import { API_URL, ROUTES } from "./config.js";
+
 async function loadBlogs(search = "") {
-const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}&q=${encodeURIComponent(search)}`);
+    const loadMore_button = document.getElementById("load_more");
+    const section = document.getElementById("blog_section");
+    Swal.fire({
+        title: "Please wait...",
+        text: "Finding the best blogs for you.",
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    const response = await fetch(
+        `${API_URL}/blog?limit=${limit}&skip=${skip}&q=${encodeURIComponent(search)}`
+    );
 
-    const blogs = await response.json();
+    const data = await response.json();
+    swal.close();
+    const blogs=data.blogs;
+    const total=data.total;
 
+    // No blogs found
     if (blogs.length === 0) {
-        await Swal.fire({
-        icon: "warning",
-        title: "No more blogs",
-        text: "No more blogs to fetch,maybe write some?"
-});
+        loadMore_button.style.display = "none";
+
+        Swal.fire({
+            icon: "info",
+            title: "No blogs found!",
+            text: search
+                ? "There are no blogs matching your search."
+                : "There are no blogs available right now. Be the first to write one!",
+            confirmButtonText: "Got it"
+        });
+
         return;
     }
 
-    const section = document.getElementById("blog_section");
-
+    // Display blogs
     blogs.forEach(blog => {
         const article = document.createElement("article");
         article.className = "blog-card";
@@ -36,54 +59,88 @@ const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}&q=${en
         section.appendChild(article);
     });
 
-    skip += limit;
+    // Increase skip by the amount actually loaded
+    skip += blogs.length;
+
+    // If fewer than the limit were returned,
+    // this was the last batch.
+    if (skip >= total) {
+        loadMore_button.style.display = "none";
+    } else {
+        loadMore_button.style.display = "";
+    }
 }
 
-document.getElementById("search_button").addEventListener("click", performSearch);
-document.getElementById("search_bar").addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-        performSearch();
-    }
-});
+
+// Search button
+document
+    .getElementById("search_button")
+    .addEventListener("click", performSearch);
+
+
+// Press Enter in search bar
+document
+    .getElementById("search_bar")
+    .addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            performSearch();
+        }
+    });
+
+
+// Perform search
 async function performSearch() {
-    
+    currentSearch = document
+        .getElementById("search_bar")
+        .value
+        .trim();
 
-    // Get user's search
-    currentSearch = document.getElementById("search_bar").value.trim();
-
-    // Start from the first search result
+    // Start from the first result
     skip = 0;
 
     // Remove currently displayed blogs
     const section = document.getElementById("blog_section");
     section.innerHTML = "";
 
-    // Ask backend for matching blogs
+    // Load search results
     await loadBlogs(currentSearch);
 }
 
 
-document.addEventListener("DOMContentLoaded", loadBlogs());
-
+// Load more button
 async function loadMore() {
     await loadBlogs(currentSearch);
 }
 
+
+// Read more
 async function readMore(id) {
     const token = localStorage.getItem("token");
 
     if (!token) {
         await Swal.fire({
-    icon: "warning",
-    title: "Login Required",
-    text: "Please log in to see the blog."
-});
+            icon: "warning",
+            title: "Login Required",
+            text: "Please log in to see the blog."
+        });
 
-        window.location.href = ROUTES.LOGIN; 
+        window.location.href = ROUTES.LOGIN;
         return;
     }
 
     window.location.href = `/blogs/${id}`;
 }
-window.loadMore = loadMore;
+
+
+// Make readMore available to inline onclick
 window.readMore = readMore;
+
+
+// Load more button listener
+document.getElementById("load_more").addEventListener("click", loadMore);
+
+
+// Initial load
+document.addEventListener("DOMContentLoaded", () => {
+    loadBlogs();
+});

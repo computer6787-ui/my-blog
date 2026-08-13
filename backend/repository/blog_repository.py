@@ -24,10 +24,14 @@ def all_blog(limit: int, skip: int, db, q=None):
                 models.Blog.body.ilike(f"%{q}%")
             )
         )
-
+    total=query.count()
     blogs = (query.order_by(desc(models.Blog.id)).offset(skip).limit(limit).all())
 
-    return blogs
+    return {
+        "blogs":blogs,
+        "total":total
+    }
+
 
 def destroy(id:int,db):
     blog=db.query(models.Blog).filter(models.Blog.id==id).delete(synchronize_session=False)

@@ -74,3 +74,10 @@ class TokenData(BaseModel):
 class VerifyUser(BaseModel):
     email: str
     verification_code: str
+
+class BlogResponse(BaseModel):
+    blogs: list[ShowBlog]
+    total: int
+
+    class Config:
+        from_attributes = True
