@@ -5,6 +5,13 @@ import { API_URL,ROUTES } from "./config.js";
 async function loadBlog() {
     const token = localStorage.getItem("token");
 
+    Swal.fire({
+    title: "Loading...",
+    allowOutsideClick: false,
+    didOpen: () => {
+    Swal.showLoading();
+        }
+    });
     const response = await fetch(`${API_URL}/blog/${id}`, {
         headers: {
             "Authorization": `Bearer ${token}`
@@ -40,6 +47,7 @@ async function loadBlog() {
     }
 
     const blog = await response.json();
+    swal.close()
 
     document.getElementById("title").textContent = blog.title;
     document.getElementById("body").textContent = blog.body;

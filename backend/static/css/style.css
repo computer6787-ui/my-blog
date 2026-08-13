@@ -131,6 +131,7 @@ body{
     border-radius:14px;
     box-shadow:0 8px 20px rgba(0,0,0,.08);
     transition:.25s;
+    margin-bottom:24px;
 }
 
 .blog-card:hover,
@@ -555,4 +556,30 @@ main{
 
 #search_button:hover {
     background-color: #a59dbf;
+}
+
+
+/*Loading*/
+.blog-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 30px;
+    font-size: 16px;
+}
+
+.blog-loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ddd;
+    border-top: 3px solid #555;
+    border-radius: 50%;
+    animation: blogSpin 0.8s linear infinite;
+}
+
+@keyframes blogSpin {
+    to {
+        transform: rotate(360deg);
+    }
 }

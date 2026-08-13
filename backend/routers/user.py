@@ -25,4 +25,4 @@ def me(current_user: models.User = Depends(oath2.get_current_user)):
 
 @router.get("/{id}",response_model=schemas.Show_user)
 def show_user(id: int, db: session = Depends(get_db)):
-    return user_repository.show_user(id,db)
+    return user_repository.show_user(id,db) 

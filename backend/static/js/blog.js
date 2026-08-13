@@ -4,25 +4,37 @@ let currentSearch = "";
 
 import { API_URL, ROUTES } from "./config.js";
 
+function showBlogLoading(message = "Loading blogs...") {
+    const section = document.getElementById("blog_section");
+
+    const loading = document.createElement("div");
+    loading.className = "blog-loading";
+    loading.innerHTML = `
+        <div class="blog-loading-spinner"></div>
+        <span>${message}</span>
+    `;
+
+    section.appendChild(loading);
+}
+
+function hideBlogLoading() {
+    const loading = document.querySelector(".blog-loading");
+
+    if (loading) {
+        loading.remove();
+    }
+}
+
 async function loadBlogs(search = "") {
     const loadMore_button = document.getElementById("load_more");
     const section = document.getElementById("blog_section");
-    Swal.fire({
-        title: "Please wait...",
-        text: "Finding the best blogs for you.",
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    const response = await fetch(
-        `${API_URL}/blog?limit=${limit}&skip=${skip}&q=${encodeURIComponent(search)}`
+    const response = await fetch(`${API_URL}/blog?limit=${limit}&skip=${skip}&q=${encodeURIComponent(search)}`
     );
 
     const data = await response.json();
-    swal.close();
     const blogs=data.blogs;
     const total=data.total;
+    hideBlogLoading();
 
     // No blogs found
     if (blogs.length === 0) {
@@ -100,16 +112,22 @@ async function performSearch() {
 
     // Remove currently displayed blogs
     const section = document.getElementById("blog_section");
+
     section.innerHTML = "";
+    showBlogLoading("Searching blogs...");
+    
 
     // Load search results
     await loadBlogs(currentSearch);
+    hideBlogLoading();
 }
 
 
 // Load more button
 async function loadMore() {
+    showBlogLoading("Loading more blogs")
     await loadBlogs(currentSearch);
+    hideBlogLoading();
 }
 
 
@@ -141,6 +159,8 @@ document.getElementById("load_more").addEventListener("click", loadMore);
 
 
 // Initial load
-document.addEventListener("DOMContentLoaded", () => {
-    loadBlogs();
+document.addEventListener("DOMContentLoaded", async() => {
+    showBlogLoading("Loading the most relevant blogs...")
+    await loadBlogs();
+    hideBlogLoading();
 });

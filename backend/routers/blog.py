@@ -26,7 +26,7 @@ def all(limit: int = 4, skip: int = 0,db:session=Depends(get_db),q:str=None):
 
 @router.post("/",status_code=status.HTTP_201_CREATED)
 def create(request:schemas.Blog,db:session=Depends(get_db),current_user:schemas.User=Depends(oath2.get_current_user)):
-    return blog_repository.create_blog(request,db)
+    return blog_repository.create_blog(request,db,current_user)
   
 
     
