@@ -116,6 +116,7 @@ body{
 .hero img{
     width: 300px;
     padding: 20px;
+    height: auto;
 }
 .hero nav{
     display:flex;
@@ -430,6 +431,12 @@ main{
 
     .hero{
         padding:50px 20px;
+    }
+    .hero img{
+        width: 40%;
+        max-width: 120;
+        padding: 5;
+        min-width: 60;
     }
 
     .hero h1{
