@@ -67,10 +67,10 @@ body{
     align-items: center;
 }
 
-.logo_text h1{
+.logo h1{
     color:#4b3b6b;
 }
-.logo_text p{
+.logo p{
     color:#666;
 }
 
@@ -110,14 +110,8 @@ body{
     background:#dedbe8;
     padding:70px 30px;
     border-radius:14px;
-    display: flex;
-    align-items: center;
 }
-.hero img{
-    width: 300px;
-    padding: 20px;
-    height: auto;
-}
+
 .hero nav{
     display:flex;
     flex-direction:column;
@@ -126,13 +120,13 @@ body{
     width:fit-content;
 }
 
-.hero_text h1{
+.hero h2{
     font-size:3rem;
     color:#402d63;
     margin-bottom:15px;
 }
 
-.hero_text p{
+.hero p{
     color:#666;
     font-size:18px;
 }
@@ -428,18 +422,15 @@ main{
         flex-wrap:wrap;
         justify-content:center;
     }
+    .logo h1{
+        font-size:2.2rem ;
+    }
 
     .hero{
         padding:50px 20px;
     }
-    .hero img{
-        width: 40%;
-        max-width: 120;
-        padding: 5;
-        min-width: 60;
-    }
 
-    .hero h1{
+    .hero h2{
         font-size:2.2rem;
     }
 
