@@ -60,6 +60,41 @@ const  response = await fetch(`${API_URL}/blog/${id}`, {
     })
 });
 
+ if (!response.ok) {
+        const error = await response.json();
+
+        if (response.status === 403) {
+            await Swal.fire({
+                icon: "error",
+                title: "Access Denied",
+                text: error.detail || "You don't have permission to edit this blog."
+            });
+        } else if (response.status === 401) {
+            await Swal.fire({
+                icon: "warning",
+                title: "Login Required",
+                text: "Please log in to edit this blog."
+            });
+
+            window.location.href = ROUTES.LOGIN;
+        } else if (response.status === 404) {
+            await Swal.fire({
+                icon: "error",
+                title: "Blog Not Found",
+                text: "This blog does not exist."
+            });
+        } else {
+            await Swal.fire({
+                icon: "error",
+                title: "Something went wrong",
+                text: error.detail || "Unable to edit the blog."
+            });
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -67,8 +102,8 @@ document.getElementById("edit-form").addEventListener("submit", async function (
     e.preventDefault();
 
     const result = await Swal.fire({
-        title: "Publish the edited blog?",
-        text: "This action cannot be undone.",
+        title: "Publish",
+        text: "Are you sure you want to edit the blog?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "Confirm",
@@ -77,7 +112,9 @@ document.getElementById("edit-form").addEventListener("submit", async function (
 
     if (!result.isConfirmed) return;
 
-    await editblog();
+    const success = await editblog();
+
+    if (!success) return;
 
     await Swal.fire({
         icon: "success",
@@ -85,13 +122,9 @@ document.getElementById("edit-form").addEventListener("submit", async function (
         text: "Blog edited successfully."
     });
 
-    // Redirect here
     window.location.href = ROUTES.PROFILE;
 });
+}
 
-
-
-
-});
-
+)
 

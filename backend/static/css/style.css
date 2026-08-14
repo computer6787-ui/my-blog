@@ -25,12 +25,21 @@ body{
 ========================= */
 
 .header{
+    background: linear-gradient(
+        105deg,
+        #ffffff 0%,
+        #fcfbfd 15%,
+        #f6f4f9 30%,
+        #e9e6f0 45%,
+        #d8d4e4 60%,
+        #c7c2d9 75%,
+        #b9b2d2 100%
+    );
     display:flex;
     justify-content:space-between;
     align-items:center;
     padding:12px 40px;
-    background:#b9b2d2;
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    box-shadow:0 4px 10px rgba(0,0,0,.2);
 }
 .nav{
     display: flex;
@@ -53,9 +62,20 @@ body{
     min-width:180px;
     text-align:center;
 }
+.logo{
+    display: flex;
+    align-items: center;
+}
+
+.logo_text h1{
+    color:#4b3b6b;
+}
+.logo_text p{
+    color:#666;
+}
 
 .logo img{
-    width:150px;
+    width:100px;
     border-radius:50px;
 }
 
@@ -90,6 +110,12 @@ body{
     background:#dedbe8;
     padding:70px 30px;
     border-radius:14px;
+    display: flex;
+    align-items: center;
+}
+.hero img{
+    width: 300px;
+    padding: 20px;
 }
 .hero nav{
     display:flex;
@@ -99,13 +125,13 @@ body{
     width:fit-content;
 }
 
-.hero h1{
+.hero_text h1{
     font-size:3rem;
     color:#402d63;
     margin-bottom:15px;
 }
 
-.hero p{
+.hero_text p{
     color:#666;
     font-size:18px;
 }
