@@ -15,7 +15,9 @@ BASE_DIR = Parent_DIR / "backend"
 
 
 
-
+print("BASE_DIR:", BASE_DIR)
+print("MANIFEST:", BASE_DIR / "static" / "images" / "favicon" / "manifest.json")
+print("EXISTS:", (BASE_DIR / "static" / "images" / "favicon" / "manifest.json").exists())
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
