@@ -50,4 +50,17 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Network error:", error);
         }
     }
+    
+    // Password toggle functionality
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    if(togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function(event) {
+            event.preventDefault();
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+        });
+    }
 });

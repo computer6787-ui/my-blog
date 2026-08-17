@@ -1,0 +1,59 @@
+
+{% extends "base.html" %}
+
+{% block title %}Update Password{% endblock %}
+
+{% block content %}
+
+<body>
+
+    <div class="update-password-container">
+
+        <h2>Update Password</h2>
+        <p>Enter your new password below.</p>
+
+        <form id="updatePassForm">
+
+            <div class="input-group">
+                <label for="password">New Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter new password"
+                    required
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="Confirm new password"
+                    required
+                >
+            </div>
+
+            <label class="show-password">
+                <input type="checkbox" id="showPassword">
+                Show password
+            </label>
+
+            <p id="message"></p>
+
+            <button type="submit">Update Password</button>
+
+        </form>
+
+    </div>
+
+    <script type="module" src="{{ url_for('static', path='js/update_pass.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

@@ -6,16 +6,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const body = document.getElementById("body");
     const blogForm = document.getElementById("blog_form");
 
+    if (!title || !body || !blogForm) return;
+
     blogForm.addEventListener("submit", createBlog);
 
     function autoResize() {
         body.style.height = "auto";
-        body.style.height = body.scrollHeight + "px";
+        body.style.height = `${Math.max(body.scrollHeight, 220)}px`;
     }
 
     body.addEventListener("input", autoResize);
 
-    // Run once in case there's already text
     autoResize();
 
 

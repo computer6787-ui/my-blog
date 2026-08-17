@@ -28,6 +28,18 @@
 </head>
 
 <body>
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('lumora-theme');
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                }
+            } catch (error) {
+                // no-op for restricted environments
+            }
+        })();
+    </script>
 
     <header>
         {% include "partials/navbar.html" %}

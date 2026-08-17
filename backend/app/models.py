@@ -26,6 +26,7 @@ class User(base):
 
 
 
+
 class PendingUser(base):
     __tablename__ = "pending_users"
 
@@ -39,6 +40,16 @@ class PendingUser(base):
 
     verification_code = Column(String, nullable=False)
 
+    expires_at = Column(
+        DateTime(timezone=True)
+    )
+
+class passward_varification(base):
+    __tablename__="passward_varification"
+    id = Column(Integer, primary_key=True, index=True)
+    email=Column(String, unique=True, nullable=False)
+    verification_code = Column(String, nullable=False)
+    verified = Column(Boolean, default=False)
     expires_at = Column(
         DateTime(timezone=True)
     )

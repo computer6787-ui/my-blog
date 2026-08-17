@@ -30,6 +30,9 @@ class User(BaseModel):
     email:str
     password:str
 
+class edit_user(BaseModel):
+    name:str
+
 class Show_user(BaseModel):
     name:str
     email:str
@@ -81,3 +84,10 @@ class BlogResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class verify_email(BaseModel):
+    email:str
+
+class Update_password(BaseModel):
+    email:str
+    new_password:str

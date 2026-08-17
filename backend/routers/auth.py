@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from ..app import models
 from backend.app.oath2 import get_current_user
@@ -16,15 +16,59 @@ router=APIRouter(
 ) 
 
  
-@router.post("/login",response_model=schemas.Token)
-def login(request:schemas.Login,db:session=Depends(get_db)):
-    user=db.query(models.User).filter(models.User.email==request.username).first()
+@router.post("/login", response_model=schemas.Token)
+async def login(
+    request: Request,
+    db: session = Depends(get_db)
+):
+    content_type = request.headers.get("content-type", "")
+
+    if "application/json" in content_type:
+        data = await request.json()
+        username = data.get("username")
+        password = data.get("password")
+
+    elif "application/x-www-form-urlencoded" in content_type:
+        form = await request.form()
+        username = form.get("username")
+        password = form.get("password")
+
+    else:
+        raise HTTPException(
+            status_code=415,
+            detail="Unsupported content type"
+        )
+
+    if not username or not password:
+        raise HTTPException(
+            status_code=422,
+            detail="Username and password are required"
+        )
+
+    user = db.query(models.User).filter(
+        models.User.email == username
+    ).first()
+
     if not user:
-        raise HTTPException(status_code=400,detail="Invalid email or password")
-    if not Encrypting.Varify(request.password,user.hashed_password):
-        raise HTTPException(status_code=400,detail="Invalid email or password")
-    
-    access_token = create_access_token(data={"sub": user.email})
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid email or password"
+        )
 
+    if not Encrypting.Varify(
+        password,
+        user.hashed_password
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid email or password"
+        )
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    access_token = create_access_token(
+        data={"sub": user.email}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
