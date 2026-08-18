@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOIR HORDE - Survival</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #050505;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+            color: #d0d0d0;
+            user-select: none;
+        }
+        #gameCanvas { display: block; background: #080808; }
+        #ui {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+        .ui-element { pointer-events: auto; }
+        #hud {
+            position: absolute;
+            top: 20px; left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .hud-bar {
+            width: 220px; height: 18px;
+            background: rgba(0,0,0,0.75);
+            border: 1px solid #333;
+            position: relative;
+        }
+        .hud-fill {
+            height: 100%;
+            transition: width 0.15s ease-out;
+        }
+        .hud-label {
+            position: absolute;
+            top: 50%; left: 8px;
+            transform: translateY(-50%);
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px black;
+            z-index: 1;
+        }
+        #healthFill { background: linear-gradient(90deg, #8b0000, #c0392b); width: 100%; }
+        #xpFill { background: linear-gradient(90deg, #b37400, #f39c12); width: 0%; }
+        #waveInfo {
+            position: absolute;
+            top: 20px; right: 20px;
+            text-align: right;
+            font-size: 13px;
+            text-shadow: 2px 2px 4px black;
+            line-height: 1.6;
+        }
+        #waveInfo div { margin-bottom: 2px; }
+        #inventory {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+        }
+        .inv-slot {
+            width: 48px; height: 48px;
+            background: rgba(0,0,0,0.75);
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            position: relative;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .inv-slot:hover { border-color: #666; transform: translateY(-2px); }
+        .inv-slot.active {
+            border-color: #f39c12;
+            box-shadow: 0 0 12px rgba(243,156,18,0.4);
+        }
+        .inv-slot .key {
+            position: absolute;
+            bottom: 2px; right: 4px;
+            font-size: 9px;
+            color: #666;
+        }
+        #powerBar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+        }
+        #mobileControls {
+            display: none;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 80;
+        }
+        #joystickZone {
+            position: absolute;
+            left: 20px; bottom: 20px;
+            width: 140px; height: 140px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.15);
+            pointer-events: auto;
+            touch-action: none;
+        }
+        #joystickKnob {
+            position: absolute;
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(243,156,18,0.4);
+            border: 2px solid #f39c12;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        #actionZone {
+            position: absolute;
+            right: 20px; bottom: 20px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(231,76,60,0.15);
+            border: 2px solid rgba(231,76,60,0.4);
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            letter-spacing: 1px;
+            touch-action: none;
+        }
+        #mobileWeapons {
+            position: absolute;
+            right: 20px; top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .mobile-weapon-btn {
+            width: 44px; height: 44px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #333;
+            color: #ccc;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .mobile-weapon-btn.active {
+            border-color: #f39c12;
+            color: #f39c12;
+        }
+        #aimHint {
+            position: absolute;
+            right: 20px; top: 20px;
+            color: rgba(255,255,255,0.25);
+            font-size: 10px;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+        @media (hover: none) and (pointer: coarse) {
+            #mobileControls { display: block; }
+            #controls { display: none; }
+        }
+        .power-indicator {
+            min-width: 80px;
+            height: 22px;
+            background: rgba(0,0,0,0.75);
+            border: 1px solid #333;
+            font-size: 10px;
+            text-align: center;
+            line-height: 22px;
+            color: #fff;
+            text-shadow: 1px 1px 2px black;
+            letter-spacing: 1px;
+        }
+        .power-button {
+            width: 48px; height: 48px;
+            background: rgba(0,0,0,0.75);
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            position: relative;
+            transition: all 0.15s;
+            cursor: pointer;
+            letter-spacing: 1px;
+            flex-direction: column;
+        }
+        .power-button:hover { border-color: #666; transform: translateY(-2px); }
+        .power-button.active { border-color: #f39c12; box-shadow: 0 0 12px rgba(243,156,18,0.4); }
+        .power-button.on-cooldown {
+            pointer-events: none;
+            background: rgba(0,0,0,0.3);
+            border-color: #111;
+            color: #555;
+        }
+        .power-button .key {
+            position: absolute;
+            bottom: 2px; right: 4px;
+            font-size: 9px;
+            color: #666;
+        }
+        .power-cooldown-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #eee;
+            text-shadow: 0 0 5px black;
+            z-index: 10;
+        }
+        #bossHealthContainer {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            display: none;
+        }
+        #bossHealthFill {
+            height: 12px;
+            background: #c0392b;
+            width: 0%;
+            transition: width 0.15s;
+        }
+        #bossHealthLabel {
+            font-size: 12px;
+            color: #f39c12;
+            text-align: center;
+            margin-bottom: 4px;
+            text-shadow: 1px 1px 2px black;
+        }
+        #upgradeScreen {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 24px;
+            pointer-events: auto;
+            z-index: 100;
+        }
+        #upgradeScreen h2 {
+            font-size: 32px;
+            color: #f39c12;
+            text-shadow: 0 0 25px rgba(243,156,18,0.6);
+            letter-spacing: 6px;
+        }
+        #upgradeOptions {
+            display: flex;
+            gap: 20px;
+        }
+        .upgrade-card {
+            width: 240px;
+            padding: 24px;
+            background: linear-gradient(145deg, #141414, #0a0a0a);
+            border: 2px solid #2a2a2a;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .upgrade-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(243,156,18,0.05), transparent);
+            transition: left 0.5s;
+        }
+        .upgrade-card:hover::before { left: 100%; }
+        .upgrade-card:hover {
+            border-color: #f39c12;
+            transform: translateY(-6px);
+            box-shadow: 0 15px 40px rgba(243,156,18,0.25);
+        }
+        .upgrade-card h3 {
+            color: #f39c12;
+            margin-bottom: 12px;
+            font-size: 15px;
+            letter-spacing: 1px;
+        }
+        .upgrade-card p {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.6;
+        }
+        #nightOverlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,5,0.85) 100%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2.5s ease-in-out;
+            z-index: 50;
+        }
+        #lootPrompt {
+            position: absolute;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #f39c12;
+            padding: 8px 18px;
+            display: none;
+            font-size: 13px;
+            pointer-events: none;
+            text-align: center;
+            letter-spacing: 1px;
+            z-index: 60;
+        }
+        #lootBar {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px; height: 5px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid #444;
+            display: none;
+            z-index: 60;
+        }
+        #lootBarFill {
+            height: 100%;
+            background: #f39c12;
+            width: 0%;
+            transition: width 0.05s linear;
+        }
+        #gameOver {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            pointer-events: auto;
+            z-index: 200;
+        }
+        #gameOver h1 {
+            font-size: 52px;
+            color: #c0392b;
+            text-shadow: 0 0 40px rgba(192,57,43,0.8);
+            letter-spacing: 8px;
+        }
+        #gameOver .stats {
+            font-size: 16px;
+            color: #888;
+            line-height: 2;
+        }
+        #gameOver button {
+            padding: 14px 36px;
+            font-size: 16px;
+            background: transparent;
+            border: 2px solid #f39c12;
+            color: #f39c12;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+        #gameOver button:hover {
+            background: #f39c12;
+            color: #000;
+            box-shadow: 0 0 25px rgba(243,156,18,0.5);
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px; right: 20px;
+            font-size: 10px;
+            color: #444;
+            text-align: right;
+            letter-spacing: 1px;
+        }
+        .notification {
+            position: absolute;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #f39c12;
+            padding: 8px 18px;
+            font-size: 13px;
+            animation: fadeInOut 3s forwards;
+            pointer-events: none;
+            letter-spacing: 1px;
+            z-index: 60;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+            8% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            75% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" tabindex="0"></canvas>
+    <div id="ui">
+        <div id="hud">
+            <div class="hud-bar">
+                <div class="hud-fill" id="healthFill"></div>
+                <span class="hud-label">HEALTH</span>
+            </div>
+            <div class="hud-bar">
+                <div class="hud-fill" id="xpFill"></div>
+                <span class="hud-label">LEVEL <span id="levelNum">1</span></span>
+            </div>
+        </div>
+        <div id="waveInfo">
+            <div>WAVE: <span id="waveNum">1</span></div>
+            <div>SCORE: <span id="score">0</span></div>
+            <div>WOOD: <span id="woodCount">0</span></div>
+            <div>ZOMBIES: <span id="zombieCount">0</span></div>
+        </div>
+        <div id="bossHealthContainer" class="ui-element">
+            <div id="bossHealthLabel">BOSS</div>
+            <div class="hud-bar" style="width: 400px;">
+                <div class="hud-fill" id="bossHealthFill"></div>
+            </div>
+        </div>
+        <div id="inventory">
+            <div class="inv-slot active" data-slot="0"><span>1</span><span class="key">1</span></div>
+            <div class="inv-slot" data-slot="1"><span>2</span><span class="key">2</span></div>
+            <div class="inv-slot" data-slot="2"><span>3</span><span class="key">3</span></div>
+        </div>
+        <div id="powerBar">
+            <div class="power-button ui-element" data-power="speed">SPD<span class="key">Z</span></div>
+            <div class="power-button ui-element" data-power="shield">SHD<span class="key">X</span></div>
+            <div class="power-button ui-element" data-power="rage">RGE<span class="key">C</span></div>
+            <div class="power-button ui-element" data-power="time_slow">SLW<span class="key">V</span></div>
+            <div class="power-button ui-element" data-power="airstrike">AIR<span class="key">F</span></div>
+            <div class="power-button ui-element" data-power="heal">HLT<span class="key">R</span></div>
+        </div>
+        <div id="nightOverlay"></div>
+        <div id="lootPrompt">HOLD [E] TO LOOT</div>
+        <div id="lootBar"><div id="lootBarFill"></div></div>
+        <div id="upgradeScreen">
+            <h2>LEVEL UP</h2>
+            <div id="upgradeOptions"></div>
+        </div>
+        <div id="gameOver">
+            <h1>SURVIVOR DOWN</h1>
+            <div class="stats" id="finalStats"></div>
+            <button onclick="location.reload()">SURVIVE AGAIN</button>
+        </div>
+        <div id="controls">
+            WASD - MOVE | MOUSE - AIM/SHOOT<br>
+            B - BUILD | E - LOOT | Z,X,C,V,F,R - POWERS | 1-3 - WEAPONS
+        </div>
+        <div id="mobileControls">
+            <div id="aimHint">DRAG RIGHT TO AIM & SHOOT</div>
+            <div id="joystickZone">
+                <div id="joystickKnob"></div>
+            </div>
+            <div id="actionZone">FIRE</div>
+            <div id="mobileWeapons">
+                <div class="mobile-weapon-btn active" data-slot="0">1</div>
+                <div class="mobile-weapon-btn" data-slot="1">2</div>
+                <div class="mobile-weapon-btn" data-slot="2">3</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/audio.js"></script>
+    <script src="js/world.js"></script>
+    <script src="js/zombies.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/powers.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

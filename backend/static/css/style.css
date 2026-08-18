@@ -1634,10 +1634,12 @@ body.dark-mode .footer-contact span {
     z-index: 2100;
     opacity: 0;
     transition: opacity 0.2s ease;
+    pointer-events: none;
 }
 
 .lumora-modal-backdrop.show {
     opacity: 1;
+    pointer-events: auto;
 }
 
 .lumora-modal-backdrop.hide {
