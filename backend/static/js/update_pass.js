@@ -1,4 +1,4 @@
-import { API_URL } from "./config.js";
+import { API_URL, showLoading, hideLoading, notify } from "./config.js?v=20260818";
 
 const form = document.getElementById("updatePassForm");
 const password = document.getElementById("password");
@@ -45,6 +45,8 @@ form.addEventListener("submit", async (e) => {
         return;
     }
 
+    showLoading("Updating your password...");
+
     try {
         const res = await fetch(`${API_URL}/user/edit_pass`,
         {
@@ -62,8 +64,8 @@ form.addEventListener("submit", async (e) => {
 
         if (res.status === 202) {
 
-            await Swal.fire({
-                icon: "success",
+            await notify({
+                type: "success",
                 title: "Password Updated!",
                 text: "Your password has been changed successfully."
             });
@@ -81,5 +83,7 @@ form.addEventListener("submit", async (e) => {
     } catch (error) {
         console.error("Error:", error);
         message.textContent = "Something went wrong. Please try again.";
+    } finally {
+        hideLoading();
     }
 });

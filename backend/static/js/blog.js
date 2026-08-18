@@ -2,7 +2,7 @@ let skip = 0;
 const limit = 4;
 let currentSearch = "";
 
-import { API_URL, ROUTES } from "./config.js";
+import { API_URL, ROUTES, notify } from "./config.js?v=20260818";
 
 function showBlogLoading(message = "Loading blogs...") {
     const section = document.getElementById("blog_section");
@@ -40,13 +40,12 @@ async function loadBlogs(search = "") {
     if (blogs.length === 0) {
         loadMore_button.style.display = "none";
 
-        Swal.fire({
-            icon: "info",
+        notify({
+            type: "info",
             title: "No blogs found!",
             text: search
                 ? "There are no blogs matching your search."
-                : "There are no blogs available right now. Be the first to write one!",
-            confirmButtonText: "Got it"
+                : "There are no blogs available right now. Be the first to write one!"
         });
 
         return;
@@ -136,10 +135,13 @@ async function readMore(id) {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        await Swal.fire({
-            icon: "warning",
+        await notify({
+            type: "warning",
             title: "Login Required",
-            text: "Please log in to see the blog."
+            text: "Please log in to see the blog.",
+            onClick: () => {
+                window.location.href = ROUTES.LOGIN;
+            }
         });
 
         window.location.href = ROUTES.LOGIN;

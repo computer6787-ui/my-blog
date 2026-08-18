@@ -1,4 +1,4 @@
-import { API_URL } from "./config.js";
+import { API_URL, notify } from "./config.js?v=20260818";
 
 const form = document.getElementById("verifyForm");
 const message = document.getElementById("message");
@@ -29,12 +29,11 @@ form.addEventListener("submit", async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-    await Swal.fire({
-    icon: "success",
-    title: "Success!",
-    text: "Account verified successfully."
-});
-
+        await notify({
+            type: "success",
+            title: "Success!",
+            text: "Account verified successfully."
+        });
 
         window.location.href = "/Update_pass";
     } else {
@@ -57,7 +56,11 @@ resendBtn.addEventListener("click", async () => {
     const data = await res.json();
 
     if (res.ok) {
-        alert("A new verification code has been sent.");
+        await notify({
+            type: "success",
+            title: "Code sent",
+            text: "A new verification code has been sent."
+        });
     } else {
         message.textContent = data.detail;
     }

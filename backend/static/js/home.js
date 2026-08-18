@@ -1,4 +1,4 @@
-import { ROUTES } from './config.js';
+import { ROUTES, notify } from './config.js?v=20260818';
 
 document.addEventListener('DOMContentLoaded', function() {
     const readBlogsButton = document.getElementById('read_blogs');
@@ -12,16 +12,18 @@ readBlogsButton.addEventListener('click', function() {
 });
 
     writeBlogButton.addEventListener('click', async function() {
-        console.log
-    const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");
     if (token){
         window.location.href= ROUTES.CREATE_BLOG;
     }else{
-        await Swal.fire({
-             icon: "warning",
+        await notify({
+             type: "warning",
              title: "Login Required",
-             text: "Please log in to write a blog."
-});
+             text: "Please log in to write a blog.",
+             onClick: () => {
+                 window.location.href = ROUTES.LOGIN;
+             }
+        });
         window.location.href= ROUTES.LOGIN
     }
 });

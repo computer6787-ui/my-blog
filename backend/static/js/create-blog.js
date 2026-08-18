@@ -1,4 +1,4 @@
-import { API_URL, ROUTES } from "./config.js";
+import { API_URL, ROUTES, showLoading, hideLoading, notify } from "./config.js?v=20260818";
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -27,14 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const blogBody = body.value;
         const token = localStorage.getItem("token");
 
-        Swal.fire({
-            title: "Creating blog...",
-            text: "Please wait while your blog is being published.",
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
+        showLoading("Creating blog...");
 
         try {
             const response = await fetch(`${API_URL}/blog`, {
@@ -49,12 +42,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 })
             });
 
-            Swal.close();
-
             if (response.ok) {
 
-                await Swal.fire({
-                    icon: "success",
+                hideLoading();
+
+                await notify({
+                    type: "success",
                     title: "Success!",
                     text: "Blog created successfully."
                 });
@@ -63,18 +56,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
             } else if (response.status === 401) {
 
-                await Swal.fire({
-                    icon: "warning",
+                hideLoading();
+
+                await notify({
+                    type: "warning",
                     title: "Login Required",
-                    text: "Please log in to write a blog."
+                    text: "Please log in to write a blog.",
+                    onClick: () => {
+                        window.location.href = ROUTES.LOGIN;
+                    }
                 });
 
                 window.location.href = ROUTES.LOGIN;
 
             } else {
 
-                await Swal.fire({
-                    icon: "error",
+                hideLoading();
+
+                await notify({
+                    type: "error",
                     title: "Oops!",
                     text: "Something went wrong."
                 });
@@ -82,12 +82,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } catch (error) {
 
-            Swal.close();
+            hideLoading();
 
             console.error("Network error:", error);
 
-            await Swal.fire({
-                icon: "error",
+            await notify({
+                type: "error",
                 title: "Connection Error",
                 text: "Could not connect to the server. Please try again."
             });

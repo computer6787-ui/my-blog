@@ -22,7 +22,7 @@
 
     <title>{% block title %}Lumora{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v=20260819">
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -49,6 +49,11 @@
         {% block content %}
         {% endblock %}
     </main>
+
+    <div id="global-loader" class="global-loader hidden" aria-live="polite" aria-busy="true">
+        <div class="global-loader-spinner"></div>
+        <span id="global-loader-text">Loading...</span>
+    </div>
 
     <footer>
         {% include "partials/footer.html" %}

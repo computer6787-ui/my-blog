@@ -1,4 +1,4 @@
-    import { API_URL } from "./config.js";
+    import { API_URL, confirmDialog } from "./config.js?v=20260818";
     document.addEventListener('DOMContentLoaded', function() {
     const authLink=document.getElementById("auth-link");
     const token=localStorage.getItem("token");
@@ -41,15 +41,13 @@
   authLink.addEventListener("click", async function (e) {
 
     if (authLink.textContent === "Logout") {
-    const result = await Swal.fire({
-    title: "You want to logout?",
-    text: "You cannot access blogs while logged out.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Confirm",
-    cancelButtonText: "Cancel"
-});
-    if (!result.isConfirmed) return;
+    const confirmed = await confirmDialog({
+        title: "Logout",
+        text: "You cannot access blogs while logged out.",
+        confirmText: "Confirm",
+        cancelText: "Cancel"
+    });
+    if (!confirmed) return;
 
         e.preventDefault();
         localStorage.removeItem("token");

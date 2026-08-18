@@ -10,16 +10,16 @@
 
     <nav class="nav">
             <a class="nav_button" href="/">Home</a>
-            <button class="menu-btn" id="menu-btn">
+            <button id="dark-mode-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">🌙</button>
+            <button class="menu-btn" id="menu-btn" type="button" aria-label="Open menu" onclick="toggleMenu()">
             <span></span>
             <span></span>
             <span></span>
             </button>
-
-        
     </nav>
 </header>
-<div class="overlay"></div>
+
+<div class="overlay" onclick="closeMenu()"></div>
 
 <aside class="drawer" id="drawer">
     <h2>Menu</h2>
@@ -30,5 +30,59 @@
     <a id="auth-link" href="/login">Login</a>
 </aside>
 
+<script>
+    function toggleMenu() {
+        const drawer = document.getElementById('drawer');
+        const overlay = document.querySelector('.overlay');
+        const menuBtn = document.getElementById('menu-btn');
 
-<script type="module" src="{{ url_for('static', path='js/navbar.js') }}"></script>
+        if (!drawer || !overlay || !menuBtn) return;
+
+        const isOpen = !drawer.classList.contains('open');
+        drawer.classList.toggle('open', isOpen);
+        menuBtn.classList.toggle('open', isOpen);
+        overlay.classList.toggle('visible', isOpen);
+    }
+
+    function closeMenu() {
+        const drawer = document.getElementById('drawer');
+        const overlay = document.querySelector('.overlay');
+        const menuBtn = document.getElementById('menu-btn');
+
+        if (!drawer || !overlay || !menuBtn) return;
+
+        drawer.classList.remove('open');
+        menuBtn.classList.remove('open');
+        overlay.classList.remove('visible');
+    }
+
+    (function() {
+        const btn = document.getElementById('dark-mode-toggle');
+        if (btn) {
+            function applyTheme(isDark) {
+                document.body.classList.toggle('dark-mode', isDark);
+                btn.textContent = isDark ? '☀️' : '🌙';
+                try {
+                    localStorage.setItem('lumora-theme', isDark ? 'dark' : 'light');
+                } catch (error) {
+                    // no-op if storage is unavailable
+                }
+            }
+
+            const savedTheme = (() => {
+                try {
+                    return localStorage.getItem('lumora-theme');
+                } catch (error) {
+                    return null;
+                }
+            })();
+
+            applyTheme(savedTheme === 'dark');
+
+            btn.addEventListener('click', function() {
+                applyTheme(!document.body.classList.contains('dark-mode'));
+            });
+        }
+    })();
+</script>
+

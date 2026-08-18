@@ -1,17 +1,18 @@
-import { API_URL,ROUTES } from "./config.js";
+import { API_URL, ROUTES, showLoading, hideLoading, notify } from "./config.js?v=20260818";
 document.addEventListener('DOMContentLoaded', function() {
     const email = document.getElementById("email");
 
 
   const userForm = document.getElementById("reset_pass_form");
-    
+
 
     userForm.addEventListener("submit", createUser);
 
     async function createUser(event) {
-      
-        event.preventDefault(); 
+
+        event.preventDefault();
         const userEmail = email.value;
+        showLoading("Sending verification code...");
         try {
             const response = await fetch(`${API_URL}/user/ver_email`, {
                 method: "POST",
@@ -24,24 +25,31 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (response.ok) {
-                await Swal.fire({
-    icon: "success",
-    title: "Success!",
-    text: "Verification code sent to your email."
-});
+                await notify({
+                    type: "success",
+                    title: "Code sent",
+                    text: "A verification code has been sent to your email."
+                });
                 localStorage.setItem("userEmail", userEmail);
-                window.location.href = "/Verify_user";;
-            
+                window.location.href = "/Verify_user";
+
             }else {
-               await Swal.fire({
-    icon: "error",
-    title: "Oops!",
-    text: "Something went wrong."
-});
+               await notify({
+                    type: "error",
+                    title: "Oops!",
+                    text: "Something went wrong."
+                });
             }
 
         } catch (error) {
             console.error("Network error:", error);
+            await notify({
+                type: "error",
+                title: "Connection Error",
+                text: "Could not send the verification email."
+            });
+        } finally {
+            hideLoading();
         }
     }
 });

@@ -1,4 +1,4 @@
-import { API_URL } from "./config.js";
+import { API_URL, showLoading, hideLoading, notify } from "./config.js?v=20260818";
 
 const form = document.getElementById("verifyForm");
 const message = document.getElementById("message");
@@ -14,52 +14,71 @@ form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const code = document.getElementById("code").value;
+    showLoading("Verifying your account...");
 
-    const res = await fetch(`${API_URL}/verify`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            email: email,
-            verification_code: code
-        })
-    });
+    try {
+        const res = await fetch(`${API_URL}/verify`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email: email,
+                verification_code: code
+            })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (res.ok) {
-    await Swal.fire({
-    icon: "success",
-    title: "Success!",
-    text: "Account verified successfully."
-});
+        if (res.ok) {
+            await notify({
+                type: "success",
+                title: "Success!",
+                text: "Account verified successfully."
+            });
 
-        localStorage.removeItem("pending_email");
-
-        window.location.href = "/login";
-    } else {
-        message.textContent = data.detail;
+            localStorage.removeItem("pending_email");
+            window.location.href = "/login";
+        } else {
+            message.textContent = data.detail;
+        }
+    } catch (error) {
+        console.error(error);
+        message.textContent = "Verification failed. Please try again.";
+    } finally {
+        hideLoading();
     }
 });
 
 resendBtn.addEventListener("click", async () => {
+    showLoading("Resending code...");
 
-    const res = await fetch(`${API_URL}/resend-code`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            email: email
-        })
-    });
+    try {
+        const res = await fetch(`${API_URL}/resend-code`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email: email
+            })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (res.ok) {
-        alert("A new verification code has been sent.");
-    } else {
-        message.textContent = data.detail;
+        if (res.ok) {
+            await notify({
+                type: "success",
+                title: "Code sent",
+                text: "A new verification code has been sent."
+            });
+        } else {
+            message.textContent = data.detail;
+        }
+    } catch (error) {
+        console.error(error);
+        message.textContent = "Could not resend the code right now.";
+    } finally {
+        hideLoading();
     }
 });

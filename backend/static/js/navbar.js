@@ -31,22 +31,40 @@
         const menuBtn = document.getElementById('menu-btn');
         const drawer = document.getElementById('drawer');
         const overlay = document.querySelector('.overlay');
+        let toggleBtn = document.getElementById('dark-mode-toggle');
 
-        if (nav && !document.getElementById('dark-mode-toggle')) {
-            const toggleBtn = document.createElement('button');
+        if (nav && !toggleBtn) {
+            toggleBtn = document.createElement('button');
             toggleBtn.id = 'dark-mode-toggle';
             toggleBtn.type = 'button';
             toggleBtn.setAttribute('aria-label', 'Toggle dark mode');
+            toggleBtn.textContent = '🌙';
             nav.appendChild(toggleBtn);
-            applyTheme(document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-
-            toggleBtn.addEventListener('click', function() {
-                const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
-                applyTheme(nextTheme);
-            });
         }
 
-        syncThemeFromStorage();
+        const initializeTheme = () => {
+            const savedTheme = (() => {
+                try {
+                    return localStorage.getItem('lumora-theme');
+                } catch (error) {
+                    return null;
+                }
+            })();
+
+            if (savedTheme === 'dark' || document.body.classList.contains('dark-mode')) {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
+            }
+        };
+
+        if (toggleBtn) {
+            toggleBtn.onclick = function() {
+                const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+                applyTheme(nextTheme);
+            };
+            initializeTheme();
+        }
 
         if (menuBtn && drawer) {
             menuBtn.addEventListener('click', function() {
