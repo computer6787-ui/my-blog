@@ -980,14 +980,28 @@ function requestFullscreen() {
     }
 }
 
+function tryFullscreen() {
+    requestFullscreen();
+}
+
 if (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) {
     const canvas = document.getElementById('gameCanvas');
     if (canvas) {
-        canvas.addEventListener('touchstart', () => {
-            document.documentElement.requestFullscreen().catch(() => {});
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            tryFullscreen();
         }, { once: true });
-        canvas.addEventListener('click', () => {
-            document.documentElement.requestFullscreen().catch(() => {});
+
+        document.addEventListener('touchend', () => {
+            tryFullscreen();
+        }, { once: true });
+
+        document.addEventListener('click', () => {
+            tryFullscreen();
+        }, { once: true });
+
+        document.addEventListener('keydown', () => {
+            tryFullscreen();
         }, { once: true });
     }
 }
