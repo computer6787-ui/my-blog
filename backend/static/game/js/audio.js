@@ -7,6 +7,8 @@ class AudioSystem {
         this.filter = null;
         this.lfo = null;
         this.lfoGain = null;
+        this.isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
+        this.volumeBoost = this.isMobile ? 2.5 : 1;
     }
 
     init() {
@@ -33,7 +35,7 @@ class AudioSystem {
         this.filter.type = 'lowpass';
         this.filter.frequency.value = 180;
         this.filter.Q.value = 5;
-        this.droneGain.gain.value = 0.025;
+        this.droneGain.gain.value = 0.08 * this.volumeBoost;
         this.lfo.type = 'sine';
         this.lfo.frequency.value = 0.08;
         this.lfoGain.gain.value = 12;
@@ -54,7 +56,7 @@ class AudioSystem {
         const now = this.ctx.currentTime;
         const baseFreq = 38 + intensity * 35;
         const filterFreq = 180 + intensity * 500;
-        const gain = 0.025 + intensity * 0.045;
+        const gain = (0.08 + intensity * 0.14) * this.volumeBoost;
 
         this.droneOsc.frequency.setTargetAtTime(baseFreq, now, 1.5);
         this.filter.frequency.setTargetAtTime(filterFreq, now, 1.5);
@@ -70,7 +72,7 @@ class AudioSystem {
         osc.type = 'square';
         osc.frequency.setValueAtTime(180, t);
         osc.frequency.exponentialRampToValueAtTime(35, t + 0.08);
-        gain.gain.setValueAtTime(0.04, t);
+        gain.gain.setValueAtTime(0.12 * this.volumeBoost, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -86,7 +88,7 @@ class AudioSystem {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(90, t);
         osc.frequency.exponentialRampToValueAtTime(25, t + 0.12);
-        gain.gain.setValueAtTime(0.025, t);
+        gain.gain.setValueAtTime(0.08 * this.volumeBoost, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -102,7 +104,7 @@ class AudioSystem {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(350, t);
         osc.frequency.exponentialRampToValueAtTime(900, t + 0.08);
-        gain.gain.setValueAtTime(0.03, t);
+        gain.gain.setValueAtTime(0.09 * this.volumeBoost, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -118,7 +120,7 @@ class AudioSystem {
             const gain = this.ctx.createGain();
             osc.type = 'triangle';
             osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0.04, t + i * 0.08);
+            gain.gain.setValueAtTime(0.12 * this.volumeBoost, t + i * 0.08);
             gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.08 + 0.2);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
@@ -135,7 +137,7 @@ class AudioSystem {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(150, t);
         osc.frequency.exponentialRampToValueAtTime(40, t + 0.3);
-        gain.gain.setValueAtTime(0.06, t);
+        gain.gain.setValueAtTime(0.18 * this.volumeBoost, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -151,7 +153,7 @@ class AudioSystem {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(200, t);
         osc.frequency.exponentialRampToValueAtTime(1200, t + 0.2);
-        gain.gain.setValueAtTime(0.05, t);
+        gain.gain.setValueAtTime(0.15 * this.volumeBoost, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -171,7 +173,7 @@ class AudioSystem {
         const noise = this.ctx.createBufferSource();
         noise.buffer = buffer;
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.1, t);
+        gain.gain.setValueAtTime(0.3 * this.volumeBoost, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'lowpass';

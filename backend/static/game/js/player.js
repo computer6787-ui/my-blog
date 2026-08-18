@@ -78,15 +78,6 @@ class Player {
         this.x = Math.max(this.radius, Math.min(world.width - this.radius, this.x));
         this.y = Math.max(this.radius, Math.min(world.height - this.radius, this.y));
 
-        const cam = world.camera;
-        if (!input.aimJoystick || !input.aimJoystick.active) {
-            this.angle = Math.atan2(input.mouseY + cam.y - this.y, input.mouseX + cam.x - this.x);
-        }
-
-        if (input.mouseDown && (!input.aimJoystick || !input.aimJoystick.active)) {
-            this.shoot(world, input.mouseX + cam.x, input.mouseY + cam.y);
-        }
-
         if (this.buildCooldown > 0) this.buildCooldown -= dt;
         if (this.bayonetCooldown > 0) this.bayonetCooldown -= dt;
 
