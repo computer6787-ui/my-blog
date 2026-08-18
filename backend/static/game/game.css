@@ -220,28 +220,28 @@ body.game-page {
     z-index: 90;
 }
 .mobile-weapon-btn {
-    width: 64px; height: 64px;
+    width: 36px; height: 36px;
     background: rgba(0,0,0,0.8);
     border: 2px solid #333;
     color: #ccc;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: bold;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 6px;
     text-transform: uppercase;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     transition: all 0.15s;
 }
 .mobile-weapon-btn.active {
     border-color: #f39c12;
     color: #f39c12;
     background: rgba(243,156,18,0.15);
-    box-shadow: 0 0 20px rgba(243,156,18,0.4);
-    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(243,156,18,0.7), 0 0 4px rgba(243,156,18,0.4);
+    transform: scale(1.05);
 }
 #aimHint {
     position: absolute;

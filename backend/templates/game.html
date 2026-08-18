@@ -153,6 +153,20 @@
     }
 
     (function() {
+        const fullscreenHint = document.getElementById('fullscreenHint');
+        if (fullscreenHint) {
+            function hideHint() {
+                fullscreenHint.style.display = 'none';
+            }
+            fullscreenHint.addEventListener('click', hideHint);
+            fullscreenHint.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                hideHint();
+            });
+        }
+    })();
+
+    (function() {
         const returnBtn = document.getElementById('gameReturnBtn');
         const backdrop = document.getElementById('gameReturnBackdrop');
         const confirmBtn = document.getElementById('gameReturnConfirm');
