@@ -142,6 +142,22 @@
             letter-spacing: 1px;
             touch-action: none;
         }
+        #buildZone {
+            position: absolute;
+            right: 150px; bottom: 20px;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(52,152,219,0.15);
+            border: 2px solid rgba(52,152,219,0.4);
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 10px;
+            letter-spacing: 1px;
+            touch-action: none;
+        }
         #mobileWeapons {
             position: absolute;
             right: 20px; top: 50%;
@@ -440,7 +456,7 @@
             padding: 20px;
         }
 
-        #rotateOverlay .rotate-icon {
+        #rotateOverlay .icon {
             font-size: 64px;
             margin-bottom: 20px;
             animation: rotatePhone 2s ease-in-out infinite;
@@ -452,7 +468,7 @@
             margin-bottom: 10px;
         }
 
-        #rotateOverlay div:last-of-type {
+        #rotateOverlay p {
             font-size: 14px;
             opacity: 0.7;
         }
@@ -532,6 +548,7 @@
                 <div id="joystickKnob"></div>
             </div>
             <div id="actionZone">FIRE</div>
+            <div id="buildZone">BUILD</div>
             <div id="mobileWeapons">
                 <div class="mobile-weapon-btn active" data-slot="0">1</div>
                 <div class="mobile-weapon-btn" data-slot="1">2</div>

@@ -836,6 +836,15 @@ class InputHandler {
             }, { passive: false });
         }
 
+        const buildZone = document.getElementById('buildZone');
+        if (buildZone) {
+            buildZone.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                game.world.player.tryBuild(game.world);
+            }, { passive: false });
+        }
+
         document.querySelectorAll('.mobile-weapon-btn').forEach(btn => {
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
@@ -890,17 +899,19 @@ document.addEventListener('keydown', (e) => {
 });
 
 if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('landscape').catch(() => {
-        const rotateOverlay = document.getElementById('rotateOverlay');
-        if (rotateOverlay) rotateOverlay.style.display = 'flex';
-    });
+    screen.orientation.lock('landscape').catch(() => {});
 }
 
-window.addEventListener('orientationchange', () => {
+function updateOrientation() {
     const rotateOverlay = document.getElementById('rotateOverlay');
-    if (rotateOverlay && (window.orientation === 0 || window.orientation === 180)) {
-        rotateOverlay.style.display = 'flex';
-    } else if (rotateOverlay) {
-        rotateOverlay.style.display = 'none';
+    const isPortrait = window.innerHeight > window.innerWidth;
+    if (rotateOverlay) {
+        rotateOverlay.style.display = isPortrait ? 'flex' : 'none';
     }
+}
+
+updateOrientation();
+window.addEventListener('resize', updateOrientation);
+window.addEventListener('orientationchange', () => {
+    setTimeout(updateOrientation, 100);
 });
