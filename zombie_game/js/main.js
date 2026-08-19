@@ -96,6 +96,44 @@ class Particle {
     }
 }
 
+class ShockwaveRing {
+    constructor(x, y, maxRadius, speed, damage) {
+        this.x = x;
+        this.y = y;
+        this.radius = 0;
+        this.maxRadius = maxRadius;
+        this.speed = speed;
+        this.damage = damage;
+        this.life = 1;
+        this.hitZombies = new Set();
+    }
+
+    update(dt, world) {
+        this.radius += this.speed * dt;
+        this.life = 1 - (this.radius / this.maxRadius);
+
+        for (const z of world.zombies) {
+            if (z.dead || this.hitZombies.has(z)) continue;
+            const dist = Math.hypot(z.x - this.x, z.y - this.y);
+            if (Math.abs(dist - this.radius) < 40) {
+                z.takeDamage(this.damage, world);
+                this.hitZombies.add(z);
+            }
+        }
+
+        if (world.boss && !world.boss.dead) {
+            const dist = Math.hypot(world.boss.x - this.x, world.boss.y - this.y);
+            if (Math.abs(dist - this.radius) < 40) {
+                world.boss.takeDamage(this.damage * 0.5, world);
+            }
+        }
+
+        if (this.radius >= this.maxRadius) {
+            this.life = 0;
+        }
+    }
+}
+
 class LootBag {
     constructor(x, y) {
         this.x = x;
@@ -519,6 +557,16 @@ class Game {
         });
         ctx.globalAlpha = 1;
 
+        this.world.shockwaves.forEach(s => {
+            ctx.globalAlpha = s.life;
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 4 + s.life * 4;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        });
+
         this.world.bullets.forEach(b => {
             ctx.save();
             ctx.translate(b.x, b.y);
@@ -667,7 +715,7 @@ class InputHandler {
                 game.world.player.activatePower('time_slow', game.world);
             }
             if (e.key.toLowerCase() === 'f') {
-                game.world.player.activatePower('airstrike', game.world);
+                game.world.player.activatePower('shockwave', game.world);
             }
             if (e.key.toLowerCase() === 'r') {
                 game.world.player.activatePower('heal', game.world);
@@ -839,4 +887,20 @@ const game = new Game();
 document.addEventListener('click', () => audio.init(), { once: true });
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.key === ' ') audio.init();
+});
+
+if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(() => {
+        const rotateOverlay = document.getElementById('rotateOverlay');
+        if (rotateOverlay) rotateOverlay.style.display = 'flex';
+    });
+}
+
+window.addEventListener('orientationchange', () => {
+    const rotateOverlay = document.getElementById('rotateOverlay');
+    if (rotateOverlay && (window.orientation === 0 || window.orientation === 180)) {
+        rotateOverlay.style.display = 'flex';
+    } else if (rotateOverlay) {
+        rotateOverlay.style.display = 'none';
+    }
 });

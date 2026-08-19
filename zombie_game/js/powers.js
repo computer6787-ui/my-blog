@@ -1,10 +1,10 @@
 const POWER_TYPES = {
-    speed: { name: 'SPD', color: '#3498db', cooldown: 15, duration: 5 },
-    shield: { name: 'SHD', color: '#2ecc71', cooldown: 20, duration: 5 },
-    rage: { name: 'RGE', color: '#e74c3c', cooldown: 18, duration: 4 },
-    time_slow: { name: 'SLW', color: '#9b59b6', cooldown: 25, duration: 6 },
-    airstrike: { name: 'AIR', color: '#f39c12', cooldown: 30, duration: 0.5 },
-    heal: { name: 'HLT', color: '#27ae60', cooldown: 12, duration: 0.5 }
+    speed: { name: 'SPD', color: '#3498db', cooldown: 30, duration: 5 },
+    shield: { name: 'SHD', color: '#2ecc71', cooldown: 30, duration: 5 },
+    rage: { name: 'RGE', color: '#e74c3c', cooldown: 30, duration: 5 },
+    time_slow: { name: 'SLW', color: '#9b59b6', cooldown: 35, duration: 6 },
+    shockwave: { name: 'SHK', color: '#e74c3c', cooldown: 45, duration: 0.5 },
+    heal: { name: 'HLT', color: '#27ae60', cooldown: 40, duration: 0.5 }
 };
 
 function updatePowerUI(player) {

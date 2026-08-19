@@ -41,6 +41,7 @@
             <div>SCORE: <span id="score">0</span></div>
             <div>WOOD: <span id="woodCount">0</span></div>
             <div>ZOMBIES: <span id="zombieCount">0</span></div>
+            <div id="waveCooldown" style="display: none;">NEXT WAVE IN: <span id="waveCooldownTime">0</span>s</div>
         </div>
         <div id="bossHealthContainer" class="ui-element">
             <div id="bossHealthLabel">BOSS</div>
@@ -58,10 +59,15 @@
             <div class="power-button ui-element" data-power="shield">SHD<span class="key">X</span></div>
             <div class="power-button ui-element" data-power="rage">RGE<span class="key">C</span></div>
             <div class="power-button ui-element" data-power="time_slow">SLW<span class="key">V</span></div>
-            <div class="power-button ui-element" data-power="airstrike">AIR<span class="key">F</span></div>
+            <div class="power-button ui-element" data-power="shockwave">SHK<span class="key">F</span></div>
             <div class="power-button ui-element" data-power="heal">HLT<span class="key">R</span></div>
         </div>
         <div id="nightOverlay"></div>
+        <div id="rotateOverlay">
+            <div class="rotate-icon">📱➡️</div>
+            <div>ROTATE YOUR PHONE</div>
+            <div style="font-size:14px;opacity:0.8;margin-top:8px;">Landscape mode required</div>
+        </div>
         <div id="lootPrompt">HOLD [E] TO LOOT</div>
         <div id="lootBar"><div id="lootBarFill"></div></div>
         <div id="upgradeScreen">
@@ -86,6 +92,7 @@
                 <div id="aimJoystickKnob"></div>
             </div>
             <div id="lootZone">LOOT</div>
+            <div id="buildZone">BUILD</div>
             <div id="mobileWeapons">
                 <div class="mobile-weapon-btn active" data-slot="0">PST</div>
                 <div class="mobile-weapon-btn" data-slot="1">SHT</div>
@@ -185,6 +192,9 @@
 
         confirmBtn.addEventListener('click', () => {
             closeModal();
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+            }
             window.location.href = '/';
         });
 

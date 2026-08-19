@@ -8,7 +8,7 @@ function updatePowerUI(player) {
         shield: 'SHIELD',
         rage: 'RAGE',
         time_slow: 'WARP',
-        airstrike: 'STRIKE',
+        shockwave: 'SHOCK',
         heal: 'HEAL'
     };
     
@@ -17,7 +17,7 @@ function updatePowerUI(player) {
         shield: '#2ecc71',
         rage: '#e74c3c',
         time_slow: '#9b59b6',
-        airstrike: '#f39c12',
+        shockwave: '#e74c3c',
         heal: '#27ae60'
     };
     
@@ -26,7 +26,7 @@ function updatePowerUI(player) {
         shield: 5,
         rage: 4,
         time_slow: 6,
-        airstrike: 0.5,
+        shockwave: 0.5,
         heal: 0.5
     };
     

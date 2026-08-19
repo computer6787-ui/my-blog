@@ -16,7 +16,7 @@ body.game-page {
 .ui-element { pointer-events: auto; }
 #gameReturnBtn {
     position: absolute;
-    top: 20px; right: 20px;
+    bottom: 20px; left: 20px;
     padding: 8px 18px;
     background: rgba(0,0,0,0.75);
     border: 1px solid #f39c12;
@@ -71,6 +71,11 @@ body.game-page {
     line-height: 1.6;
 }
 #waveInfo div { margin-bottom: 2px; }
+#waveCooldown {
+    color: #f39c12;
+    font-weight: bold;
+    font-size: 14px;
+}
 #inventory {
     position: absolute;
     bottom: 70px;
@@ -189,6 +194,22 @@ body.game-page {
     letter-spacing: 1px;
     touch-action: none;
 }
+#buildZone {
+    position: absolute;
+    left: 250px; bottom: 55px;
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: rgba(52,152,219,0.15);
+    border: 2px solid rgba(52,152,219,0.4);
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 10px;
+    letter-spacing: 1px;
+    touch-action: none;
+}
 #aimJoystickZone {
     position: absolute;
     right: 20px; bottom: 20px;
@@ -238,10 +259,10 @@ body.game-page {
 }
 .mobile-weapon-btn.active {
     border-color: #f39c12;
-    color: #f39c12;
-    background: rgba(243,156,18,0.15);
-    box-shadow: 0 0 12px rgba(243,156,18,0.7), 0 0 4px rgba(243,156,18,0.4);
-    transform: scale(1.05);
+    color: #ffffff;
+    background: rgba(243, 156, 18, 0.35);
+    box-shadow: 0 0 15px #f39c12, 0 0 8px #f39c12, inset 0 0 10px rgba(243, 156, 18, 0.6);
+    transform: scale(1.08);
 }
 #aimHint {
     position: absolute;
@@ -406,7 +427,7 @@ body.game-page {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,5,0.85) 100%);
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,5,0.65) 100%);
     pointer-events: none;
     opacity: 0;
     transition: opacity 2.5s ease-in-out;
@@ -511,4 +532,51 @@ body.game-page {
     8% { opacity: 1; transform: translateX(-50%) translateY(0); }
     75% { opacity: 1; }
     100% { opacity: 0; transform: translateX(-50%) translateY(-5px); }
+}
+
+#rotateOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    padding: 20px;
+}
+
+#rotateOverlay .rotate-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: rotatePhone 2s ease-in-out infinite;
+}
+
+#rotateOverlay div:first-of-type {
+    font-size: 24px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+#rotateOverlay div:last-of-type {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+@keyframes rotatePhone {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+}
+
+@media (orientation: portrait) {
+    #rotateOverlay {
+        display: flex;
+    }
+    #gameCanvas, #ui, #mobileControls, #controls {
+        display: none !important;
+    }
 }

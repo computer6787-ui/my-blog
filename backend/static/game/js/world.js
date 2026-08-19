@@ -52,6 +52,7 @@ class World {
         this.powerOrbs = [];
         this.projectiles = [];
         this.burnEffects = [];
+        this.shockwaves = [];
         this.boss = null;
 
         this.player = null;
@@ -122,6 +123,10 @@ class World {
             this.particles[i].update(scaledDt);
             if (this.particles[i].life <= 0) this.particles.splice(i, 1);
         }
+        for (let i = this.shockwaves.length - 1; i >= 0; i--) {
+            this.shockwaves[i].update(scaledDt, this);
+            if (this.shockwaves[i].life <= 0) this.shockwaves.splice(i, 1);
+        }
         for (let i = this.lootBags.length - 1; i >= 0; i--) {
             this.lootBags[i].update(scaledDt);
             if (this.lootBags[i].life <= 0) this.lootBags.splice(i, 1);
@@ -146,7 +151,7 @@ class World {
     triggerNight() {
         this.nightActive = true;
         this.nightIntensity = 0;
-        document.getElementById('nightOverlay').style.opacity = '0.75';
+        document.getElementById('nightOverlay').style.opacity = '0.55';
         this.showNotification('NIGHT FALLS');
     }
 
@@ -294,8 +299,8 @@ class World {
             const bossAlive = this.boss && !this.boss.dead;
             if (aliveZombies === 0 && this.zombiesSpawned >= maxZombies && !bossAlive) {
                 this.waveActive = false;
-                this.waveDelay = 5;
-                this.showNotification(`WAVE ${this.wave} CLEARED`);
+                this.waveDelay = 10;
+                this.showNotification(`WAVE ${this.wave} CLEARED - PREPARING NEXT WAVE...`);
             }
         } else if (this.waveDelay > 0) {
             this.waveDelay -= dt;

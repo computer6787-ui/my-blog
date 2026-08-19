@@ -182,9 +182,9 @@ class Player {
                 world.timeScale = 0.5;
                 world.showNotification('TIME WARP ACTIVATED!');
                 break;
-            case 'airstrike':
-                this.airstrike(world);
-                world.showNotification('AIRSTRIKE CALLED!');
+            case 'shockwave':
+                this.shockwave(world);
+                world.showNotification('SHOCKWAVE UNLEASHED!');
                 break;
             case 'heal':
                 this.health = Math.min(this.maxHealth, this.health + 50);
@@ -197,32 +197,12 @@ class Player {
         if (audio.initialized) audio.playPowerUp();
     }
 
-    airstrike(world) {
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => {
-                const x = world.player.x + (Math.random() - 0.5) * 400;
-                const y = world.player.y + (Math.random() - 0.5) * 400;
-
-                world.createParticles(x, y, 15, '#e74c3c');
-
-                for (const z of world.zombies) {
-                    if (z.dead) continue;
-                    const dist = Math.hypot(z.x - x, z.y - y);
-                    if (dist < 60) {
-                        z.takeDamage(100, world);
-                    }
-                }
-
-                if (world.boss && !world.boss.dead) {
-                    const dist = Math.hypot(world.boss.x - x, world.boss.y - y);
-                    if (dist < 60) {
-                        world.boss.takeDamage(100, world);
-                    }
-                }
-
-                if (audio.initialized) audio.playExplosion();
-            }, i * 200);
-        }
+    shockwave(world) {
+        world.createParticles(this.x, this.y, 50, '#e74c3c');
+        world.shockwaves.push(new ShockwaveRing(this.x, this.y, 600, 800, 9999));
+        
+        if (audio.initialized) audio.playExplosion();
+        world.showNotification('SHOCKWAVE UNLEASHED!');
     }
 
     shoot(world, targetX, targetY) {

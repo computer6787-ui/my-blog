@@ -5,14 +5,14 @@ class Player {
         this.vx = 0;
         this.vy = 0;
         this.radius = 14;
-        this.speed = 210;
-        this.health = 100;
-        this.maxHealth = 100;
+        this.speed = 240;
+        this.health = 150;
+        this.maxHealth = 150;
         this.angle = 0;
         this.weapons = [
-            { name: 'Pistol', damage: 28, fireRate: 0.28, spread: 0.06, bullets: 1, knockback: 4, color: '#f39c12', lastFired: 0, size: 4 },
-            { name: 'Shotgun', damage: 16, fireRate: 0.75, spread: 0.28, bullets: 6, knockback: 10, color: '#e74c3c', lastFired: 0, size: 3, burn: false },
-            { name: 'SMG', damage: 11, fireRate: 0.07, spread: 0.14, bullets: 1, knockback: 2, color: '#3498db', lastFired: 0, size: 3 }
+            { name: 'Pistol', damage: 40, fireRate: 0.25, spread: 0.06, bullets: 1, knockback: 6, color: '#f39c12', lastFired: 0, size: 4 },
+            { name: 'Shotgun', damage: 22, fireRate: 0.65, spread: 0.28, bullets: 7, knockback: 14, color: '#e74c3c', lastFired: 0, size: 3, burn: false },
+            { name: 'SMG', damage: 15, fireRate: 0.06, spread: 0.12, bullets: 1, knockback: 3, color: '#3498db', lastFired: 0, size: 3 }
         ];
         this.currentWeapon = 0;
         this.level = 1;
@@ -23,9 +23,9 @@ class Player {
         this.lootTimer = 0;
         this.synergies = [];
         this.buildCooldown = 0;
-        this.regen = 0;
+        this.regen = 2;
         this.regenTimer = 0;
-        this.looterRadius = 40;
+        this.looterRadius = 50;
         this.bayonet = false;
         this.bayonetCooldown = 0;
 
@@ -175,9 +175,9 @@ class Player {
                 world.timeScale = 0.5;
                 world.showNotification('TIME WARP ACTIVATED!');
                 break;
-            case 'airstrike':
-                this.airstrike(world);
-                world.showNotification('AIRSTRIKE CALLED!');
+            case 'shockwave':
+                this.shockwave(world);
+                world.showNotification('SHOCKWAVE UNLEASHED!');
                 break;
             case 'heal':
                 this.health = Math.min(this.maxHealth, this.health + 50);
@@ -190,32 +190,12 @@ class Player {
         if (audio.initialized) audio.playPowerUp();
     }
 
-    airstrike(world) {
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => {
-                const x = world.player.x + (Math.random() - 0.5) * 400;
-                const y = world.player.y + (Math.random() - 0.5) * 400;
-
-                world.createParticles(x, y, 15, '#e74c3c');
-
-                for (const z of world.zombies) {
-                    if (z.dead) continue;
-                    const dist = Math.hypot(z.x - x, z.y - y);
-                    if (dist < 60) {
-                        z.takeDamage(100, world);
-                    }
-                }
-
-                if (world.boss && !world.boss.dead) {
-                    const dist = Math.hypot(world.boss.x - x, world.boss.y - y);
-                    if (dist < 60) {
-                        world.boss.takeDamage(100, world);
-                    }
-                }
-
-                if (audio.initialized) audio.playExplosion();
-            }, i * 200);
-        }
+    shockwave(world) {
+        world.createParticles(this.x, this.y, 50, '#e74c3c');
+        world.shockwaves.push(new ShockwaveRing(this.x, this.y, 600, 800, 9999));
+        
+        if (audio.initialized) audio.playExplosion();
+        world.showNotification('SHOCKWAVE UNLEASHED!');
     }
 
     shoot(world, targetX, targetY) {

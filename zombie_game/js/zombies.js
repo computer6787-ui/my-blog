@@ -356,7 +356,7 @@ class BossZombie extends Zombie {
             world.createParticles(this.x, this.y, 30, '#f39c12');
             
             for (let i = 0; i < 3; i++) {
-                const powerType = ['speed', 'shield', 'rage', 'time_slow', 'airstrike', 'heal'][Math.floor(Math.random() * 6)];
+                const powerType = ['speed', 'shield', 'rage', 'time_slow', 'shockwave', 'heal'][Math.floor(Math.random() * 6)];
                 world.powerOrbs.push(new PowerOrb(this.x + (Math.random() - 0.5) * 50, this.y + (Math.random() - 0.5) * 50, powerType));
             }
             

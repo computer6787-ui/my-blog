@@ -52,6 +52,7 @@ class World {
         this.powerOrbs = [];
         this.projectiles = [];
         this.burnEffects = [];
+        this.shockwaves = [];
         this.boss = null;
 
         this.player = null;
@@ -121,6 +122,10 @@ class World {
         for (let i = this.particles.length - 1; i >= 0; i--) {
             this.particles[i].update(scaledDt);
             if (this.particles[i].life <= 0) this.particles.splice(i, 1);
+        }
+        for (let i = this.shockwaves.length - 1; i >= 0; i--) {
+            this.shockwaves[i].update(scaledDt, this);
+            if (this.shockwaves[i].life <= 0) this.shockwaves.splice(i, 1);
         }
         for (let i = this.lootBags.length - 1; i >= 0; i--) {
             this.lootBags[i].update(scaledDt);

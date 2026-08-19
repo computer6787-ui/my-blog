@@ -96,6 +96,44 @@ class Particle {
     }
 }
 
+class ShockwaveRing {
+    constructor(x, y, maxRadius, speed, damage) {
+        this.x = x;
+        this.y = y;
+        this.radius = 0;
+        this.maxRadius = maxRadius;
+        this.speed = speed;
+        this.damage = damage;
+        this.life = 1;
+        this.hitZombies = new Set();
+    }
+
+    update(dt, world) {
+        this.radius += this.speed * dt;
+        this.life = 1 - (this.radius / this.maxRadius);
+
+        for (const z of world.zombies) {
+            if (z.dead || this.hitZombies.has(z)) continue;
+            const dist = Math.hypot(z.x - this.x, z.y - this.y);
+            if (Math.abs(dist - this.radius) < 40) {
+                z.takeDamage(this.damage, world);
+                this.hitZombies.add(z);
+            }
+        }
+
+        if (world.boss && !world.boss.dead) {
+            const dist = Math.hypot(world.boss.x - this.x, world.boss.y - this.y);
+            if (Math.abs(dist - this.radius) < 40) {
+                world.boss.takeDamage(this.damage * 0.5, world);
+            }
+        }
+
+        if (this.radius >= this.maxRadius) {
+            this.life = 0;
+        }
+    }
+}
+
 class LootBag {
     constructor(x, y) {
         this.x = x;
@@ -298,6 +336,10 @@ class Game {
         document.getElementById('zombieCount').textContent = this.world.zombies.filter(z => !z.dead).length;
         document.getElementById('waveNum').textContent = this.world.wave;
         
+        document.querySelectorAll('.inv-slot, .mobile-weapon-btn').forEach((s) => {
+            s.classList.toggle('active', parseInt(s.dataset.slot) === p.currentWeapon);
+        });
+
         if (this.world.boss && !this.world.boss.dead) {
             document.getElementById('bossHealthContainer').style.display = 'block';
             const hpPct = Math.max(0, (this.world.boss.health / this.world.boss.maxHealth) * 100);
@@ -305,20 +347,27 @@ class Game {
         } else {
             document.getElementById('bossHealthContainer').style.display = 'none';
         }
+
+        if (this.world.waveDelay > 0) {
+            document.getElementById('waveCooldown').style.display = 'block';
+            document.getElementById('waveCooldownTime').textContent = Math.ceil(this.world.waveDelay);
+        } else {
+            document.getElementById('waveCooldown').style.display = 'none';
+        }
     }
 
     render() {
         const ctx = this.ctx;
         const cam = this.world.camera;
 
-        ctx.fillStyle = '#080808';
+        ctx.fillStyle = '#1a1a1a';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         ctx.save();
         ctx.translate(-cam.x, -cam.y);
 
         const gridSize = 100;
-        ctx.strokeStyle = '#111';
+        ctx.strokeStyle = '#2a2a2a';
         ctx.lineWidth = 1;
         ctx.beginPath();
         for (let x = 0; x <= this.world.width; x += gridSize) {
@@ -331,20 +380,20 @@ class Game {
         }
         ctx.stroke();
 
-        ctx.fillStyle = '#0c0c0c';
+        ctx.fillStyle = '#1e1e1e';
         ctx.fillRect(0, 0, this.world.width, this.world.height);
 
-        ctx.fillStyle = '#0f0f0f';
+        ctx.fillStyle = '#222';
         for (let i = 0; i < 200; i++) {
             const gx = (i * 137.508) % this.world.width;
             const gy = (i * 89.753) % this.world.height;
             const gr = 2 + (i % 6);
-            ctx.globalAlpha = 0.15 + (i % 3) * 0.05;
+            ctx.globalAlpha = 0.25 + (i % 3) * 0.1;
             ctx.fillRect(gx, gy, gr, gr);
         }
         ctx.globalAlpha = 1;
 
-        ctx.strokeStyle = '#151515';
+        ctx.strokeStyle = '#333';
         ctx.lineWidth = 1;
         for (let i = 0; i < 80; i++) {
             const cx = (i * 173.23) % this.world.width;
@@ -537,6 +586,16 @@ class Game {
         });
         ctx.globalAlpha = 1;
 
+        this.world.shockwaves.forEach(s => {
+            ctx.globalAlpha = s.life;
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 4 + s.life * 4;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        });
+
         this.world.bullets.forEach(b => {
             ctx.save();
             ctx.translate(b.x, b.y);
@@ -670,8 +729,8 @@ class InputHandler {
             if (e.key >= '1' && e.key <= '3') {
                 const idx = parseInt(e.key) - 1;
                 game.world.player.currentWeapon = idx;
-                document.querySelectorAll('.inv-slot, .mobile-weapon-btn').forEach((s, i) => {
-                    s.classList.toggle('active', i === idx);
+                document.querySelectorAll('.inv-slot, .mobile-weapon-btn').forEach((s) => {
+                    s.classList.toggle('active', parseInt(s.dataset.slot) === idx);
                 });
             }
             if (e.key.toLowerCase() === 'e') {
@@ -690,7 +749,7 @@ class InputHandler {
                 game.world.player.activatePower('time_slow', game.world);
             }
             if (e.key.toLowerCase() === 'f') {
-                game.world.player.activatePower('airstrike', game.world);
+                game.world.player.activatePower('shockwave', game.world);
             }
             if (e.key.toLowerCase() === 'r') {
                 game.world.player.activatePower('heal', game.world);
@@ -1005,3 +1064,19 @@ if (document.documentElement.requestFullscreen || document.documentElement.webki
         }, { once: true });
     }
 }
+
+if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(() => {
+        const rotateOverlay = document.getElementById('rotateOverlay');
+        if (rotateOverlay) rotateOverlay.style.display = 'flex';
+    });
+}
+
+window.addEventListener('orientationchange', () => {
+    const rotateOverlay = document.getElementById('rotateOverlay');
+    if (rotateOverlay && window.orientation === 0 || window.orientation === 180) {
+        rotateOverlay.style.display = 'flex';
+    } else if (rotateOverlay) {
+        rotateOverlay.style.display = 'none';
+    }
+});

@@ -35,13 +35,13 @@ class Zombie {
         }
 
         const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
-        const detectRange = 280;
+        const detectRange = 1500;
 
         if (distToPlayer < detectRange) {
             this.state = 'chase';
             this.lastKnownX = player.x;
             this.lastKnownY = player.y;
-            this.smellTimer = 3.5;
+            this.smellTimer = 999;
         } else if (this.smellTimer > 0) {
             this.state = 'chase';
             this.smellTimer -= dt;
@@ -53,8 +53,10 @@ class Zombie {
             const tx = this.smellTimer > 0 ? this.lastKnownX : player.x;
             const ty = this.smellTimer > 0 ? this.lastKnownY : player.y;
             const angle = Math.atan2(ty - this.y, tx - this.x);
-            this.vx = Math.cos(angle) * this.speed;
-            this.vy = Math.sin(angle) * this.speed;
+            const dist = Math.hypot(tx - this.x, ty - this.y);
+            const speedMult = Math.min(1, dist / 400);
+            this.vx = Math.cos(angle) * this.speed * (0.35 + 0.65 * speedMult);
+            this.vy = Math.sin(angle) * this.speed * (0.35 + 0.65 * speedMult);
         } else {
             this.wanderTimer -= dt;
             if (this.wanderTimer <= 0) {
@@ -248,13 +250,13 @@ class BossZombie extends Zombie {
         }
 
         const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
-        const detectRange = 400;
+        const detectRange = 1500;
 
         if (distToPlayer < detectRange) {
             this.state = 'chase';
             this.lastKnownX = player.x;
             this.lastKnownY = player.y;
-            this.smellTimer = 5;
+            this.smellTimer = 999;
         } else if (this.smellTimer > 0) {
             this.state = 'chase';
             this.smellTimer -= dt;
@@ -266,8 +268,10 @@ class BossZombie extends Zombie {
             const tx = this.smellTimer > 0 ? this.lastKnownX : player.x;
             const ty = this.smellTimer > 0 ? this.lastKnownY : player.y;
             const angle = Math.atan2(ty - this.y, tx - this.x);
-            this.vx = Math.cos(angle) * this.speed;
-            this.vy = Math.sin(angle) * this.speed;
+            const dist = Math.hypot(tx - this.x, ty - this.y);
+            const speedMult = Math.min(1, dist / 400);
+            this.vx = Math.cos(angle) * this.speed * (0.35 + 0.65 * speedMult);
+            this.vy = Math.sin(angle) * this.speed * (0.35 + 0.65 * speedMult);
         } else {
             this.wanderTimer -= dt;
             if (this.wanderTimer <= 0) {
@@ -356,7 +360,7 @@ class BossZombie extends Zombie {
             world.createParticles(this.x, this.y, 30, '#f39c12');
             
             for (let i = 0; i < 3; i++) {
-                const powerType = ['speed', 'shield', 'rage', 'time_slow', 'airstrike', 'heal'][Math.floor(Math.random() * 6)];
+                const powerType = ['speed', 'shield', 'rage', 'time_slow', 'shockwave', 'heal'][Math.floor(Math.random() * 6)];
                 world.powerOrbs.push(new PowerOrb(this.x + (Math.random() - 0.5) * 50, this.y + (Math.random() - 0.5) * 50, powerType));
             }
             
