@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
-            this.textContent = type === 'password' ? '🙈' : '🐵';
+            this.textContent = type === 'password' ? '🙈' : '🙉';
         });
     }
 });
