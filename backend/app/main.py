@@ -120,14 +120,6 @@ def resetPass_verEmail(request:Request):
     context={}
     )
 
-@app.get("/game")
-def game_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="game.html",
-        context={}
-    )
-
 @app.get("/Update_pass")
 def resetPass_verEmail(request:Request):
     return templates.TemplateResponse(

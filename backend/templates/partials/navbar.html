@@ -27,68 +27,8 @@
 
     <a href="/user">Profile</a>
     <a href="/user">My Blogs</a>
-    <a href="/game" id="play-game-link">Play Game</a>
     <a id="auth-link" href="/login">Login</a>
 </aside>
-
-<div class="lumora-modal-backdrop" id="gameConfirmBackdrop">
-    <div class="lumora-modal">
-        <div class="lumora-modal-header">
-            <div class="lumora-modal-badge">?</div>
-            <h3>Start Game</h3>
-        </div>
-        <p>You are about to leave this page and start playing NOIR HORDE. Any unsaved changes on the current page may be lost.</p>
-        <div class="lumora-modal-actions">
-            <button class="lumora-btn lumora-btn-secondary" id="gameCancelBtn">Cancel</button>
-            <button class="lumora-btn lumora-btn-primary" id="gameConfirmBtn">Play Now</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    (function() {
-        const playLinks = document.querySelectorAll('#play-game-link');
-        const backdrop = document.getElementById('gameConfirmBackdrop');
-        const confirmBtn = document.getElementById('gameConfirmBtn');
-        const cancelBtn = document.getElementById('gameCancelBtn');
-        if (!backdrop || !confirmBtn || !cancelBtn || playLinks.length === 0) return;
-
-        let pendingHref = null;
-
-        function openConfirm(href) {
-            pendingHref = href;
-            backdrop.classList.add('show');
-            backdrop.classList.remove('hide');
-        }
-
-        function closeConfirm() {
-            backdrop.classList.remove('show');
-            backdrop.classList.add('hide');
-            pendingHref = null;
-        }
-
-        playLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                openConfirm(link.getAttribute('href'));
-            });
-        });
-
-        confirmBtn.addEventListener('click', () => {
-            const href = pendingHref;
-            closeConfirm();
-            if (href) {
-                window.location.href = href;
-            }
-        });
-
-        cancelBtn.addEventListener('click', closeConfirm);
-
-        backdrop.addEventListener('click', (e) => {
-            if (e.target === backdrop) closeConfirm();
-        });
-    })();
-</script>
 
 <script>
     function toggleMenu() {
