@@ -5,7 +5,7 @@ from fastapi import Depends, status,HTTPException
 from backend.app.database import get_db
 from backend.app.encryption import Encrypting
 from backend.utils.varification import generate_verification_code
-from backend.utils.mail import send_verification_email
+from backend.utils.mail import send_verification_email, send_password_reset_email
 
 
 
@@ -130,19 +130,19 @@ async def ver_email(request,db):
     print(verification_code)
     
     ver_code = models.passward_varification(
-        email=request.email,
-        verification_code=verification_code,
-        expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)
-    )
-    try:
-        await send_verification_email(
-            request.email,
-            verification_code
+            email=request.email,
+            verification_code=verification_code,
+            expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)
         )
-        db.add(ver_code)
-        db.commit()
-        db.refresh(ver_code)
-        return ver_code
+    try:
+            await send_password_reset_email(
+                request.email,
+                verification_code
+            )
+            db.add(ver_code)
+            db.commit()
+            db.refresh(ver_code)
+            return ver_code
 
 
     except Exception:

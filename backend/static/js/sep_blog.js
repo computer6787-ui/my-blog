@@ -1,6 +1,7 @@
+import { API_URL, ROUTES, showLoading, hideLoading, notify } from "./config.js?v=20260818";
+
 const parts = window.location.pathname.split("/");
 const id = parts[parts.length - 1];
-import { API_URL, ROUTES, showLoading, hideLoading, notify } from "./config.js?v=20260818";
 
 async function loadBlog() {
     const token = localStorage.getItem("token");

@@ -14,7 +14,7 @@ from .database import get_db
 oath2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-def get_current_user(data: str=Depends(oath2_scheme), db=Depends(get_db)):
+def get_current_user(data: str = Depends(oath2_scheme), db = Depends(get_db)) -> models.User:
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",

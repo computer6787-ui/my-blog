@@ -7,7 +7,7 @@ from backend.app.token import create_access_token
 from ..app import schemas
 from ..app.encryption import Encrypting
 from ..app.database import get_db
-from sqlalchemy.orm import session
+from sqlalchemy.orm import Session
 
 
 
@@ -19,7 +19,7 @@ router=APIRouter(
 @router.post("/login", response_model=schemas.Token)
 async def login(
     request: Request,
-    db: session = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     content_type = request.headers.get("content-type", "")
 

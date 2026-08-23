@@ -4,17 +4,21 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
-DB_URL=os.getenv("DATABASE_URL")
-engine=create_engine(DB_URL)
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable is not set")
+
+engine = create_engine(DATABASE_URL)
+
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+base = declarative_base()
 
 
-SessionLocal=sessionmaker(bind=engine,autocommit=False,autoflush=False)
-
-base=declarative_base()
-
- 
 def get_db():
-    db=SessionLocal()
+    db = SessionLocal()
     try:
         yield db
     finally:

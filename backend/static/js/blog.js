@@ -1,8 +1,8 @@
+import { API_URL, ROUTES, notify } from "./config.js?v=20260818";
+
 let skip = 0;
 const limit = 4;
 let currentSearch = "";
-
-import { API_URL, ROUTES, notify } from "./config.js?v=20260818";
 
 function showBlogLoading(message = "Loading blogs...") {
     const section = document.getElementById("blog_section");
