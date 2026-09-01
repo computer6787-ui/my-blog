@@ -1033,6 +1033,7 @@ body.dark-mode .category-option.is-selected {
     width: 34px;
     height: 34px;
     border-radius: 50%;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1040,6 +1041,17 @@ body.dark-mode .category-option.is-selected {
     font-weight: 800;
     font-size: 0.85rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.author-avatar-image,
+.profile-avatar-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .author-meta {
@@ -1342,6 +1354,7 @@ body.dark-mode .shimmer {
     color: inherit;
     text-decoration: none;
     border-radius: 50%;
+    overflow: hidden;
     flex-shrink: 0;
 }
 
@@ -1349,6 +1362,7 @@ body.dark-mode .shimmer {
     width: 46px;
     height: 46px;
     border-radius: 50%;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1438,6 +1452,7 @@ body.dark-mode .shimmer {
     width: 56px;
     height: 56px;
     border-radius: 50%;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1700,16 +1715,49 @@ body.dark-mode .shimmer {
     padding: 0.75rem;
 }
 
+.profile-image-panel .crop-stage-wrap {
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-image-panel .crop-stage {
+    width: min(100%, 340px);
+    height: min(100%, 340px);
+    min-width: 280px;
+    min-height: 280px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0 0 4px var(--surface), 0 0 0 6px var(--accent);
+    background: var(--surface-alt);
+    max-height: none;
+}
+
+.profile-image-panel .crop-stage img {
+    border-radius: 50%;
+}
+
 .crop-stage {
     position: relative;
     width: min(100%, 420px);
     max-height: 56vh;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    border-radius: 50%;
+    border-radius: 18px;
     background: linear-gradient(135deg, rgba(123, 92, 242, 0.08), rgba(99, 102, 241, 0.12));
     margin: 0 auto;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.crop-stage.is-dragging {
+    cursor: grabbing;
 }
 
 .crop-stage img {
@@ -1722,17 +1770,7 @@ body.dark-mode .shimmer {
     transform-origin: center center;
     transition: transform 0.12s ease;
     will-change: transform;
-    border-radius: 50%;
-}
-
-#profile_crop_stage {
-    width: min(100%, 420px);
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-}
-
-#profile_crop_image {
-    border-radius: 50%;
+    border-radius: 0;
 }
 
 .crop-controls {
@@ -1949,6 +1987,7 @@ body.dark-mode .shimmer {
     width: 72px;
     height: 72px;
     border-radius: 50%;
+    overflow: hidden;
     background: var(--accent-gradient);
     color: #ffffff;
     display: flex;

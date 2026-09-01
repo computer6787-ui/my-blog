@@ -1,5 +1,15 @@
 import { API_URL, ROUTES, notify } from "./config.js?v=20260818";
 
+// Global functions for inline onclick handlers - must be defined before DOMContentLoaded
+window.edit_blog = function (id) {
+    window.location.href = `/edit-blog/${id}`;
+};
+
+window.delete_blog = function (id) {
+    window.location.href = `/delete-blog/${id}`;
+};
+
+
 document.addEventListener("DOMContentLoaded", async function () {
     const token = localStorage.getItem("token");
     const container = document.getElementById("published-blogs");
@@ -106,3 +116,4 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     await loadMyBlogs();
 });
+

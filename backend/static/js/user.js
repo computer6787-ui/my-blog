@@ -1,5 +1,15 @@
 import { API_URL, ROUTES, notify, confirmDialog } from "./config.js?v=20260818";
 
+// Global functions for inline onclick handlers - must be defined before DOMContentLoaded
+window.edit_blog = function (id) {
+    window.location.href = `/edit-blog/${id}`;
+};
+
+window.delete_blog = function (id) {
+    window.location.href = `/delete-blog/${id}`;
+};
+
+
 document.addEventListener("DOMContentLoaded", async function () {
     const token = localStorage.getItem("token");
     const nameEl = document.getElementById("name");
@@ -36,6 +46,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const adjustProfileBtn = document.getElementById("btn-adjust-profile");
     const clearProfileBtn = document.getElementById("btn-clear-profile");
     const profileEditorModal = document.getElementById("profile_image_editor_modal");
+    const profileCropStage = document.getElementById("profile_crop_stage");
     const profileCropImg = document.getElementById("profile_crop_image");
     const profileCropZoom = document.getElementById("profile_crop_zoom");
     const profileCropX = document.getElementById("profile_crop_x");
@@ -160,6 +171,66 @@ document.addEventListener("DOMContentLoaded", async function () {
         const offsetY = (yPercent - 0.5) * 2 * maxShift;
         profileCropImg.style.transform = `scale(${zoom}) translate(${offsetX}%, ${offsetY}%)`;
         profileZoomValue.textContent = `${Math.round(zoom * 100)}%`;
+    }
+
+    function clampProfileCropValue(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function attachProfileCropDragAndZoomHandlers() {
+        if (!profileCropStage || !profileCropZoom || !profileCropX || !profileCropY) return;
+
+        const dragState = { pointerId: null, startX: 0, startY: 0, originX: 50, originY: 50 };
+
+        const setCropFromPointer = (clientX, clientY) => {
+            const dx = clientX - dragState.startX;
+            const dy = clientY - dragState.startY;
+            const nextX = clampProfileCropValue(dragState.originX + (dx / profileCropStage.clientWidth) * 100, 0, 100);
+            const nextY = clampProfileCropValue(dragState.originY + (dy / profileCropStage.clientHeight) * 100, 0, 100);
+            profileCropX.value = String(nextX);
+            profileCropY.value = String(nextY);
+            updateProfileCropPreview();
+        };
+
+        profileCropStage.addEventListener("pointerdown", (event) => {
+            if (event.pointerType === "mouse" && event.button !== 0) return;
+            dragState.pointerId = event.pointerId;
+            dragState.startX = event.clientX;
+            dragState.startY = event.clientY;
+            dragState.originX = Number(profileCropX.value);
+            dragState.originY = Number(profileCropY.value);
+            profileCropStage.setPointerCapture(event.pointerId);
+            profileCropStage.classList.add("is-dragging");
+        });
+
+        profileCropStage.addEventListener("pointermove", (event) => {
+            if (dragState.pointerId !== event.pointerId) return;
+            setCropFromPointer(event.clientX, event.clientY);
+        });
+
+        const endDrag = (event) => {
+            if (dragState.pointerId !== null && event.pointerId === dragState.pointerId) {
+                dragState.pointerId = null;
+                profileCropStage.classList.remove("is-dragging");
+            }
+        };
+
+        profileCropStage.addEventListener("pointerup", endDrag);
+        profileCropStage.addEventListener("pointercancel", endDrag);
+        profileCropStage.addEventListener("pointerleave", (event) => {
+            if (dragState.pointerId !== null && event.pointerId === dragState.pointerId) {
+                endDrag(event);
+            }
+        });
+
+        profileCropStage.addEventListener("wheel", (event) => {
+            event.preventDefault();
+            const currentZoom = Number(profileCropZoom.value);
+            const delta = event.deltaY < 0 ? 0.1 : -0.1;
+            const nextZoom = clampProfileCropValue(currentZoom + delta, 1, 2.7);
+            profileCropZoom.value = String(nextZoom);
+            updateProfileCropPreview();
+        }, { passive: false });
     }
 
     async function processProfileImage(file) {
@@ -729,7 +800,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     };
 
-    window.edit_blog = function (id) {
-        window.location.href = `/edit-blog/${id}`;
-    };
+    // Call profile crop handlers
+    attachProfileCropDragAndZoomHandlers();
 });
+

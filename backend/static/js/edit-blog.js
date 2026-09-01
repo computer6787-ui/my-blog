@@ -94,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const previewImgWrap = document.getElementById("image_preview_img_wrap");
     const previewImg = document.getElementById("preview_img");
     const editorModal = document.getElementById("image_editor_modal");
+    const cropStage = document.getElementById("crop_stage");
     const cropImg = document.getElementById("crop_image");
     const cropZoom = document.getElementById("crop_zoom");
     const cropX = document.getElementById("crop_x");
@@ -177,6 +178,66 @@ document.addEventListener("DOMContentLoaded", function () {
         zoomValue.textContent = `${Math.round(zoom * 100)}%`;
     }
 
+    function clampCropValue(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function attachCropDragAndZoomHandlers() {
+        if (!cropStage || !cropZoom || !cropX || !cropY) return;
+
+        const dragState = { pointerId: null, startX: 0, startY: 0, originX: 50, originY: 50 };
+
+        const setCropFromPointer = (clientX, clientY) => {
+            const dx = clientX - dragState.startX;
+            const dy = clientY - dragState.startY;
+            const nextX = clampCropValue(dragState.originX + (dx / cropStage.clientWidth) * 100, 0, 100);
+            const nextY = clampCropValue(dragState.originY + (dy / cropStage.clientHeight) * 100, 0, 100);
+            cropX.value = String(nextX);
+            cropY.value = String(nextY);
+            updateCropPreview();
+        };
+
+        cropStage.addEventListener("pointerdown", (event) => {
+            if (event.pointerType === "mouse" && event.button !== 0) return;
+            dragState.pointerId = event.pointerId;
+            dragState.startX = event.clientX;
+            dragState.startY = event.clientY;
+            dragState.originX = Number(cropX.value);
+            dragState.originY = Number(cropY.value);
+            cropStage.setPointerCapture(event.pointerId);
+            cropStage.classList.add("is-dragging");
+        });
+
+        cropStage.addEventListener("pointermove", (event) => {
+            if (dragState.pointerId !== event.pointerId) return;
+            setCropFromPointer(event.clientX, event.clientY);
+        });
+
+        const endDrag = (event) => {
+            if (dragState.pointerId !== null && event.pointerId === dragState.pointerId) {
+                dragState.pointerId = null;
+                cropStage.classList.remove("is-dragging");
+            }
+        };
+
+        cropStage.addEventListener("pointerup", endDrag);
+        cropStage.addEventListener("pointercancel", endDrag);
+        cropStage.addEventListener("pointerleave", (event) => {
+            if (dragState.pointerId !== null && event.pointerId === dragState.pointerId) {
+                endDrag(event);
+            }
+        });
+
+        cropStage.addEventListener("wheel", (event) => {
+            event.preventDefault();
+            const currentZoom = Number(cropZoom.value);
+            const delta = event.deltaY < 0 ? 0.1 : -0.1;
+            const nextZoom = clampCropValue(currentZoom + delta, 1, 2.7);
+            cropZoom.value = String(nextZoom);
+            updateCropPreview();
+        }, { passive: false });
+    }
+
     function createWebPDataUrl(file, quality = 0.72, maxWidth = 1600, maxHeight = 1200) {
         return new Promise((resolve, reject) => {
             const url = URL.createObjectURL(file);
@@ -235,6 +296,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (adjustBtn) adjustBtn.classList.add("hidden");
         updateImagePreview("");
     }
+
+    attachCropDragAndZoomHandlers();
 
     if (cropZoom) cropZoom.addEventListener("input", updateCropPreview);
     if (cropX) cropX.addEventListener("input", updateCropPreview);
