@@ -6,26 +6,136 @@
 <main class="profile-main">
     <section class="user-profile-card">
         <div class="profile-card-top">
-            <div class="profile-avatar-large" id="profile-avatar">L</div>
+            <div class="profile-avatar-column">
+                <div class="profile-avatar-large" id="profile-avatar">L</div>
+                <div class="profile-edit-inline">
+                    <input id="profile-picture-input" type="url" class="hidden profile-picture-input" placeholder="Profile image URL or selected photo" autocomplete="off">
+                    <input id="profile-device-image" type="file" accept="image/*" class="hidden" />
+                    <button type="button" id="btn-upload-profile" class="btn-secondary-sm hidden">📷 Add Profile Picture</button>
+                    <button type="button" id="btn-adjust-profile" class="btn-secondary-sm hidden">✂️ Adjust Photo</button>
+                    <button type="button" id="btn-clear-profile" class="btn-secondary-sm hidden">✕ Clear</button>
+                </div>
+            </div>
             <div class="profile-card-info">
                 <div class="profile-name-row">
                     <h2 id="name" class="profile-name">User Profile</h2>
                     <input id="name-input" type="text" name="name" class="hidden inline-name-input" placeholder="Enter new name" maxlength="50" required>
-                    <button type="button" class="profile-edit-name-btn" id="toggle-name-edit" aria-label="Edit name">✎ Edit</button>
                 </div>
                 <div class="profile-email-badge">
                     <span class="email-icon">✉</span>
                     <span id="email" class="email-text">Loading email...</span>
+                </div>
+
+                <div class="profile-bio-card">
+                    <p id="bio" class="profile-bio">No bio yet. Tell the community a little about yourself.</p>
+                    <textarea id="bio-input" class="hidden profile-bio-input" maxlength="500" placeholder="Write a short bio..."></textarea>
+                </div>
+
+                <div class="profile-meta-grid" id="profile-readonly-meta">
+                    <div class="profile-meta-item hidden" id="location-row">
+                        <span class="meta-label">📍</span>
+                        <span id="location-text">Add your place</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="hobby-row">
+                        <span class="meta-label">🎯</span>
+                        <span id="hobby-text">Add your hobby</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="occupation-row">
+                        <span class="meta-label">💼</span>
+                        <span id="occupation-text">Add your occupation</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="education-row">
+                        <span class="meta-label">🎓</span>
+                        <span id="education-text">Add your education</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="facebook-row">
+                        <span class="meta-label">f</span>
+                        <span id="facebook-text">Facebook profile</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="instagram-row">
+                        <span class="meta-label">◎</span>
+                        <span id="instagram-text">Instagram</span>
+                    </div>
+                </div>
+
+                <div class="profile-edit-grid hidden" id="profile-edit-grid">
+                    <label>
+                        <span>Place</span>
+                        <input id="location-input" type="text" maxlength="150" placeholder="Where are you based?">
+                    </label>
+                    <label>
+                        <span>Hobby</span>
+                        <input id="hobby-input" type="text" maxlength="150" placeholder="What do you love doing?">
+                    </label>
+                    <label>
+                        <span>Occupation</span>
+                        <input id="occupation-input" type="text" maxlength="150" placeholder="What do you do?">
+                    </label>
+                    <label>
+                        <span>Education</span>
+                        <input id="education-input" type="text" maxlength="150" placeholder="Where did you study?">
+                    </label>
+                    <label>
+                        <span>Facebook</span>
+                        <input id="facebook-input" type="text" maxlength="255" placeholder="facebook.com/yourname">
+                    </label>
+                    <label>
+                        <span>Instagram</span>
+                        <input id="instagram-input" type="text" maxlength="255" placeholder="instagram.com/yourname">
+                    </label>
+                </div>
+
+                <div id="profile_image_editor_modal" class="image-editor-modal hidden" aria-hidden="true">
+                    <div class="image-editor-panel profile-image-panel">
+                        <div class="image-editor-header">
+                            <div>
+                                <h3>Adjust profile photo</h3>
+                                <p>Zoom in and crop the part you want people to see.</p>
+                            </div>
+                            <button type="button" id="close_profile_crop_editor" class="btn-secondary-sm">Close</button>
+                        </div>
+
+                        <div class="crop-stage-wrap">
+                            <div id="profile_crop_stage" class="crop-stage">
+                                <img id="profile_crop_image" src="" alt="Profile crop preview" />
+                            </div>
+                        </div>
+
+                        <div class="crop-controls">
+                            <div class="crop-range-row">
+                                <label for="profile_crop_zoom">Zoom</label>
+                                <span id="profile_zoom_value">100%</span>
+                            </div>
+                            <input id="profile_crop_zoom" type="range" min="1" max="2.7" step="0.01" value="1" />
+
+                            <div class="crop-axis-row">
+                                <div>
+                                    <label for="profile_crop_x">Horizontal</label>
+                                    <input id="profile_crop_x" type="range" min="0" max="100" value="50" />
+                                </div>
+                                <div>
+                                    <label for="profile_crop_y">Vertical</label>
+                                    <input id="profile_crop_y" type="range" min="0" max="100" value="50" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image-editor-actions">
+                            <button type="button" id="cancel_profile_crop_editor" class="btn-cancel">Cancel</button>
+                            <button type="button" id="apply_profile_crop_editor" class="publish-button">
+                                <span>Use This Crop</span>
+                                <span class="btn-arrow">✦</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <p id="name-message" class="form-message" aria-live="polite"></p>
             </div>
         </div>
 
         <div class="profile-card-actions">
-            <a href="/create-blog" class="hero-btn hero-btn-primary">
-                <span>Write New Story</span>
-                <span class="btn-icon">✍️</span>
-            </a>
+            <button type="button" class="profile-edit-name-btn" id="toggle-profile-edit" aria-label="Edit profile">✎ Edit Profile</button>
+            <button type="button" class="btn-cancel hidden" id="cancel-profile-edit" aria-label="Cancel profile editing">Cancel</button>
             <div id="profile-loading" class="profile-loading hidden" aria-live="polite">
                 <div class="loading-spinner small"></div>
                 <span>Syncing profile...</span>
@@ -33,18 +143,6 @@
         </div>
     </section>
 
-    <section class="user-stories-section">
-        <div class="user-stories-header">
-            <div class="user-stories-title-wrap">
-                <h3>My Published Stories</h3>
-                <span id="story-count-badge" class="badge-count">0 stories</span>
-            </div>
-        </div>
-
-        <div id="published-blogs" class="user-stories-grid" aria-live="polite">
-            <!-- User story cards loaded here -->
-        </div>
-    </section>
 </main>
 
 <script type="module" src="{{ url_for('static', path='js/user.js') }}?v=20260901"></script>

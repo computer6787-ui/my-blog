@@ -5,12 +5,45 @@ from fastapi.responses import FileResponse
 from sqlalchemy import desc, or_
 
 
+CATEGORY_KEYWORDS = {
+    "Tech": ["code", "programming", "software", "data", "server", "api", "python", "javascript", "app", "developer", "database", "tech", "digital", "computer"],
+    "Life": ["life", "people", "family", "friend", "love", "health", "home", "travel", "journey", "nature", "peace", "memory", "experience"],
+    "Creative": ["art", "creative", "music", "paint", "design", "visual", "poem", "story", "beautiful", "aesthetic", "color", "inspire"],
+    "Ideas": ["idea", "thought", "concept", "vision", "future", "possibility", "innovation", "dream", "change", "better", "potential"],
+    "Insights": ["insight", "learn", "knowledge", "wisdom", "understand", "discover", "lesson", "truth", "meaning", "purpose", "deep"],
+    "Thoughts": ["think", "thought", "mind", "feel", "emotion", "wonder", "curious", "reflect", "ponder", "soul", "heart", "hope"],
+    "Design": ["design", "ui", "ux", "interface", "layout", "visual", "user", "experience", "minimal", "modern", "product"],
+    "Story": ["story", "journey", "adventure", "explore", "horizon", "chapter", "narrative", "memory", "moment", "experience"],
+}
+
+
+def infer_category(title: str | None, body: str | None) -> str | None:
+    text = f"{title or ''} {body or ''}".lower()
+    best_category = None
+    best_score = 0
+
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        score = sum(1 for keyword in keywords if keyword in text)
+        if score > best_score:
+            best_score = score
+            best_category = category
+
+    return best_category if best_score > 0 else "Creative"
+
+
+def normalize_blog_category(request):
+    raw_category = getattr(request, "category", None)
+    if raw_category and raw_category.strip():
+        return raw_category.strip()
+    return infer_category(getattr(request, "title", None), getattr(request, "body", None))
+
+
 def create_blog(request, db, current_user):
     new_blog = models.Blog(
         title=request.title,
         body=request.body,
         image_url=getattr(request, "image_url", None),
-        category=getattr(request, "category", None),
+        category=normalize_blog_category(request),
         user_id=current_user.id,
     )
     db.add(new_blog)
@@ -19,7 +52,21 @@ def create_blog(request, db, current_user):
     return new_blog
 
 
-def all_blog(limit: int, skip: int, db, q=None):
+def matches_category(blog, category):
+    if not category:
+        return True
+
+    normalized_category = category.strip()
+    saved_category = (blog.category or "").strip()
+    if saved_category and saved_category.lower() == normalized_category.lower():
+        return True
+
+    text = f"{blog.title or ''} {blog.body or ''}".lower()
+    keywords = CATEGORY_KEYWORDS.get(normalized_category, [])
+    return any(keyword in text for keyword in keywords)
+
+
+def all_blog(limit: int, skip: int, db, q=None, category=None):
     query = db.query(models.Blog)
 
     if q:
@@ -29,8 +76,14 @@ def all_blog(limit: int, skip: int, db, q=None):
                 models.Blog.body.ilike(f"%{q}%"),
             )
         )
-    total = query.count()
-    blogs = query.order_by(desc(models.Blog.id)).offset(skip).limit(limit).all()
+
+    blogs = query.order_by(desc(models.Blog.id)).all()
+
+    if category:
+        blogs = [blog for blog in blogs if matches_category(blog, category)]
+
+    total = len(blogs)
+    blogs = blogs[skip:skip + limit]
 
     for blog in blogs:
         blog.likes_count = db.query(models.Like).filter(models.Like.blog_id == blog.id).count()
@@ -88,6 +141,10 @@ def update(id: int, request, db, current_user):
         if hasattr(request, "model_dump")
         else request.dict()
     )
+
+    if not update_data.get("category") or not str(update_data.get("category")).strip():
+        update_data["category"] = infer_category(update_data.get("title"), update_data.get("body"))
+
     db.query(models.Blog).filter(models.Blog.id == id).update(
         update_data, synchronize_session=False
     )

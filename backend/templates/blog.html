@@ -27,7 +27,9 @@
 
         <div class="single-story-author-bar">
             <div class="author-info-group">
-                <div id="author-avatar" class="single-author-avatar">L</div>
+                <a id="author-avatar-link" class="author-avatar-link" href="/" aria-label="View author profile">
+                    <div id="author-avatar" class="single-author-avatar">L</div>
+                </a>
                 <div class="author-meta-text">
                     <span class="author-label">Written by</span>
                     <strong id="author" class="author-name"></strong>
@@ -49,10 +51,12 @@
 
     <footer class="single-story-footer">
         <div class="story-author-card">
-            <div id="footer-author-avatar" class="footer-author-avatar">L</div>
+            <a id="footer-author-avatar-link" class="author-avatar-link" href="/" aria-label="View author profile">
+                <div id="footer-author-avatar" class="footer-author-avatar">L</div>
+            </a>
             <div class="footer-author-text">
                 <h4 id="footer-author-name">Lumora Author</h4>
-                <p>Sharing ideas and stories that inspire and connect us all on Lumora.</p>
+                <p id="footer-author-bio">Sharing ideas and stories that inspire and connect us all on Lumora.</p>
             </div>
         </div>
 
@@ -99,8 +103,9 @@
     </footer>
 </article>
 
-<script type="module" src="{{ url_for('static', path='js/sep_blog.js') }}?v=20260901"></script>
-<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
+<script type="module" src="{{ url_for('static', path='js/sep_blog.js') }}?v=20260902"></script>
+<script type="module" src="{{ url_for('static', path='js/config.js') }}?v=20260902"></script>
+<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260902"></script>
 {% endblock %}
 
 {% block scripts %}

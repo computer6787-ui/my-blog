@@ -31,6 +31,10 @@ def show_user(id: int, db: Session = Depends(get_db)):
 def update(request:schemas.edit_user,db: Session = Depends(get_db),current_user:models.User=Depends(oath2.get_current_user)):
     return user_repository.edit_user(request,db,current_user)
 
+@router.put("/edit_profile",status_code=status.HTTP_202_ACCEPTED)
+def update_profile(request:schemas.UserProfileEdit,db: Session = Depends(get_db),current_user:models.User=Depends(oath2.get_current_user)):
+    return user_repository.edit_user_profile(request,db,current_user)
+
 @router.put("/edit_pass",status_code=status.HTTP_202_ACCEPTED)
 async def update_pass(request:schemas.Update_password,db: Session = Depends(get_db)):
     return await user_repository.update_pass(request,db)

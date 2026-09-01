@@ -20,16 +20,16 @@ def get_current_user(data: str = Depends(oath2_scheme), db = Depends(get_db)) ->
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-   
 
     username = token.verify_token(data, credentials_exception)
 
-    user = db.query(models.User).filter(models.User.email == username).first()
-
-
-    if not user:
+    users = db.query(models.User).filter(models.User.email == username).all()
+    if not users:
         raise credentials_exception
 
-    return user
+    def user_priority(user: models.User):
+        return (len(user.blogs or []), user.id)
+
+    return max(users, key=user_priority)
 
     

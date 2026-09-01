@@ -1,4 +1,4 @@
-import { API_URL, ROUTES, showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260818";
+import { API_URL, ROUTES, showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260902";
 
 const id = window.location.pathname.split("/").pop();
 
@@ -192,13 +192,42 @@ async function loadBlog() {
         const blog = await response.json();
         const authorName = blog.creator?.name || "Lumora Writer";
         const authorInitial = authorName.trim()[0]?.toUpperCase() || "L";
+        const authorProfilePicture = blog.creator?.profile_picture_url || "";
+        const savedAuthorBio = (blog.creator?.bio || "").trim();
+        const authorBio = savedAuthorBio || "Sharing ideas and stories that inspire and connect us all on Lumora.";
         const readTime = calculateReadTime(blog.body);
+        const authorProfileTarget = (() => {
+            const authorId = blog.creator?.id;
+            if (!authorId) return "/";
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) return `/profile/${authorId}`;
+                const parsed = JSON.parse(atob(token.split(".")[1] || ""));
+                const currentUserId = Number(parsed?.sub || parsed?.user_id || parsed?.id || 0);
+                return currentUserId === Number(authorId) ? "/user" : `/profile/${authorId}`;
+            } catch {
+                return `/profile/${authorId}`;
+            }
+        })();
         // Use intelligent content analysis instead of random hashing
         const theme = analyzeStoryContent(blog.title, blog.body);
 
         document.title = `${blog.title} - Lumora`;
         document.getElementById("title").textContent = blog.title;
-        document.getElementById("author").textContent = authorName;
+        const authorLink = document.getElementById("author");
+        const authorAvatarLink = document.getElementById("author-avatar-link");
+        const footerAvatarLink = document.getElementById("footer-author-avatar-link");
+        if (authorAvatarLink) authorAvatarLink.href = authorProfileTarget;
+        if (footerAvatarLink) footerAvatarLink.href = authorProfileTarget;
+        if (authorLink) {
+            authorLink.textContent = authorName;
+            authorLink.style.cursor = "pointer";
+            authorLink.onclick = () => { window.location.href = authorProfileTarget; };
+        }
+        const footerAuthorBioEl = document.getElementById("footer-author-bio");
+        if (footerAuthorBioEl) {
+            footerAuthorBioEl.textContent = authorBio;
+        }
         document.getElementById("body").innerHTML = formatBody(blog.body);
 
         const readTimeEl = document.getElementById("story-readtime");
@@ -212,17 +241,31 @@ async function loadBlog() {
 
         const avatarEl = document.getElementById("author-avatar");
         if (avatarEl) {
-            avatarEl.textContent = authorInitial;
-            avatarEl.style.background = theme.gradient;
+            if (authorProfilePicture) {
+                avatarEl.innerHTML = `<img src="${authorProfilePicture}" alt="${authorName}" class="profile-avatar-image">`;
+                avatarEl.style.background = "transparent";
+            } else {
+                avatarEl.textContent = authorInitial;
+                avatarEl.style.background = theme.gradient;
+            }
         }
 
         const footerAvatarEl = document.getElementById("footer-author-avatar");
         const footerNameEl = document.getElementById("footer-author-name");
         if (footerAvatarEl) {
-            footerAvatarEl.textContent = authorInitial;
-            footerAvatarEl.style.background = theme.gradient;
+            if (authorProfilePicture) {
+                footerAvatarEl.innerHTML = `<img src="${authorProfilePicture}" alt="${authorName}" class="profile-avatar-image">`;
+                footerAvatarEl.style.background = "transparent";
+            } else {
+                footerAvatarEl.textContent = authorInitial;
+                footerAvatarEl.style.background = theme.gradient;
+            }
         }
-        if (footerNameEl) footerNameEl.textContent = authorName;
+        if (footerNameEl) {
+            footerNameEl.textContent = authorName;
+            footerNameEl.style.cursor = "pointer";
+            footerNameEl.onclick = () => { window.location.href = authorProfileTarget; };
+        }
 
         const coverImg = document.getElementById("story-cover-img");
         const coverPlaceholder = document.getElementById("story-cover-placeholder");

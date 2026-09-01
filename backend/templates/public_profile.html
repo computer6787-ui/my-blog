@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Lumora{% endblock %}
+
+{% block content %}
+<main class="profile-main">
+    <section class="user-profile-card public-profile-card">
+        <div class="profile-card-top">
+            <div class="profile-avatar-large" id="profile-avatar">L</div>
+            <div class="profile-card-info">
+                <div class="profile-name-row">
+                    <h2 id="name" class="profile-name">Loading profile...</h2>
+                </div>
+                <div class="profile-email-badge">
+                    <span class="email-icon">✉</span>
+                    <span id="email" class="email-text">Loading email...</span>
+                </div>
+
+                <div class="profile-bio-card">
+                    <p id="bio" class="profile-bio">No bio yet.</p>
+                </div>
+
+                <div class="profile-meta-grid">
+                    <div class="profile-meta-item hidden" id="location-row">
+                        <span class="meta-label">📍</span>
+                        <span id="location-text">Location</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="hobby-row">
+                        <span class="meta-label">🎯</span>
+                        <span id="hobby-text">Hobby</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="occupation-row">
+                        <span class="meta-label">💼</span>
+                        <span id="occupation-text">Occupation</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="education-row">
+                        <span class="meta-label">🎓</span>
+                        <span id="education-text">Education</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="facebook-row">
+                        <span class="meta-label">f</span>
+                        <span id="facebook-text">Facebook</span>
+                    </div>
+                    <div class="profile-meta-item hidden" id="instagram-row">
+                        <span class="meta-label">◎</span>
+                        <span id="instagram-text">Instagram</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="user-stories-section">
+        <div class="user-stories-header">
+            <div class="user-stories-title-wrap">
+                <h3>Published Stories</h3>
+                <span id="story-count-badge" class="badge-count">0 stories</span>
+            </div>
+        </div>
+        <div id="published-blogs" class="user-stories-grid" aria-live="polite"></div>
+    </section>
+</main>
+
+<script type="module" src="{{ url_for('static', path='js/public_profile.js') }}?v=20260901"></script>
+{% endblock %}

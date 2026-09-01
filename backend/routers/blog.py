@@ -21,8 +21,8 @@ def show(id: int,db: Session = Depends(get_db),current_user:models.User=Depends(
 
 
 @router.get("/",response_model=schemas.BlogResponse)
-def all(limit: int = 4, skip: int = 0,db: Session = Depends(get_db),q: str | None = None):
-    return blog_repository.all_blog(limit, skip, db,q)
+def all(limit: int = 4, skip: int = 0, db: Session = Depends(get_db), q: str | None = None, category: str | None = None):
+    return blog_repository.all_blog(limit, skip, db, q, category)
 
 @router.post("/",status_code=status.HTTP_201_CREATED)
 def create(request:schemas.Blog,db: Session = Depends(get_db),current_user:models.User=Depends(oath2.get_current_user)):

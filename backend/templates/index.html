@@ -55,11 +55,36 @@
         </div>
 
         <div class="search-wrap">
-            <div class="Search_container">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="search_bar" placeholder="Search by title or content..." autocomplete="off">
-                <button type="button" id="clear_search" class="clear-search-btn hidden" aria-label="Clear search">✕</button>
-                <button id="search_button" class="search-action-btn">Search</button>
+            <div class="search-controls">
+                <div class="Search_container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="search_bar" placeholder="Search by title or content..." autocomplete="off">
+                    <button type="button" id="clear_search" class="clear-search-btn hidden" aria-label="Clear search">✕</button>
+                    <button id="search_button" class="search-action-btn">Search</button>
+                </div>
+                <div class="category-filter-shell" id="category_filter_shell">
+                    <label class="category-filter-label">Category</label>
+                    <div class="category-filter-wrap">
+                        <span class="category-filter-icon">✦</span>
+                        <button type="button" id="category_filter_button" class="category-filter-button" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="category-filter-value">All categories</span>
+                            <span class="category-filter-chevron">▾</span>
+                        </button>
+                        <input type="hidden" id="category_filter" value="">
+                    </div>
+
+                    <div id="category_filter_menu" class="category-filter-menu" role="listbox" aria-label="Filter by category">
+                        <button type="button" class="category-option is-selected" data-value="" role="option" aria-selected="true">All categories</button>
+                        <button type="button" class="category-option" data-value="Tech" role="option" aria-selected="false">Tech</button>
+                        <button type="button" class="category-option" data-value="Life" role="option" aria-selected="false">Life</button>
+                        <button type="button" class="category-option" data-value="Creative" role="option" aria-selected="false">Creative</button>
+                        <button type="button" class="category-option" data-value="Ideas" role="option" aria-selected="false">Ideas</button>
+                        <button type="button" class="category-option" data-value="Insights" role="option" aria-selected="false">Insights</button>
+                        <button type="button" class="category-option" data-value="Thoughts" role="option" aria-selected="false">Thoughts</button>
+                        <button type="button" class="category-option" data-value="Design" role="option" aria-selected="false">Design</button>
+                        <button type="button" class="category-option" data-value="Story" role="option" aria-selected="false">Story</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

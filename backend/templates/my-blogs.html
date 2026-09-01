@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}My Blogs - Lumora{% endblock %}
+
+{% block content %}
+<main class="profile-main">
+    <section class="user-stories-section my-blogs-page">
+        <div class="user-stories-header">
+            <div class="user-stories-title-wrap">
+                <h3>My Published Stories</h3>
+                <span id="story-count-badge" class="badge-count">0 stories</span>
+            </div>
+            <div class="profile-card-actions compact-actions">
+                <a href="/create-blog" class="hero-btn hero-btn-primary">
+                    <span>Write New Story</span>
+                    <span class="btn-icon">✍️</span>
+                </a>
+            </div>
+        </div>
+
+        <div id="published-blogs" class="user-stories-grid" aria-live="polite">
+            <!-- User story cards loaded here -->
+        </div>
+    </section>
+</main>
+
+<script type="module" src="{{ url_for('static', path='js/my_blogs.js') }}?v=20260901"></script>
+{% endblock %}

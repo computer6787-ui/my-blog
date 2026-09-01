@@ -52,6 +52,23 @@ def init_db():
                     conn.execute(text(f"ALTER TABLE blogs ADD COLUMN created_at {created_at_sql};"))
                     conn.execute(text(set_null_sql))
                     conn.commit()
+
+        if "users" in insp.get_table_names():
+            user_cols = [c["name"] for c in insp.get_columns("users")]
+            for column_name, column_sql in {
+                "profile_picture_url": "ALTER TABLE users ADD COLUMN profile_picture_url VARCHAR;",
+                "bio": "ALTER TABLE users ADD COLUMN bio VARCHAR;",
+                "location": "ALTER TABLE users ADD COLUMN location VARCHAR;",
+                "hobby": "ALTER TABLE users ADD COLUMN hobby VARCHAR;",
+                "occupation": "ALTER TABLE users ADD COLUMN occupation VARCHAR;",
+                "education": "ALTER TABLE users ADD COLUMN education VARCHAR;",
+                "facebook": "ALTER TABLE users ADD COLUMN facebook VARCHAR;",
+                "instagram": "ALTER TABLE users ADD COLUMN instagram VARCHAR;",
+            }.items():
+                if column_name not in user_cols:
+                    with engine.connect() as conn:
+                        conn.execute(text(column_sql))
+                        conn.commit()
     except Exception as e:
         print("Database initialization notice:", e)
 
@@ -107,7 +124,23 @@ def user_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="user.html",
-        context={}
+        context={"is_own_profile": True, "profile_user_id": None}
+    )
+
+@app.get("/my-blogs")
+def my_blogs_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="my-blogs.html",
+        context={"is_own_profile": True, "profile_user_id": None}
+    )
+
+@app.get("/profile/{user_id}")
+def public_profile_page(request: Request, user_id: int):
+    return templates.TemplateResponse(
+        request=request,
+        name="public_profile.html",
+        context={"is_own_profile": False, "profile_user_id": user_id}
     )
 
 @app.get("/register")

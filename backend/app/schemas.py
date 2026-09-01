@@ -41,10 +41,30 @@ class edit_user(BaseModel):
     name: str
 
 
+class UserProfileEdit(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    profile_picture_url: Optional[str] = None
+    location: Optional[str] = None
+    hobby: Optional[str] = None
+    occupation: Optional[str] = None
+    education: Optional[str] = None
+    facebook: Optional[str] = None
+    instagram: Optional[str] = None
+
+
 class Show_user(BaseModel):
     id: int
     name: str
     email: str
+    profile_picture_url: Optional[str] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    hobby: Optional[str] = None
+    occupation: Optional[str] = None
+    education: Optional[str] = None
+    facebook: Optional[str] = None
+    instagram: Optional[str] = None
     blogs: list[BlogSummary] = []
 
     class Config:

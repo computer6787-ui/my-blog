@@ -14,11 +14,23 @@ scheduler = BackgroundScheduler()
 
 
 async def create_pending_user(request, db):
+    normalized_email = (request.email or "").strip().lower()
+    if not normalized_email:
+        raise HTTPException(status_code=400, detail="Email is required")
+
+    existing_user = db.query(models.User).filter(models.User.email.ilike(normalized_email)).first()
+    if existing_user:
+        raise HTTPException(status_code=409, detail="An account with this email already exists")
+
+    existing_pending = db.query(models.PendingUser).filter(models.PendingUser.email.ilike(normalized_email)).first()
+    if existing_pending:
+        raise HTTPException(status_code=409, detail="Verification is already pending for this email")
+
     verification_code = generate_verification_code()
 
     new_pending_user = models.PendingUser(
         name=request.name,
-        email=request.email,
+        email=normalized_email,
         hashed_password=Encrypting.bcrypt(request.password),
         verification_code=verification_code,
         expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)
@@ -26,7 +38,7 @@ async def create_pending_user(request, db):
 
     try:
         await send_verification_email(
-            request.email,
+            normalized_email,
             verification_code
         )
 
@@ -46,15 +58,22 @@ def show_user(id:int,db):
     return user
 
 async def verify_pending_user(request, db):
+    normalized_email = (request.email or "").strip().lower()
 
     pending_user = db.query(models.PendingUser).filter(
-        models.PendingUser.email == request.email
+        models.PendingUser.email.ilike(normalized_email)
     ).first()
 
     if not pending_user:
         raise HTTPException(
             status_code=404,
             detail="Pending user not found"
+        )
+
+    if db.query(models.User).filter(models.User.email.ilike(normalized_email)).first():
+        raise HTTPException(
+            status_code=409,
+            detail="This email is already registered"
         )
 
     if pending_user.verification_code != request.verification_code:
@@ -73,7 +92,7 @@ async def verify_pending_user(request, db):
     # Create real user
     new_user = models.User(
         name=pending_user.name,
-        email=pending_user.email,
+        email=normalized_email,
         hashed_password=pending_user.hashed_password
     )
 
@@ -118,6 +137,45 @@ def edit_user(request,db,current_user):
     db.commit()
     db.refresh(User)
     return User
+
+
+def edit_user_profile(request, db, current_user):
+    user = db.query(models.User).filter(models.User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if request.name is not None:
+        cleaned_name = (request.name or "").strip()
+        if cleaned_name:
+            user.name = cleaned_name
+
+    if request.bio is not None:
+        user.bio = (request.bio or "").strip()[:500]
+
+    if request.profile_picture_url is not None:
+        user.profile_picture_url = (request.profile_picture_url or "").strip() or None
+
+    if request.location is not None:
+        user.location = (request.location or "").strip()[:150] or None
+
+    if request.hobby is not None:
+        user.hobby = (request.hobby or "").strip()[:150] or None
+
+    if request.occupation is not None:
+        user.occupation = (request.occupation or "").strip()[:150] or None
+
+    if request.education is not None:
+        user.education = (request.education or "").strip()[:150] or None
+
+    if request.facebook is not None:
+        user.facebook = (request.facebook or "").strip()[:255] or None
+
+    if request.instagram is not None:
+        user.instagram = (request.instagram or "").strip()[:255] or None
+
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 

@@ -1,8 +1,9 @@
-import { API_URL, ROUTES, notify } from "./config.js?v=20260818";
+import { API_URL, ROUTES, notify } from "./config.js?v=20260902";
 
 let skip = 0;
 const limit = 6;
 let currentSearch = "";
+let currentCategory = "";
 let isLoading = false;
 
 const PALETTES = [
@@ -104,7 +105,8 @@ export function getBlogPlaceholderTheme(blog) {
     return {
         ...palette,
         authorInitials,
-        authorName: blog.creator?.name || "Lumora Writer"
+        authorName: blog.creator?.name || "Lumora Writer",
+        profilePicture: blog.creator?.profile_picture_url || ""
     };
 }
 
@@ -182,6 +184,22 @@ function removeSkeletonCards() {
 }
 
 
+function getAuthorProfileTarget(blog) {
+    const authorId = blog.creator?.id || blog.user_id;
+    if (!authorId) return "/profile/1";
+
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) return `/profile/${authorId}`;
+
+        const parsed = JSON.parse(atob(token.split(".")[1] || ""));
+        const currentUserId = Number(parsed?.sub || parsed?.user_id || parsed?.id || 0);
+        return currentUserId === Number(authorId) ? "/user" : `/profile/${authorId}`;
+    } catch {
+        return `/profile/${authorId}`;
+    }
+}
+
 export function createBlogCardElement(blog) {
     const theme = getBlogPlaceholderTheme(blog);
     const readTime = calculateReadTime(blog.body);
@@ -189,6 +207,7 @@ export function createBlogCardElement(blog) {
     const cleanImageUrl = hasImage ? blog.image_url.trim() : "";
     const likesCount = Number(blog.likes_count || 0);
     const commentsCount = Number(blog.comments_count || 0);
+    const authorProfileHref = getAuthorProfileTarget(blog);
 
     const article = document.createElement("article");
     article.className = "blog-card";
@@ -196,8 +215,11 @@ export function createBlogCardElement(blog) {
     article.setAttribute("tabindex", "0");
     article.setAttribute("aria-label", blog.title || "Story");
 
-    const snippet = blog.body
-        ? blog.body.replace(/(\r\n|\n|\r)/gm, " ").slice(0, 110) + (blog.body.length > 110 ? "..." : "")
+    const rawSnippet = blog.body ? blog.body.replace(/\s+/g, " ").trim() : "";
+    const snippet = rawSnippet
+        ? rawSnippet.length > 110
+            ? rawSnippet.slice(0, 110).trimEnd() + "..."
+            : rawSnippet
         : "";
 
     article.innerHTML = `
@@ -245,14 +267,14 @@ export function createBlogCardElement(blog) {
             </div>
 
             <div class="blog-card-footer">
-                <div class="blog-card-author">
+                <a href="${authorProfileHref}" class="blog-card-author" aria-label="View author profile">
                     <div class="author-avatar" style="background: ${theme.gradient};" aria-hidden="true">
-                        ${theme.authorInitials}
+                        ${theme.profilePicture ? `<img src="${escapeHtml(theme.profilePicture)}" alt="${escapeHtml(theme.authorName)}" class="author-avatar-image" onerror="this.style.display='none'; this.parentElement.innerHTML='${theme.authorInitials}'">` : theme.authorInitials}
                     </div>
                     <div class="author-meta">
                         <span class="author-name">${escapeHtml(theme.authorName)}</span>
                     </div>
-                </div>
+                </a>
 
                 <div class="blog-card-action">
                     <span class="read-action-text">Read story</span>
@@ -263,6 +285,9 @@ export function createBlogCardElement(blog) {
     `;
 
     article.addEventListener("click", () => readMore(blog.id));
+    article.querySelector(".blog-card-author")?.addEventListener("click", (event) => {
+        event.stopPropagation();
+    });
     article.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -273,7 +298,7 @@ export function createBlogCardElement(blog) {
     return article;
 }
 
-async function loadBlogs(search = "", append = false) {
+async function loadBlogs(search = "", append = false, category = currentCategory) {
     if (isLoading) return;
     isLoading = true;
 
@@ -292,9 +317,14 @@ async function loadBlogs(search = "", append = false) {
     }
 
     try {
-        const response = await fetch(
-            `${API_URL}/blog?limit=${limit}&skip=${skip}&q=${encodeURIComponent(search)}`
-        );
+        const query = new URLSearchParams({
+            limit: String(limit),
+            skip: String(skip),
+            q: search || "",
+            category: category || ""
+        });
+
+        const response = await fetch(`${API_URL}/blog?${query.toString()}`);
 
         if (!response.ok) {
             throw new Error(`Server returned ${response.status}`);
@@ -311,16 +341,18 @@ async function loadBlogs(search = "", append = false) {
 
             const emptyState = document.createElement("div");
             emptyState.className = "empty-blog-state";
+            const activeCategoryLabel = category ? ` in "${escapeHtml(category)}"` : "";
+            const emptyTitle = search || category ? "No stories found" : "No stories published yet";
+            const emptyText = search || category
+                ? `We couldn't find any articles matching${activeCategoryLabel}${search ? ` for "<strong>${escapeHtml(search)}</strong>"` : ""}. Try a different keyword or switch the category.`
+                : "Be the first to publish a captivating story and share your thoughts with the world!";
+
             emptyState.innerHTML = `
                 <div class="empty-icon">🔍</div>
-                <h3>${search ? "No stories found" : "No stories published yet"}</h3>
-                <p>${
-                    search
-                        ? `We couldn't find any articles matching "<strong>${escapeHtml(search)}</strong>". Try different keywords or clear the search.`
-                        : "Be the first to publish a captivating story and share your thoughts with the world!"
-                }</p>
+                <h3>${emptyTitle}</h3>
+                <p>${emptyText}</p>
                 <div class="empty-actions">
-                    ${search ? `<button type="button" class="btn-clear-search" id="empty-clear-btn">Clear Search</button>` : `<a href="/create-blog" class="hero-btn hero-btn-primary">Write First Story ✍️</a>`}
+                    ${search || category ? `<button type="button" class="btn-clear-search" id="empty-clear-btn">Clear Filters</button>` : `<a href="/create-blog" class="hero-btn hero-btn-primary">Write First Story ✍️</a>`}
                 </div>
             `;
             section.appendChild(emptyState);
@@ -329,7 +361,9 @@ async function loadBlogs(search = "", append = false) {
             if (emptyClearBtn) {
                 emptyClearBtn.addEventListener("click", () => {
                     const searchBar = document.getElementById("search_bar");
+                    const categoryFilter = document.getElementById("category_filter");
                     if (searchBar) searchBar.value = "";
+                    if (categoryFilter) categoryFilter.value = "";
                     updateClearButtonVisibility();
                     performSearch();
                 });
@@ -383,13 +417,15 @@ function updateClearButtonVisibility() {
 
 async function performSearch() {
     const searchBar = document.getElementById("search_bar");
+    const categoryFilter = document.getElementById("category_filter");
     currentSearch = searchBar ? searchBar.value.trim() : "";
+    currentCategory = categoryFilter ? categoryFilter.value.trim() : "";
     skip = 0;
-    await loadBlogs(currentSearch, false);
+    await loadBlogs(currentSearch, false, currentCategory);
 }
 
 async function loadMore() {
-    await loadBlogs(currentSearch, true);
+    await loadBlogs(currentSearch, true, currentCategory);
 }
 
 async function readMore(id) {
@@ -420,6 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchBar = document.getElementById("search_bar");
     const clearSearchBtn = document.getElementById("clear_search");
     const loadMoreBtn = document.getElementById("load_more");
+    const categoryFilter = document.getElementById("category_filter");
 
     if (searchBtn) {
         searchBtn.addEventListener("click", (e) => {
@@ -446,6 +483,62 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             updateClearButtonVisibility();
             performSearch();
+        });
+    }
+
+    if (categoryFilter) {
+        const shell = categoryFilter.closest(".category-filter-shell");
+        const trigger = document.getElementById("category_filter_button");
+        const menuOptions = [...document.querySelectorAll(".category-option")];
+
+        const syncSelectedCategoryVisual = (nextValue = "") => {
+            const value = nextValue || "";
+            const selectedOption = menuOptions.find((option) => option.dataset.value === value) || menuOptions[0];
+            const label = selectedOption ? selectedOption.textContent.trim() : "All categories";
+
+            menuOptions.forEach((option) => {
+                const isSelected = option === selectedOption;
+                option.classList.toggle("is-selected", isSelected);
+                option.setAttribute("aria-selected", String(isSelected));
+            });
+
+            if (trigger) {
+                const valueEl = trigger.querySelector(".category-filter-value");
+                if (valueEl) valueEl.textContent = label;
+            }
+        };
+
+        const setCategoryShellState = (isOpen) => {
+            if (shell) {
+                shell.classList.toggle("is-open", isOpen);
+            }
+            if (trigger) {
+                trigger.setAttribute("aria-expanded", String(isOpen));
+            }
+        };
+
+        syncSelectedCategoryVisual(categoryFilter.value || "");
+
+        trigger?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const isOpen = shell?.classList.contains("is-open");
+            setCategoryShellState(!isOpen);
+        });
+
+        menuOptions.forEach((option) => {
+            option.addEventListener("click", () => {
+                const nextValue = option.dataset.value || "";
+                categoryFilter.value = nextValue;
+                syncSelectedCategoryVisual(nextValue);
+                setCategoryShellState(false);
+                performSearch();
+            });
+        });
+
+        document.addEventListener("click", (event) => {
+            if (shell && !shell.contains(event.target)) {
+                setCategoryShellState(false);
+            }
         });
     }
 

@@ -46,6 +46,7 @@
                     <label for="image_url" class="form-label">Cover Header Image <span class="optional-pill">Optional</span></label>
                     <div class="image-action-buttons">
                         <button type="button" id="btn-upload-img" class="btn-secondary-sm">📷 Upload Photo</button>
+                        <button type="button" id="btn-adjust-img" class="btn-secondary-sm hidden">✂️ Adjust Photo</button>
                         <button type="button" id="btn-surprise-img" class="btn-secondary-sm">🎲 Surprise Image</button>
                         <button type="button" id="btn-clear-img" class="btn-secondary-sm hidden">✕ Clear</button>
                     </div>
@@ -76,6 +77,51 @@
                     <div id="image_preview_img_wrap" class="preview-img-wrap hidden">
                         <img id="preview_img" src="" alt="Cover preview" class="preview-img">
                         <span class="preview-badge">Live Preview</span>
+                    </div>
+                </div>
+
+                <div id="image_editor_modal" class="image-editor-modal hidden" aria-hidden="true">
+                    <div class="image-editor-panel">
+                        <div class="image-editor-header">
+                            <div>
+                                <h3>Adjust cover photo</h3>
+                                <p>Zoom in and crop the part you want people to see.</p>
+                            </div>
+                            <button type="button" id="close_crop_editor" class="btn-secondary-sm">Close</button>
+                        </div>
+
+                        <div class="crop-stage-wrap">
+                            <div id="crop_stage" class="crop-stage">
+                                <img id="crop_image" src="" alt="Crop preview" />
+                            </div>
+                        </div>
+
+                        <div class="crop-controls">
+                            <div class="crop-range-row">
+                                <label for="crop_zoom">Zoom</label>
+                                <span id="zoom_value">100%</span>
+                            </div>
+                            <input id="crop_zoom" type="range" min="1" max="2.7" step="0.01" value="1" />
+
+                            <div class="crop-axis-row">
+                                <div>
+                                    <label for="crop_x">Horizontal</label>
+                                    <input id="crop_x" type="range" min="0" max="100" value="50" />
+                                </div>
+                                <div>
+                                    <label for="crop_y">Vertical</label>
+                                    <input id="crop_y" type="range" min="0" max="100" value="50" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image-editor-actions">
+                            <button type="button" id="cancel_crop_editor" class="btn-cancel">Cancel</button>
+                            <button type="button" id="apply_crop_editor" class="publish-button">
+                                <span>Use This Crop</span>
+                                <span class="btn-arrow">✦</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

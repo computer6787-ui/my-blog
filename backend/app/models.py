@@ -53,6 +53,14 @@ class User(base):
     name=Column(String)
     email=Column(String)
     hashed_password=Column(String)
+    profile_picture_url=Column(String, nullable=True)
+    bio=Column(String, nullable=True)
+    location=Column(String, nullable=True)
+    hobby=Column(String, nullable=True)
+    occupation=Column(String, nullable=True)
+    education=Column(String, nullable=True)
+    facebook=Column(String, nullable=True)
+    instagram=Column(String, nullable=True)
 
     blogs=relationship("Blog",back_populates="creator")
 
