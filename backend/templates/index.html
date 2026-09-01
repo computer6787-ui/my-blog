@@ -1,65 +1,87 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Lumora - Where Ideas Come to Light{% endblock %}
 
 {% block content %}
 
 <section class="hero">
-    <h2>Welcome to Lumora</h2>
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            <span>The Modern Journal &amp; Thought Space</span>
+        </div>
 
-    <p>
-Ideas begin as quiet thoughts, waiting to be noticed.
-With courage, they become words.
-Words become stories, and stories become memories.
-Every page carries a different voice and perspective.
-Read slowly. Write freely. Explore freely.
-Discover the thoughts and experiences of others.
-Or leave behind a piece of your own.<br>
-**Welcome to Lumora, where every idea has a chance to shine.**
+        <h1 class="hero-title">Where Ideas Spark &amp; Stories Unfold</h1>
 
-    </p>
-    <br>
+        <p class="hero-desc">
+            Ideas begin as quiet thoughts waiting to be noticed. With courage, they become words,
+            and words become memorable stories. Read freely, write boldly, and discover unique perspectives.
+        </p>
 
-    <div class="hero-nav">
-        <button class="nav_button" id="read_blogs">Read Blogs</button>
+        <div class="hero-nav">
+            <a href="#explore-section" id="read_blogs" class="hero-btn hero-btn-primary">
+                Explore Stories
+                <span class="btn-icon">↓</span>
+            </a>
 
-        <button id="write_blog" class="nav_button">Write Blog</button>
+            <a href="/create-blog" id="write_blog" class="hero-btn hero-btn-secondary">
+                Write a Story
+                <span class="btn-icon">✍️</span>
+            </a>
+        </div>
+
+        <div class="hero-highlights">
+            <div class="highlight-item">
+                <span class="highlight-icon">✦</span>
+                <span>Rich Visual Cards</span>
+            </div>
+            <div class="highlight-item">
+                <span class="highlight-icon">⚡</span>
+                <span>Fast &amp; Responsive</span>
+            </div>
+            <div class="highlight-item">
+                <span class="highlight-icon">🎨</span>
+                <span>Dynamic Placeholders</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="explore-section" class="explore-section">
+    <div class="section-header">
+        <div class="section-title-wrap">
+            <span class="section-subtitle">DISCOVER &amp; READ</span>
+            <h2 class="section-title">Latest Stories</h2>
+        </div>
+
+        <div class="search-wrap">
+            <div class="Search_container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search_bar" placeholder="Search by title or content..." autocomplete="off">
+                <button type="button" id="clear_search" class="clear-search-btn hidden" aria-label="Clear search">✕</button>
+                <button id="search_button" class="search-action-btn">Search</button>
+            </div>
+        </div>
     </div>
 
-    <br>
+    <div id="blog_section" class="blog-grid" aria-live="polite">
+        <!-- Blog cards loaded dynamically -->
+    </div>
+
+    <div class="load-more-wrap">
+        <button id="load_more" class="load-more-btn">
+            <span>Load More Stories</span>
+            <span class="load-more-arrow">↓</span>
+        </button>
+    </div>
 </section>
 
-
-
-
-<h1>Latest Blogs</h1>
-
-<div class="Search_container">
-    <input type="text"
-    id="search_bar"
-    placeholder="Search">
-    <button id="search_button">Search</button>
-</div>
-
-<section id="blog_section" class="blog-posts">
-
-</section>
-
-<button id="load_more"
-class="nav_button">
-
-Load More
-
-</button>
-
-
-
-<script type="module"  src="{{ url_for('static', path='js/blog.js') }}"></script>
-<script type="module"  src="{{ url_for('static', path='js/index.js') }}"></script>
-<script type="module"  src="{{ url_for('static', path='js/home.js') }}"></script>
-
+<script type="module" src="{{ url_for('static', path='js/blog.js') }}?v=20260901"></script>
+<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
+<script type="module" src="{{ url_for('static', path='js/home.js') }}?v=20260901"></script>
 
 {% endblock %}
 
 {% block scripts %}
 {% endblock %}
+

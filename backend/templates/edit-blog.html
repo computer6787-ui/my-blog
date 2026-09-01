@@ -1,23 +1,118 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Blog{% endblock %}
+{% block title %}Edit Story - Lumora{% endblock %}
 
 {% block content %}
+<main class="editor-main">
+    <div class="editor-container">
+        <header class="editor-header">
+            <a href="/user" class="back-link">← Back to Profile</a>
+            <h2>Edit Story</h2>
+            <p class="editor-subtitle">Update your title, cover image, and story content.</p>
+        </header>
 
+        <form id="edit-form" class="story-editor-form">
+            <div class="form-group">
+                <label for="title" class="form-label">Story Title</label>
+                <input 
+                    type="text" 
+                    id="title" 
+                    name="title" 
+                    class="editor-title-input" 
+                    placeholder="Story Title..." 
+                    maxlength="150" 
+                    required 
+                    autocomplete="off"
+                >
+            </div>
 
-    <main>
-        <div class="auth-container">
-            <form id="edit-form">
-            <h2>Edit Blog</h2>
-            <input type="text" id="title" name="title" class="title" placeholder="Title" required><br><hr><br>
-            <textarea id="body" name="body" class="body" placeholder="Write your blog here..." required></textarea><br><br>
-            <button type="submit" class="publish-button">Publish</button>
-            </form>
-        </div>
-    </main>
-    <script type="module" src="{{ url_for('static', path='js/edit-blog.js') }}" ></script>
-    <script type="module" src="{{ url_for('static', path='js/index.js') }}" ></script>
+            <div class="form-group">
+                <label for="category" class="form-label">Category <span class="optional-pill">Optional</span></label>
+                <select id="category" name="category" class="editor-category-select">
+                    <option value="">Auto-detect from content</option>
+                    <option value="Tech">🌊 Tech</option>
+                    <option value="Life">🌿 Life</option>
+                    <option value="Creative">✨ Creative</option>
+                    <option value="Ideas">🚀 Ideas</option>
+                    <option value="Insights">💡 Insights</option>
+                    <option value="Thoughts">🔮 Thoughts</option>
+                    <option value="Design">⚡ Design</option>
+                    <option value="Story">✦ Story</option>
+                </select>
+            </div>
 
+            <div class="form-group">
+                <div class="label-with-actions">
+                    <label for="image_url" class="form-label">Cover Header Image <span class="optional-pill">Optional</span></label>
+                    <div class="image-action-buttons">
+                        <button type="button" id="btn-upload-img" class="btn-secondary-sm">📷 Upload Photo</button>
+                        <button type="button" id="btn-surprise-img" class="btn-secondary-sm">🎲 Surprise Image</button>
+                        <button type="button" id="btn-clear-img" class="btn-secondary-sm hidden">✕ Clear</button>
+                    </div>
+                </div>
+
+                <input type="file" id="device_image" accept="image/*" class="hidden" />
+
+                <div class="image-input-wrap">
+                    <span class="input-prefix-icon">🖼️</span>
+                    <input 
+                        type="url" 
+                        id="image_url" 
+                        name="image_url" 
+                        class="editor-image-input" 
+                        placeholder="Paste image URL or choose a photo from your device"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div id="image_preview_box" class="image-preview-card">
+                    <div id="image_preview_placeholder" class="preview-placeholder">
+                        <span class="preview-icon">✨</span>
+                        <div class="preview-text">
+                            <strong>Dynamic Gradient Cover</strong>
+                            <span>If no custom image is provided, a vibrant dynamic gradient cover will be auto-generated.</span>
+                        </div>
+                    </div>
+                    <div id="image_preview_img_wrap" class="preview-img-wrap hidden">
+                        <img id="preview_img" src="" alt="Cover preview" class="preview-img">
+                        <span class="preview-badge">Live Preview</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="label-with-stats">
+                    <label for="body" class="form-label">Story Content</label>
+                    <div class="editor-stats">
+                        <span id="word-count">0 words</span>
+                        <span class="stat-divider">•</span>
+                        <span id="reading-time">~1 min read</span>
+                    </div>
+                </div>
+
+                <textarea 
+                    id="body" 
+                    name="body" 
+                    class="editor-body-textarea" 
+                    placeholder="Write your story here..." 
+                    rows="12" 
+                    required
+                ></textarea>
+            </div>
+
+            <div class="editor-actions">
+                <a href="/user" class="btn-cancel">Cancel</a>
+                <button type="submit" class="publish-button">
+                    <span>Save Changes</span>
+                    <span class="btn-arrow">✓</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script type="module" src="{{ url_for('static', path='js/edit-blog.js') }}?v=20260901"></script>
+<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
 
 {% endblock %}
 

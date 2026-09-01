@@ -1,47 +1,57 @@
 {% extends "base.html" %}
 
-{% block title %}Profile{% endblock %}
+{% block title %}Profile - Lumora{% endblock %}
 
 {% block content %}
-
- <main>
-    <article class="user-profile">
-        <div class="profile-header">
-            <h3>User Profile</h3>
-            <div id="profile-loading" class="profile-loading hidden" aria-live="polite">
-                <div class="loading-spinner small"></div>
-                <span>Loading profile...</span>
+<main class="profile-main">
+    <section class="user-profile-card">
+        <div class="profile-card-top">
+            <div class="profile-avatar-large" id="profile-avatar">L</div>
+            <div class="profile-card-info">
+                <div class="profile-name-row">
+                    <h2 id="name" class="profile-name">User Profile</h2>
+                    <input id="name-input" type="text" name="name" class="hidden inline-name-input" placeholder="Enter new name" maxlength="50" required>
+                    <button type="button" class="profile-edit-name-btn" id="toggle-name-edit" aria-label="Edit name">✎ Edit</button>
+                </div>
+                <div class="profile-email-badge">
+                    <span class="email-icon">✉</span>
+                    <span id="email" class="email-text">Loading email...</span>
+                </div>
+                <p id="name-message" class="form-message" aria-live="polite"></p>
             </div>
         </div>
 
-        <div class="profile-details">
-            <h5 class="profile-name-row">
-                <span class="profile-label">Name:</span>
-                <span id="name" class="name"></span>
-                <input id="name-input" type="text" name="name" class="hidden inline-name-input" placeholder="New name" maxlength="50" required>
-                <button type="button" class="text-button" id="toggle-name-edit" aria-label="Edit name">✎</button>
-            </h5>
-            <h5>
-                <span class="profile-label">Email:</span>
-                <span id="email" class="email"></span>
-            </h5>
+        <div class="profile-card-actions">
+            <a href="/create-blog" class="hero-btn hero-btn-primary">
+                <span>Write New Story</span>
+                <span class="btn-icon">✍️</span>
+            </a>
+            <div id="profile-loading" class="profile-loading hidden" aria-live="polite">
+                <div class="loading-spinner small"></div>
+                <span>Syncing profile...</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="user-stories-section">
+        <div class="user-stories-header">
+            <div class="user-stories-title-wrap">
+                <h3>My Published Stories</h3>
+                <span id="story-count-badge" class="badge-count">0 stories</span>
+            </div>
         </div>
 
-        <p id="name-message" class="form-message" aria-live="polite"></p>
-    </article>
-    <article id="published-blogs">
-        <hr>
-        <h4>Blogs:<span></span></h4>
-        <br>
-        <br>
-        <hr> 
-    </article>
- </main>
-<script type="module" src="{{ url_for('static', path='js/user.js') }}?v=20260818"></script>
-<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260818"></script>
+        <div id="published-blogs" class="user-stories-grid" aria-live="polite">
+            <!-- User story cards loaded here -->
+        </div>
+    </section>
+</main>
 
+<script type="module" src="{{ url_for('static', path='js/user.js') }}?v=20260901"></script>
+<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
 
 {% endblock %}
 
 {% block scripts %}
 {% endblock %}
+

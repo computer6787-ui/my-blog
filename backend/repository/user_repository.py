@@ -199,9 +199,41 @@ async def verify_user(request,db):
     db.commit()
     
     return {"verified":True}
-        
- 
 
+
+async def resend_verification_code(request, db):
+    email = (request.email or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required")
+
+    pending_user = db.query(models.PendingUser).filter(models.PendingUser.email == email).first()
+    if pending_user:
+        new_code = generate_verification_code()
+        pending_user.verification_code = new_code
+        pending_user.expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+        try:
+            await send_verification_email(email, new_code)
+            db.commit()
+            return {"message": "Verification code resent successfully"}
+        except Exception:
+            db.rollback()
+            raise HTTPException(status_code=500, detail="Could not resend verification code")
+
+    reset_record = db.query(models.passward_varification).filter(models.passward_varification.email == email).first()
+    if reset_record:
+        new_code = generate_verification_code()
+        reset_record.verification_code = new_code
+        reset_record.expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+        reset_record.verified = False
+        try:
+            await send_password_reset_email(email, new_code)
+            db.commit()
+            return {"message": "Password reset code resent successfully"}
+        except Exception:
+            db.rollback()
+            raise HTTPException(status_code=500, detail="Could not resend password reset code")
+
+    raise HTTPException(status_code=404, detail="No pending verification was found for this email")
 
 
 async def update_pass(request, db):

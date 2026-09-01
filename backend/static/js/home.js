@@ -5,29 +5,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const writeBlogButton = document.getElementById('write_blog');
     const blogSection = document.getElementById('blog_section');
 
-readBlogsButton.addEventListener('click', function() {
-     blogSection.scrollIntoView({ behavior: 'smooth' });
-
-
-});
-
-    writeBlogButton.addEventListener('click', async function() {
-        const token = localStorage.getItem("token");
-    if (token){
-        window.location.href= ROUTES.CREATE_BLOG;
-    }else{
-        await notify({
-             type: "warning",
-             title: "Login Required",
-             text: "Please log in to write a blog.",
-             onClick: () => {
-                 window.location.href = ROUTES.LOGIN;
-             }
+    if (readBlogsButton && blogSection) {
+        readBlogsButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            blogSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
-        window.location.href= ROUTES.LOGIN
+    }
+
+    if (writeBlogButton) {
+        writeBlogButton.addEventListener('click', async function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const token = localStorage.getItem('token');
+
+            if (token) {
+                window.location.assign(ROUTES.CREATE_BLOG);
+                return;
+            }
+
+            try {
+                await notify({
+                    type: 'warning',
+                    title: 'Login Required',
+                    text: 'Please log in to write a blog.',
+                    duration: 2600,
+                    onClick: () => {
+                        window.location.assign(ROUTES.LOGIN);
+                    }
+                });
+            } finally {
+                window.location.assign(ROUTES.LOGIN);
+            }
+        });
     }
 });
-
-
-
-})

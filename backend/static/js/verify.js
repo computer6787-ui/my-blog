@@ -10,75 +10,89 @@ if (!email) {
     message.textContent = "No email found. Please register again.";
 }
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+if (form) {
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    const code = document.getElementById("code").value;
-    showLoading("Verifying your account...");
+        if (!email) {
+            message.textContent = "No email found. Please register again.";
+            return;
+        }
 
-    try {
-        const res = await fetch(`${API_URL}/verify`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email: email,
-                verification_code: code
-            })
-        });
+        const code = document.getElementById("code").value;
+        showLoading("Verifying your account...");
 
-        const data = await res.json();
-
-        if (res.ok) {
-            await notify({
-                type: "success",
-                title: "Success!",
-                text: "Account verified successfully."
+        try {
+            const res = await fetch(`${API_URL}/verify`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    verification_code: code
+                })
             });
 
-            localStorage.removeItem("pending_email");
-            window.location.href = "/login";
-        } else {
-            message.textContent = data.detail;
+            const data = await res.json();
+
+            if (res.ok) {
+                await notify({
+                    type: "success",
+                    title: "Success!",
+                    text: "Account verified successfully."
+                });
+
+                localStorage.removeItem("pending_email");
+                window.location.href = "/login";
+            } else {
+                message.textContent = data.detail;
+            }
+        } catch (error) {
+            console.error(error);
+            message.textContent = "Verification failed. Please try again.";
+        } finally {
+            hideLoading();
         }
-    } catch (error) {
-        console.error(error);
-        message.textContent = "Verification failed. Please try again.";
-    } finally {
-        hideLoading();
-    }
-});
+    });
+}
 
-resendBtn.addEventListener("click", async () => {
-    showLoading("Resending code...");
+if (resendBtn) {
+    resendBtn.addEventListener("click", async () => {
+        if (!email) {
+            message.textContent = "No email found. Please register again.";
+            return;
+        }
 
-    try {
-        const res = await fetch(`${API_URL}/resend-code`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email: email
-            })
-        });
+        showLoading("Resending code...");
 
-        const data = await res.json();
-
-        if (res.ok) {
-            await notify({
-                type: "success",
-                title: "Code sent",
-                text: "A new verification code has been sent."
+        try {
+            const res = await fetch(`${API_URL}/resend-code`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email
+                })
             });
-        } else {
-            message.textContent = data.detail;
+
+            const data = await res.json();
+
+            if (res.ok) {
+                await notify({
+                    type: "success",
+                    title: "Code sent",
+                    text: "A new verification code has been sent."
+                });
+            } else {
+                message.textContent = data.detail || "Could not resend the code right now.";
+            }
+        } catch (error) {
+            console.error(error);
+            message.textContent = "Could not resend the code right now.";
+        } finally {
+            hideLoading();
         }
-    } catch (error) {
-        console.error(error);
-        message.textContent = "Could not resend the code right now.";
-    } finally {
-        hideLoading();
-    }
-});
+    });
+}

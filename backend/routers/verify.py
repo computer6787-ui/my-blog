@@ -18,3 +18,7 @@ async def verify_user(request: schemas.VerifyUser, db: Session = Depends(get_db)
 async def varify_user(request:schemas.VerifyUser,db: Session = Depends(get_db)):
     return await user_repository.verify_user(request,db)
 
+@router.post("/resend-code")
+async def resend_code(request: schemas.verify_email, db: Session = Depends(get_db)):
+    return await user_repository.resend_verification_code(request, db)
+

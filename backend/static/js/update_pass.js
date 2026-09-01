@@ -71,7 +71,7 @@ form.addEventListener("submit", async (e) => {
             });
 
             // Remove reset-related data
-            localStorage.removeItem("email");
+            localStorage.removeItem("userEmail");
 
             // Go to login
             window.location.href = "/login";

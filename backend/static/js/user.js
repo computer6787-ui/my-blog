@@ -158,46 +158,84 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
 
             if (!response.ok) {
-                throw new Error("Failed to load user");
+                throw new Error("Failed to load user profile");
             }
 
             const user = await response.json();
             const blogs = Array.isArray(user.blogs) ? user.blogs : [];
             originalName = user.name || "";
 
-            if (nameEl) nameEl.textContent = originalName || "No name set";
-            if (emailEl) emailEl.textContent = user.email || "No email set";
+            if (nameEl) nameEl.textContent = originalName || "Author";
+            if (emailEl) emailEl.textContent = user.email || "No email";
+            
+            const avatarEl = document.getElementById("profile-avatar");
+            if (avatarEl) {
+                avatarEl.textContent = (originalName[0] || "L").toUpperCase();
+            }
+
+            const storyCountBadge = document.getElementById("story-count-badge");
+            if (storyCountBadge) {
+                storyCountBadge.textContent = `${blogs.length} ${blogs.length === 1 ? "story" : "stories"}`;
+            }
+
             if (nameInput) nameInput.value = "";
             closeNameEditor();
 
             if (container) {
-                container.innerHTML = `
-                    <hr>
-                    <h4>Blogs:</h4>
-                    <br>
-                    <br>
-                    <hr>
-                `;
+                container.innerHTML = "";
 
                 if (blogs.length === 0) {
-                    const emptyState = document.createElement("p");
-                    emptyState.className = "empty-state";
-                    emptyState.textContent = "You have not published any blogs yet.";
+                    const emptyState = document.createElement("div");
+                    emptyState.className = "empty-blog-state";
+                    emptyState.innerHTML = `
+                        <div class="empty-icon">✍️</div>
+                        <h3>No stories published yet</h3>
+                        <p>You haven't written any stories yet. Start sharing your ideas with the Lumora community!</p>
+                        <div class="empty-actions">
+                            <a href="/create-blog" class="hero-btn hero-btn-primary">Write First Story</a>
+                        </div>
+                    `;
                     container.appendChild(emptyState);
                     return;
                 }
 
+                const PALETTES = [
+                    { gradient: "linear-gradient(135deg, #ff6b6b 0%, #a855f7 50%, #6366f1 100%)", icon: "✨" },
+                    { gradient: "linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #6366f1 100%)", icon: "🌊" },
+                    { gradient: "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)", icon: "🌿" },
+                    { gradient: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f43f5e 100%)", icon: "🚀" },
+                    { gradient: "linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%)", icon: "💡" },
+                    { gradient: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%)", icon: "🔮" }
+                ];
+
                 [...blogs].reverse().forEach(blog => {
                     const card = document.createElement("div");
-                    card.className = "personalBlog-card";
+                    card.className = "user-story-card";
+
+                    const hasImage = Boolean(blog.image_url && blog.image_url.trim().length > 5);
+                    const cleanImageUrl = hasImage ? blog.image_url.trim() : "";
+                    const theme = PALETTES[blog.id % PALETTES.length];
+                    const readTime = `${Math.max(1, Math.ceil((blog.body || "").split(/\s+/).filter(Boolean).length / 180))} min read`;
+                    const snippet = (blog.body || "").slice(0, 90) + (blog.body?.length > 90 ? "..." : "");
 
                     card.innerHTML = `
-                        <hr>
-                        <h2>${blog.title}</h2>
-                        <p>${blog.body.slice(0, 70)}...</p>
-                        <button class="dict_button" onclick="edit_blog(${blog.id})">Edit</button>
-                        <button class="dict_button" onclick="delete_blog(${blog.id})">Delete</button>
-                        <hr>
+                        <div class="user-story-media" onclick="window.location.href='/blogs/${blog.id}'">
+                            ${hasImage ? `
+                                <img src="${cleanImageUrl}" alt="${blog.title || 'Story'}" class="user-story-img" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                                <div class="user-story-placeholder hidden" style="background: ${theme.gradient};">${theme.icon}</div>
+                            ` : `
+                                <div class="user-story-placeholder" style="background: ${theme.gradient};">${theme.icon}</div>
+                            `}
+                            <span class="user-story-readtime">⏱ ${readTime}</span>
+                        </div>
+                        <div class="user-story-content">
+                            <h4 class="user-story-title" onclick="window.location.href='/blogs/${blog.id}'">${blog.title || "Untitled"}</h4>
+                            <p class="user-story-snippet">${snippet}</p>
+                            <div class="user-story-actions">
+                                <button class="btn-story-edit" onclick="edit_blog(${blog.id})" aria-label="Edit story">✎ Edit</button>
+                                <button class="btn-story-delete" onclick="delete_blog(${blog.id})" aria-label="Delete story">🗑 Delete</button>
+                            </div>
+                        </div>
                     `;
 
                     container.appendChild(card);
@@ -207,21 +245,22 @@ document.addEventListener("DOMContentLoaded", async function () {
             console.error(error);
             await notify({
                 type: "error",
-                title: "User not found",
-                text: "Failed to load user"
+                title: "Error",
+                text: "Failed to load user profile"
             });
         } finally {
             setProfileLoading(false);
         }
     }
 
+
     await loadUser();
 
     window.delete_blog = async function (id) {
         const confirmed = await confirmDialog({
-            title: "Delete the blog?",
-            text: "This action cannot be undone.",
-            confirmText: "Confirm",
+            title: "Delete Story",
+            text: "Are you sure you want to delete this story? This action cannot be undone.",
+            confirmText: "Delete",
             cancelText: "Cancel"
         });
 
@@ -230,36 +269,34 @@ document.addEventListener("DOMContentLoaded", async function () {
         try {
             const response = await fetch(`${API_URL}/blog/${id}`, {
                 method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             if (response.ok) {
                 await notify({
                     type: "success",
-                    title: "Success!",
-                    text: "Blog deleted successfully"
+                    title: "Story Deleted",
+                    text: "Your story was deleted successfully."
                 });
                 window.location.reload();
             } else {
                 await notify({
                     type: "error",
-                    title: "Request failed",
-                    text: "Failed to delete the blog."
+                    title: "Delete Failed",
+                    text: "Failed to delete the story."
                 });
             }
         } catch (error) {
             console.error(error);
             await notify({
                 type: "error",
-                title: "Request failed",
-                text: "Failed to delete the blog."
+                title: "Connection Error",
+                text: "Could not connect to the server."
             });
         }
     };
 
-    window.edit_blog = async function (id) {
-        window.location.href = `edit-blog/${id}`;
+    window.edit_blog = function (id) {
+        window.location.href = `/edit-blog/${id}`;
     };
 });

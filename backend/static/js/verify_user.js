@@ -1,4 +1,4 @@
-import { API_URL, notify } from "./config.js?v=20260818";
+import { API_URL, showLoading, hideLoading, notify } from "./config.js?v=20260818";
 
 const form = document.getElementById("verifyForm");
 const message = document.getElementById("message");
@@ -10,58 +10,89 @@ if (!email) {
     message.textContent = "No email found. Please enter your email again.";
 }
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+if (form) {
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    const code = document.getElementById("code").value;
+        if (!email) {
+            message.textContent = "No email found. Please enter your email again.";
+            return;
+        }
 
-    const res = await fetch(`${API_URL}/verify_user`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            email: email,
-            verification_code: code
-        })
+        const code = document.getElementById("code").value;
+
+        showLoading("Verifying your code...");
+
+        try {
+            const res = await fetch(`${API_URL}/verify_user`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    verification_code: code
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                await notify({
+                    type: "success",
+                    title: "Success!",
+                    text: "Code verified successfully."
+                });
+
+                window.location.href = "/Update_pass";
+            } else {
+                message.textContent = data.detail || "Verification failed.";
+            }
+        } catch (error) {
+            console.error(error);
+            message.textContent = "Verification failed. Please try again.";
+        } finally {
+            hideLoading();
+        }
     });
+}
 
-    const data = await res.json();
+if (resendBtn) {
+    resendBtn.addEventListener("click", async () => {
+        if (!email) {
+            message.textContent = "No email found. Please enter your email again.";
+            return;
+        }
 
-    if (res.ok) {
-        await notify({
-            type: "success",
-            title: "Success!",
-            text: "Account verified successfully."
-        });
+        showLoading("Resending code...");
 
-        window.location.href = "/Update_pass";
-    } else {
-        message.textContent = data.detail;
-    }
-});
+        try {
+            const res = await fetch(`${API_URL}/resend-code`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email
+                })
+            });
 
-resendBtn.addEventListener("click", async () => {
+            const data = await res.json();
 
-    const res = await fetch(`${API_URL}/resend-code`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            email: email
-        })
+            if (res.ok) {
+                await notify({
+                    type: "success",
+                    title: "Code sent",
+                    text: "A new verification code has been sent."
+                });
+            } else {
+                message.textContent = data.detail || "Could not resend the code right now.";
+            }
+        } catch (error) {
+            console.error(error);
+            message.textContent = "Could not resend the code right now.";
+        } finally {
+            hideLoading();
+        }
     });
-
-    const data = await res.json();
-
-    if (res.ok) {
-        await notify({
-            type: "success",
-            title: "Code sent",
-            text: "A new verification code has been sent."
-        });
-    } else {
-        message.textContent = data.detail;
-    }
-});
+}

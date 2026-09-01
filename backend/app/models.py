@@ -10,10 +10,39 @@ class Blog(base):
     id=Column(Integer, primary_key=True, index=True)
     title=Column(String)
     body=Column(String)
+    image_url=Column(String, nullable=True)
+    category=Column(String, nullable=True)
     published=Column(Boolean, default=True)
+    created_at=Column(DateTime, default=datetime.utcnow)
     user_id=Column(Integer,ForeignKey("users.id"))
 
     creator=relationship("User",back_populates="blogs")
+    likes=relationship("Like", back_populates="blog", cascade="all, delete-orphan")
+    comments=relationship("Comment", back_populates="blog", cascade="all, delete-orphan")
+
+
+class Like(base):
+    __tablename__="likes"
+    id=Column(Integer, primary_key=True, index=True)
+    blog_id=Column(Integer, ForeignKey("blogs.id", ondelete="CASCADE"))
+    user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    created_at=Column(DateTime, default=datetime.utcnow)
+    
+    blog=relationship("Blog", back_populates="likes")
+    user=relationship("User")
+
+
+class Comment(base):
+    __tablename__="comments"
+    id=Column(Integer, primary_key=True, index=True)
+    blog_id=Column(Integer, ForeignKey("blogs.id", ondelete="CASCADE"))
+    user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    content=Column(String)
+    created_at=Column(DateTime, default=datetime.utcnow)
+    
+    blog=relationship("Blog", back_populates="comments")
+    user=relationship("User")
+
 
 class User(base):
     __tablename__="users"
@@ -53,3 +82,4 @@ class passward_varification(base):
     expires_at = Column(
         DateTime(timezone=True)
     )
+

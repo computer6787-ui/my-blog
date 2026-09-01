@@ -1,20 +1,106 @@
 {% extends "base.html" %}
 
-{% block title %}Blogs{% endblock %}
+{% block title %}Story - Lumora{% endblock %}
 
 {% block content %}
+<article class="single-story-article">
+    <div class="story-nav-bar">
+        <a href="/" class="back-link">← Back to Stories</a>
+    </div>
 
-    <section class="blog-header">
-        <h1 id="title"></h1>
-        <b>Written by✍️: <span id="author"></span></b>
-        <hr>
-    </section>
-    <form id="blog-content">
-    <p readonly id="body" class="blog-content"></p>
-    </form>
-    <script  type="module" src="{{ url_for('static', path='js/sep_blog.js') }}?v=20260818"></script>
-    <script  type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260818"></script>
+    <div id="story-cover-container" class="story-cover-container">
+        <!-- Image or dynamic placeholder banner loaded here -->
+        <div id="story-cover-placeholder" class="story-cover-placeholder">
+            <span class="placeholder-icon" id="cover-icon">✦</span>
+            <span class="placeholder-category" id="cover-category">Story</span>
+        </div>
+        <img id="story-cover-img" src="" alt="Story header" class="story-cover-img hidden">
+    </div>
 
+    <header class="single-story-header">
+        <div class="story-meta-pills">
+            <span id="story-category" class="story-category-pill">✦ Lumora Story</span>
+            <span id="story-readtime" class="story-readtime-pill">⏱ 2 min read</span>
+        </div>
+
+        <h1 id="title" class="single-story-title"></h1>
+
+        <div class="single-story-author-bar">
+            <div class="author-info-group">
+                <div id="author-avatar" class="single-author-avatar">L</div>
+                <div class="author-meta-text">
+                    <span class="author-label">Written by</span>
+                    <strong id="author" class="author-name"></strong>
+                </div>
+            </div>
+
+            <div class="story-share-actions">
+                <span id="story-date" class="story-date-pill" aria-label="Story date">—</span>
+                <button type="button" id="btn-copy-link" class="btn-share" aria-label="Copy story link">
+                    <span>🔗 Share Story</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="single-story-body-wrap">
+        <div id="body" class="single-story-content"></div>
+    </div>
+
+    <footer class="single-story-footer">
+        <div class="story-author-card">
+            <div id="footer-author-avatar" class="footer-author-avatar">L</div>
+            <div class="footer-author-text">
+                <h4 id="footer-author-name">Lumora Author</h4>
+                <p>Sharing ideas and stories that inspire and connect us all on Lumora.</p>
+            </div>
+        </div>
+
+        <!-- Like and Comment Section -->
+        <div class="story-interaction-bar">
+            <button type="button" id="btn-like" class="btn-interaction btn-like">
+                <span class="interaction-icon">❤️</span>
+                <span class="interaction-count" id="likes-count">0</span>
+                <span class="interaction-label">Like</span>
+            </button>
+            <button type="button" id="btn-comments-toggle" class="btn-interaction btn-comments">
+                <span class="interaction-icon">💬</span>
+                <span class="interaction-count" id="comments-count">0</span>
+                <span class="interaction-label">Comments</span>
+            </button>
+        </div>
+
+        <!-- Comments Section -->
+        <div id="comments-section" class="comments-section hidden">
+            <h3 class="comments-header">Comments</h3>
+            
+            <form id="comment-form" class="comment-form">
+                <div class="comment-input-wrap">
+                    <textarea 
+                        id="comment-input" 
+                        class="comment-input" 
+                        placeholder="Share your thoughts..."
+                        rows="3"
+                    ></textarea>
+                    <button type="submit" id="btn-submit-comment" class="btn-submit-comment">
+                        Post Comment
+                    </button>
+                </div>
+            </form>
+
+            <div id="comments-list" class="comments-list">
+                <!-- Comments loaded here -->
+            </div>
+        </div>
+
+        <div class="story-footer-nav">
+            <a href="/" class="hero-btn hero-btn-primary">Explore More Stories →</a>
+        </div>
+    </footer>
+</article>
+
+<script type="module" src="{{ url_for('static', path='js/sep_blog.js') }}?v=20260901"></script>
+<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
 {% endblock %}
 
 {% block scripts %}

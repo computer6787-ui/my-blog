@@ -14,8 +14,10 @@
             </div>
             <button type="submit" id="login_button">Login</button>
             </form>
-        <p>Don't have an account? <a href="/register">Register here</a></p>
-        <p>Forgot your password? <a href="/resetPass">Reset here</a></p>
+        <div class="auth-links">
+            <p>Don't have an account? <a href="/register">Register here</a></p>
+            <p>Forgot your password? <a href="/resetPass">Reset here</a></p>
+        </div>
         </div>
     </main>
 <script type="module" src="{{ url_for('static', path='js/login.js') }}"></script>

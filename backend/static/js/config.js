@@ -39,6 +39,11 @@ export function hideLoading() {
 }
 
 export function notify({ type = "info", title = "", text = "", duration = 3200, onClick = null } = {}) {
+    if (typeof document === "undefined") {
+        return Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true, value: null });
+    }
+
+    const safeType = ["success", "error", "warning", "info"].includes(type) ? type : "info";
     const container = document.getElementById("lumora-toast-stack") || (() => {
         const stack = document.createElement("div");
         stack.id = "lumora-toast-stack";
@@ -57,10 +62,12 @@ export function notify({ type = "info", title = "", text = "", duration = 3200, 
         info: "i"
     };
 
-    toast.className = `lumora-toast lumora-toast-${type}`;
+    toast.className = `lumora-toast lumora-toast-${safeType}`;
     toast.style.cursor = "pointer";
+    toast.setAttribute("role", "status");
+    toast.tabIndex = 0;
     toast.innerHTML = `
-        <div class="lumora-toast-icon">${iconMap[type] || "i"}</div>
+        <div class="lumora-toast-icon">${iconMap[safeType] || "i"}</div>
         <div class="lumora-toast-body">
             ${safeTitle ? `<strong>${safeTitle}</strong>` : ""}
             ${safeText ? `<span>${safeText}</span>` : ""}
@@ -69,58 +76,76 @@ export function notify({ type = "info", title = "", text = "", duration = 3200, 
     `;
 
     let settled = false;
+    let timeoutId = null;
+    let removeTimerId = null;
 
-    const close = () => {
-        if (settled) return;
+    const finish = (reason = "dismiss") => {
+        if (settled) {
+            return { isConfirmed: false, isDenied: false, isDismissed: true, value: null };
+        }
+
         settled = true;
+
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+
         toast.classList.remove("show");
         toast.classList.add("hide");
-        setTimeout(() => toast.remove(), 220);
-    };
 
-    const resolveToast = () => {
-        if (settled) return;
-        settled = true;
-        close();
-        return { isConfirmed: true, isDismissed: false, value: true };
+        if (reason === "click" && typeof onClick === "function") {
+            onClick();
+        }
+
+        if (removeTimerId) clearTimeout(removeTimerId);
+        removeTimerId = setTimeout(() => toast.remove(), 220);
+
+        return {
+            isConfirmed: reason === "click",
+            isDenied: false,
+            isDismissed: reason !== "click",
+            value: reason === "click" ? true : null
+        };
     };
 
     return new Promise((resolve) => {
-        const handleClose = () => {
-            resolve(resolveToast());
+        const handleClose = (reason = "dismiss") => {
+            resolve(finish(reason));
         };
+
+        const closeButton = toast.querySelector(".lumora-toast-close");
 
         toast.addEventListener("click", (event) => {
             if (event.target.closest(".lumora-toast-close")) {
-                handleClose();
+                event.stopPropagation();
+                handleClose("dismiss");
                 return;
             }
-
-            if (typeof onClick === "function") {
-                onClick();
-            }
-
-            handleClose();
+            handleClose("click");
         });
 
-        toast.querySelector(".lumora-toast-close").addEventListener("click", (event) => {
-            event.stopPropagation();
-            handleClose();
-        });
+        if (closeButton) {
+            closeButton.addEventListener("click", (event) => {
+                event.stopPropagation();
+                handleClose("dismiss");
+            });
+        }
 
-        container.appendChild(toast);
+        if (container && container.isConnected) {
+            container.appendChild(toast);
+        } else {
+            document.body.appendChild(container);
+            container.appendChild(toast);
+        }
+
         requestAnimationFrame(() => toast.classList.add("show"));
 
         if (duration > 0) {
-            setTimeout(() => {
-                if (!settled) {
-                    resolve(resolveToast());
-                }
+            timeoutId = setTimeout(() => {
+                if (!settled) handleClose("timeout");
             }, duration);
-            return;
         }
-
-        resolve(resolveToast());
     });
 }
 
