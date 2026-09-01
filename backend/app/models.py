@@ -1,8 +1,11 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from .database import base
-from datetime import datetime
+from datetime import datetime, timezone
 
+
+def utcnow():
+    return datetime.now(timezone.utc)
 
 
 class Blog(base):
@@ -13,7 +16,7 @@ class Blog(base):
     image_url=Column(String, nullable=True)
     category=Column(String, nullable=True)
     published=Column(Boolean, default=True)
-    created_at=Column(DateTime, default=datetime.utcnow)
+    created_at=Column(DateTime(timezone=True), default=utcnow)
     user_id=Column(Integer,ForeignKey("users.id"))
 
     creator=relationship("User",back_populates="blogs")
@@ -26,7 +29,7 @@ class Like(base):
     id=Column(Integer, primary_key=True, index=True)
     blog_id=Column(Integer, ForeignKey("blogs.id", ondelete="CASCADE"))
     user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    created_at=Column(DateTime, default=datetime.utcnow)
+    created_at=Column(DateTime(timezone=True), default=utcnow)
     
     blog=relationship("Blog", back_populates="likes")
     user=relationship("User")
@@ -38,7 +41,7 @@ class Comment(base):
     blog_id=Column(Integer, ForeignKey("blogs.id", ondelete="CASCADE"))
     user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     content=Column(String)
-    created_at=Column(DateTime, default=datetime.utcnow)
+    created_at=Column(DateTime(timezone=True), default=utcnow)
     
     blog=relationship("Blog", back_populates="comments")
     user=relationship("User")

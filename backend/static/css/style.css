@@ -1574,6 +1574,8 @@ body.dark-mode .shimmer {
     display: flex;
     align-items: center;
     gap: 1.4rem;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .profile-avatar-large {
@@ -1595,12 +1597,16 @@ body.dark-mode .shimmer {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+    min-width: 0;
+    flex: 1 1 220px;
 }
 
 .profile-name-row {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
+    min-width: 0;
 }
 
 .profile-name {
@@ -1638,6 +1644,9 @@ body.dark-mode .shimmer {
     font-weight: 700;
     color: var(--text);
     outline: none;
+    flex: 1 1 180px;
+    min-width: 0;
+    max-width: min(100%, 260px);
 }
 
 .form-message {

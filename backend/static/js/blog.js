@@ -117,8 +117,21 @@ export function calculateReadTime(text = "") {
 function formatBangladeshDate(value) {
     if (!value) return "Just now";
 
-    const date = new Date(value);
+    let date = new Date(value);
     if (Number.isNaN(date.getTime())) return "Just now";
+
+    if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(String(value))) {
+        date = new Date(`${String(value).replace(" ", "T")}Z`);
+    }
+
+    if (Number.isNaN(date.getTime())) return "Just now";
+
+    const diffMs = Date.now() - date.getTime();
+    const ageInDays = diffMs / (1000 * 60 * 60 * 24);
+
+    if (ageInDays > 30) {
+        return "long time ago";
+    }
 
     return new Intl.DateTimeFormat("en-BD", {
         timeZone: "Asia/Dhaka",

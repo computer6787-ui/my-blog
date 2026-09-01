@@ -124,8 +124,21 @@ function calculateReadTime(text = "") {
 function formatBangladeshDate(value) {
     if (!value) return "Just now";
 
-    const date = new Date(value);
+    let date = new Date(value);
     if (Number.isNaN(date.getTime())) return "Just now";
+
+    if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(String(value))) {
+        date = new Date(`${String(value).replace(" ", "T")}Z`);
+    }
+
+    if (Number.isNaN(date.getTime())) return "Just now";
+
+    const diffMs = Date.now() - date.getTime();
+    const ageInDays = diffMs / (1000 * 60 * 60 * 24);
+
+    if (ageInDays > 30) {
+        return "long time ago";
+    }
 
     return new Intl.DateTimeFormat("en-BD", {
         timeZone: "Asia/Dhaka",
@@ -415,8 +428,17 @@ function renderComments(comments) {
     }
     
     commentsList.innerHTML = comments.map(comment => {
-        const date = new Date(comment.created_at);
-        const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        let date = new Date(comment.created_at);
+        const rawValue = comment.created_at;
+        if (rawValue && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(String(rawValue))) {
+            date = new Date(`${String(rawValue).replace(" ", "T")}Z`);
+        }
+        const dateStr = new Intl.DateTimeFormat("en-BD", {
+            timeZone: "Asia/Dhaka",
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }).format(date);
         const isOwner = currentUserId === comment.user_id;
         
         return `
