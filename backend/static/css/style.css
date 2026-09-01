@@ -2285,6 +2285,11 @@ body.dark-mode .shimmer {
     pointer-events: auto;
 }
 
+.lumora-modal-backdrop.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .lumora-modal {
     width: min(440px, calc(100vw - 2rem));
     background: var(--surface);

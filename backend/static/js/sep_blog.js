@@ -1,4 +1,4 @@
-import { API_URL, ROUTES, showLoading, hideLoading, notify } from "./config.js?v=20260818";
+import { API_URL, ROUTES, showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260818";
 
 const id = window.location.pathname.split("/").pop();
 
@@ -436,9 +436,7 @@ function renderComments(comments) {
     
     commentsList.querySelectorAll(".btn-delete-comment").forEach(btn => {
         btn.addEventListener("click", async (e) => {
-            if (confirm("Delete this comment?")) {
-                await deleteComment(e.target.dataset.id);
-            }
+            await deleteComment(e.target.dataset.id);
         });
     });
 }
@@ -505,6 +503,15 @@ async function submitComment(event) {
 async function deleteComment(commentId) {
     const token = localStorage.getItem("token");
 
+    const confirmed = await confirmDialog({
+        title: "Delete Comment",
+        text: "Are you sure you want to delete this comment? This action cannot be undone.",
+        confirmText: "Delete",
+        cancelText: "Cancel"
+    });
+
+    if (!confirmed) return;
+
     try {
         const response = await fetch(`${API_URL}/interact/comment/${commentId}`, {
             method: "DELETE",
@@ -515,8 +522,12 @@ async function deleteComment(commentId) {
         });
 
         if (response.ok) {
+            await notify({
+                type: "success",
+                title: "Comment Deleted",
+                text: "Your comment has been removed."
+            });
             await loadComments();
-            notify({ type: "success", title: "Comment Deleted", text: "The comment has been removed." });
         } else if (response.status === 401) {
             localStorage.removeItem("token");
             notify({ type: "info", title: "Login Required", text: "Please login again." });
@@ -524,11 +535,11 @@ async function deleteComment(commentId) {
         } else if (response.status === 403) {
             notify({ type: "error", title: "Permission Denied", text: "You can only delete your own comments." });
         } else {
-            notify({ type: "error", title: "Error", text: "Could not delete comment." });
+            notify({ type: "error", title: "Delete Failed", text: "Could not delete the comment." });
         }
     } catch (error) {
         console.error("Error deleting comment:", error);
-        notify({ type: "error", title: "Error", text: "Could not delete comment." });
+        notify({ type: "error", title: "Connection Error", text: "Could not connect to the server." });
     }
 }
 
