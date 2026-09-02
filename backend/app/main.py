@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
@@ -103,6 +103,10 @@ app.mount(
     StaticFiles(directory=str(BASE_DIR / "static")),
     name="static"
 )
+
+@app.get("/googlecd638c7d6a56159d.html")
+def google_site_verification():
+    return PlainTextResponse("google-site-verification: googlecd638c7d6a56159d.html")
 
 @app.get("/")
 def Home_page(request: Request):
