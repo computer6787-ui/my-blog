@@ -2586,6 +2586,40 @@ body.dark-mode .shimmer {
 .auth-links a:hover {
     text-decoration: underline;
 }
+
+/* ===== AUTH DIVIDER & GOOGLE BUTTON ===== */
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 1.4rem 0;
+}
+
+.auth-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+}
+
+.auth-divider-text {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: lowercase;
+}
+
+.google-btn-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.google-btn-wrapper iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
 /* ===== GLOBAL LOADER, TOASTS & MODALS ===== */
 
 .hidden {

@@ -205,3 +205,20 @@ def resetPass_verEmail(request:Request):
         name="update_pass.html",
         context={}
     )
+
+
+@app.get("/privacy-policy")
+def privacy_policy(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="privacy-policy.html",
+        context={}
+    )
+
+@app.get("/terms-of-service")
+def terms_of_service(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="terms-of-service.html",
+        context={}
+    )

@@ -2,6 +2,10 @@
 
 {% block title %}Login{% endblock %}
 
+{% block extra_head %}
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+{% endblock %}
+
 {% block content %}
     <main>
         <div class="auth-container">
@@ -14,7 +18,16 @@
             </div>
             <button type="submit" id="login_button">Login</button>
             </form>
-        <div class="auth-links">
+
+            <div class="auth-divider">
+                <span class="auth-divider-line"></span>
+                <span class="auth-divider-text">or</span>
+                <span class="auth-divider-line"></span>
+            </div>
+
+            <div id="google_signin_button" class="google-btn-wrapper"></div>
+
+            <div class="auth-links">
             <p>Don't have an account? <a href="/register">Register here</a></p>
             <p>Forgot your password? <a href="/resetPass">Reset here</a></p>
         </div>

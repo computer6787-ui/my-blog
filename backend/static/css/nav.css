@@ -1,0 +1,304 @@
+﻿/* ===== HEADER & NAVIGATION ===== */
+
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.25rem;
+    width: 100%;
+    padding: 0.9rem clamp(1.2rem, 4vw, 3rem);
+    background: rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .header {
+    background: rgba(15, 22, 32, 0.88);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.logo img {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    object-fit: cover;
+    box-shadow: 0 6px 14px rgba(122, 92, 242, 0.2);
+}
+
+.logo_text h1 {
+    margin: 0;
+    color: var(--primary-deep);
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+.logo_text p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.nav_button, .nav_link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    background: var(--accent-gradient);
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 16px rgba(122, 92, 242, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    border: none;
+}
+
+.nav_button:hover, .nav_link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(122, 92, 242, 0.32);
+    filter: brightness(1.05);
+}
+
+/* The mobile-only "Home" link lives inside the logo row; hidden on desktop,
+   shown only within the mobile media query below. */
+.mobile-home {
+    display: none;
+}
+
+#dark-mode-toggle {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-alt);
+    color: var(--text);
+    font-size: 1.05rem;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+#dark-mode-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.menu-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface-alt);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    transition: transform 0.2s ease;
+}
+
+.menu-btn span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.menu-btn.open span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.menu-btn.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-btn.open span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 14, 24, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.drawer {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: min(82vw, 300px);
+    height: 100vh;
+    padding: 2rem 1.5rem;
+    background: var(--surface);
+    border-left: 1px solid var(--line);
+    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.15);
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.drawer.open {
+    right: 0;
+}
+
+.drawer h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary-deep);
+    margin-bottom: 0.5rem;
+}
+
+.drawer hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin-bottom: 0.5rem;
+}
+
+.drawer a {
+    display: block;
+    padding: 0.85rem 1.1rem;
+    border-radius: 12px;
+    background: var(--surface-alt);
+    color: var(--text);
+    font-weight: 600;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.drawer a:hover {
+    background: var(--primary-soft);
+    color: var(--accent-strong);
+    transform: translateX(3px);
+}
+
+body.dark-mode .drawer a:hover {
+    background: var(--primary-soft);
+    color: #ffffff;
+}
+
+/* Dark mode toggle inside the drawer (slide switch) */
+.drawer-theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.85rem 1.1rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--surface-alt);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s ease, transform 0.2s ease;
+    overflow: hidden;
+}
+
+.drawer-theme-toggle:hover {
+    background: var(--primary-soft);
+    transform: translateX(3px);
+}
+
+.drawer-theme-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.drawer-theme-label {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.drawer-theme-switch {
+    position: relative;
+    width: 46px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: rgba(122, 92, 242, 0.18);
+    border: 1px solid rgba(122, 92, 242, 0.35);
+    transition: background 0.25s ease;
+}
+
+.drawer-theme-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.dark-mode .drawer-theme-switch {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+body.dark-mode .drawer-theme-knob {
+    transform: translateX(22px);
+}
+
+/* Slide animation on the label text when the theme changes */
+.drawer-theme-label {
+    display: inline-block;
+    animation: theme-label-slide-in 0.25s ease;
+}
+
+@keyframes theme-label-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
