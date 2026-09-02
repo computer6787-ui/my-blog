@@ -1,4 +1,5 @@
 import { API_URL, ROUTES, showLoading, hideLoading, notify } from "./config.js?v=20260818";
+import { setupMentionAutocomplete } from "./mention-autocomplete.js?v=20260909";
 
 // Theme to image query mappings for intelligent cover selection
 const THEME_IMAGE_QUERIES = {
@@ -118,6 +119,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const readingTimeEl = document.getElementById("reading-time");
 
     if (!titleInput || !bodyInput || !blogForm) return;
+
+    setupMentionAutocomplete(bodyInput);
 
     function updateStats() {
         const text = bodyInput.value.trim();
@@ -433,12 +436,12 @@ document.addEventListener("DOMContentLoaded", function () {
     blogForm.addEventListener("submit", async function (event) {
         event.preventDefault();
         const blogTitle = titleInput.value.trim();
-        const blogBody = bodyInput.value.trim();
+        const blogBody = bodyInput.value;
         const blogImageUrl = imageInput ? imageInput.value.trim() : null;
         const blogCategory = categoryInput ? categoryInput.value.trim() : null;
         const token = localStorage.getItem("token");
 
-        if (!blogTitle || !blogBody) {
+        if (!blogTitle || !blogBody.trim()) {
             notify({ type: "warning", title: "Missing Fields", text: "Please provide a title and story content." });
             return;
         }

@@ -18,7 +18,7 @@
 
     <title>{% block title %}Lumora{% endblock %}</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v=20260901">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v=20260908">
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -63,6 +63,8 @@
 
     {% block scripts %}
     {% endblock %}
+
+    <script src="{{ url_for('static', path='js/notifications.js') }}?v=20260906"></script>
 
 </body>
 

@@ -1,10 +1,20 @@
 (function() {
-    function applyTheme(theme) {
-        const isDark = theme === 'dark';
+    function applyTheme(isDark) {
         document.body.classList.toggle('dark-mode', isDark);
-        const toggleBtn = document.getElementById('dark-mode-toggle');
+        const toggleBtn = document.getElementById('drawer-theme-toggle');
+        const label = document.getElementById('drawer-theme-label');
+        const icon = document.getElementById('drawer-theme-icon');
+        if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+        if (label) {
+            label.textContent = isDark ? 'Dark mode' : 'Light mode';
+            // Restart the slide animation so the label visibly slides each toggle
+            label.style.animation = 'none';
+            void label.offsetWidth;
+            label.style.animation = '';
+        }
         if (toggleBtn) {
-            toggleBtn.textContent = isDark ? '☀️' : '🌙';
+            toggleBtn.setAttribute('aria-pressed', String(isDark));
+            toggleBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
         }
         try {
             localStorage.setItem('lumora-theme', isDark ? 'dark' : 'light');
@@ -27,43 +37,17 @@
     }
 
     function initDarkMode() {
-        const nav = document.querySelector('.nav');
         const menuBtn = document.getElementById('menu-btn');
         const drawer = document.getElementById('drawer');
         const overlay = document.querySelector('.overlay');
-        let toggleBtn = document.getElementById('dark-mode-toggle');
-
-        if (nav && !toggleBtn) {
-            toggleBtn = document.createElement('button');
-            toggleBtn.id = 'dark-mode-toggle';
-            toggleBtn.type = 'button';
-            toggleBtn.setAttribute('aria-label', 'Toggle dark mode');
-            toggleBtn.textContent = '🌙';
-            nav.appendChild(toggleBtn);
-        }
-
-        const initializeTheme = () => {
-            const savedTheme = (() => {
-                try {
-                    return localStorage.getItem('lumora-theme');
-                } catch (error) {
-                    return null;
-                }
-            })();
-
-            if (savedTheme === 'dark' || document.body.classList.contains('dark-mode')) {
-                applyTheme('dark');
-            } else {
-                applyTheme('light');
-            }
-        };
+        const toggleBtn = document.getElementById('drawer-theme-toggle');
 
         if (toggleBtn) {
-            toggleBtn.onclick = function() {
+            toggleBtn.addEventListener('click', function() {
                 const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
                 applyTheme(nextTheme);
-            };
-            initializeTheme();
+            });
+            syncThemeFromStorage();
         }
 
         if (menuBtn && drawer) {

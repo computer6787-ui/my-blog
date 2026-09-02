@@ -29,6 +29,21 @@ def init_db():
     try:
         models.base.metadata.create_all(engine)
         insp = inspect(engine)
+
+        if "comments" in insp.get_table_names():
+            comment_cols = [c["name"] for c in insp.get_columns("comments")]
+            if "parent_id" not in comment_cols:
+                with engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE comments ADD COLUMN parent_id INTEGER;"))
+                    conn.commit()
+
+        if "notifications" in insp.get_table_names():
+            notif_cols = [c["name"] for c in insp.get_columns("notifications")]
+            if "actor_name" not in notif_cols:
+                with engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE notifications ADD COLUMN actor_name VARCHAR;"))
+                    conn.commit()
+
         if "blogs" in insp.get_table_names():
             cols = [c["name"] for c in insp.get_columns("blogs")]
             if "image_url" not in cols:
@@ -69,6 +84,8 @@ def init_db():
                     with engine.connect() as conn:
                         conn.execute(text(column_sql))
                         conn.commit()
+    # Trim older notifications that exceed the retention limit for each user
+        interact.prune_all_notifications()
     except Exception as e:
         print("Database initialization notice:", e)
 

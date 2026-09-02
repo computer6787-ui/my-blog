@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
 
@@ -162,6 +162,12 @@ class LikeToggleResponse(BaseModel):
 class CommentCreate(BaseModel):
     blog_id: int
     content: str
+    parent_id: Optional[int] = None
+    mentions: Optional[list[str]] = Field(default_factory=list)
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
 
 
 class CommentUpdate(BaseModel):
@@ -172,10 +178,14 @@ class CommentResponse(BaseModel):
     id: int
     blog_id: int
     user_id: int
+    parent_id: Optional[int] = None
     content: str
     created_at: datetime
     user_name: str
     user_initial: str
+    user_profile_picture_url: Optional[str] = None
+    mentions: Optional[list[dict]] = None
+    replies: Optional[list["CommentResponse"]] = Field(default_factory=list)
 
     class Config:
         from_attributes = True
@@ -197,3 +207,51 @@ class BlogDetailResponse(BaseModel):
     class Config:
         from_attributes = True
         orm_mode = True
+
+
+# Mention schemas
+class MentionResponse(BaseModel):
+    id: int
+    comment_id: int
+    mentioned_user_id: int
+    mentioned_user_name: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+# Notification schemas
+class NotificationResponse(BaseModel):
+    id: int
+    user_id: int
+    type: str
+    reference_type: str
+    reference_id: int
+    is_read: bool
+    created_at: datetime
+    message: Optional[str] = None
+    actor_name: Optional[str] = None
+    actor_profile_picture_url: Optional[str] = None
+    blog_id: Optional[int] = None
+    comment_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+    @classmethod
+    def build_message(cls, notification_type: str, actor_name: Optional[str] = None) -> str:
+        who = actor_name or "Someone"
+        type_map = {
+            "mention": f"{who} mentioned you in a comment",
+            "like": f"{who} liked your blog",
+            "comment": f"{who} commented on your blog",
+            "reply": f"{who} replied to your comment",
+        }
+        return type_map.get(notification_type, f"{who} interacted with your content")
+
+
+class MarkNotificationRead(BaseModel):
+    notification_id: int

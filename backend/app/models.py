@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
 from .database import base
 from datetime import datetime, timezone
@@ -40,11 +40,38 @@ class Comment(base):
     id=Column(Integer, primary_key=True, index=True)
     blog_id=Column(Integer, ForeignKey("blogs.id", ondelete="CASCADE"))
     user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    parent_id=Column(Integer, nullable=True, default=None)
     content=Column(String)
     created_at=Column(DateTime(timezone=True), default=utcnow)
     
     blog=relationship("Blog", back_populates="comments")
     user=relationship("User")
+    mentions=relationship("Mention", back_populates="comment", cascade="all, delete-orphan")
+
+
+class Mention(base):
+    __tablename__="mentions"
+    id=Column(Integer, primary_key=True, index=True)
+    comment_id=Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"))
+    mentioned_user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    created_at=Column(DateTime(timezone=True), default=utcnow)
+
+    comment=relationship("Comment", back_populates="mentions")
+    mentioned_user=relationship("User", foreign_keys=[mentioned_user_id])
+
+
+class Notification(base):
+    __tablename__="notifications"
+    id=Column(Integer, primary_key=True, index=True)
+    user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    type=Column(String)  # 'mention', 'like', 'comment'
+    reference_type=Column(String)  # 'blog', 'comment'
+    reference_id=Column(Integer)
+    actor_name=Column(String, nullable=True)
+    is_read=Column(Boolean, default=False)
+    created_at=Column(DateTime(timezone=True), default=utcnow)
+
+    user=relationship("User", foreign_keys=[user_id])
 
 
 class User(base):
@@ -63,8 +90,10 @@ class User(base):
     instagram=Column(String, nullable=True)
 
     blogs=relationship("Blog",back_populates="creator")
-
-
+    likes=relationship("Like", back_populates="user")
+    comments=relationship("Comment", back_populates="user")
+    mentions_received=relationship("Mention", foreign_keys=[Mention.mentioned_user_id], back_populates="mentioned_user")
+    notifications=relationship("Notification", back_populates="user")
 
 
 class PendingUser(base):

@@ -1,4 +1,5 @@
 ﻿import { API_URL, ROUTES, showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260818";
+import { setupMentionAutocomplete } from "./mention-autocomplete.js?v=20260909";
 
 const id = window.location.pathname.split("/").pop();
 
@@ -107,6 +108,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const readingTimeEl = document.getElementById("reading-time");
 
     if (!titleInput || !bodyInput || !editForm) return;
+
+    setupMentionAutocomplete(bodyInput);
 
     function updateStats() {
         const text = bodyInput.value.trim();
@@ -453,7 +456,7 @@ document.addEventListener("DOMContentLoaded", function () {
     async function editBlog() {
         const token = localStorage.getItem("token");
         const newTitle = titleInput.value.trim();
-        const newBody = bodyInput.value.trim();
+        const newBody = bodyInput.value;
         const newImageUrl = imageInput ? imageInput.value.trim() : null;
         const newCategory = categoryInput ? categoryInput.value.trim() : null;
 

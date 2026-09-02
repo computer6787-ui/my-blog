@@ -23,6 +23,16 @@ async def create_pending_user(request:schemas.User,db: Session = Depends(get_db)
 def me(current_user: models.User = Depends(oath2.get_current_user)):
     return current_user
 
+@router.get("/search", response_model=list[schemas.Show_user])
+def search_users(q: str, db: Session = Depends(get_db), limit: int = 8):
+    query = (q or "").strip()
+    if not query:
+        return []
+    users = db.query(models.User).filter(
+        models.User.name.ilike(f"%{query}%")
+    ).limit(min(limit, 20)).all()
+    return users
+
 @router.get("/{id}",response_model=schemas.Show_user)
 def show_user(id: int, db: Session = Depends(get_db)):
     return user_repository.show_user(id,db) 

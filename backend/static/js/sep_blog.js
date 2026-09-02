@@ -1,4 +1,5 @@
 import { API_URL, ROUTES, showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260902";
+import { setupMentionAutocomplete } from "./mention-autocomplete.js?v=20260909";
 
 const id = window.location.pathname.split("/").pop();
 
@@ -150,11 +151,58 @@ function formatBangladeshDate(value) {
     }).format(date);
 }
 
+// Escapes user text, then wraps every "@name" mention (including multi-word
+// names) in a colored, clickable .mention-chip span so mentions stand out and
+// can navigate to the mentioned user's profile. Runs on the escaped string so
+// chip attributes are safe from HTML injection.
+function renderMentionsAsChips(safeText) {
+    return safeText.replace(
+        /@([\w]+(?: [A-Z][\w]*)*)/g,
+        (match, username) =>
+            `<span class="mention-chip" data-username="${escapeHtml(username)}">@${escapeHtml(username)}</span>`
+    );
+}
+
+// Attach click navigation to every mention chip in the rendered blog body.
+// Since blog bodies don't carry resolved user ids, we look the name up live,
+// exactly like the "unknown mention" fallback used for comments.
+function attachBodyMentionClicks(container) {
+    if (!container) return;
+    container.querySelectorAll(".mention-chip").forEach(chip => {
+        chip.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const username = (chip.dataset.username || "").trim();
+            if (!username) return;
+            try {
+                const token = localStorage.getItem("token");
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                const response = await fetch(`${API_URL}/user/search?q=${encodeURIComponent(username)}&limit=5`, { headers });
+                if (response.ok) {
+                    const users = await response.json();
+                    const match = users.find(u => (u.name || "").toLowerCase() === username.toLowerCase());
+                    if (match) {
+                        window.location.href = profileUrlForUser(match.id);
+                        return;
+                    }
+                }
+            } catch (error) {
+                // ignore, fall through to no-op
+            }
+        });
+    });
+}
+
 function formatBody(text = "") {
     if (!text) return "";
-    return text.split(/\n{2,}/)
+    // Escape first so raw user HTML can't break out of the <p> wrappers, then
+    // render mention chips, then (re)build paragraphs on blank-line boundaries.
+    const escaped = escapeHtml(text);
+    const withChips = renderMentionsAsChips(escaped);
+    return withChips.split(/\n{2,}/)
         .map(p => {
-            const clean = p.trim().replace(/\n/g, "<br>");
+            // Preserve leading indentation and multiple spaces exactly as stored.
+            // White-space: pre-wrap on .single-story-content renders them as-is.
+            const clean = p.replace(/\n/g, "<br>");
             return clean ? `<p>${clean}</p>` : "";
         })
         .join("");
@@ -228,7 +276,9 @@ async function loadBlog() {
         if (footerAuthorBioEl) {
             footerAuthorBioEl.textContent = authorBio;
         }
-        document.getElementById("body").innerHTML = formatBody(blog.body);
+        const bodyEl = document.getElementById("body");
+        bodyEl.innerHTML = formatBody(blog.body);
+        attachBodyMentionClicks(bodyEl);
 
         const readTimeEl = document.getElementById("story-readtime");
         if (readTimeEl) readTimeEl.textContent = `⏱ ${readTime}`;
@@ -464,46 +514,246 @@ async function loadComments() {
 function renderComments(comments) {
     const commentsList = document.getElementById("comments-list");
     if (!commentsList) return;
-    
+
     if (comments.length === 0) {
         commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first to share your thoughts!</p>';
         return;
     }
-    
-    commentsList.innerHTML = comments.map(comment => {
-        let date = new Date(comment.created_at);
-        const rawValue = comment.created_at;
-        if (rawValue && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(String(rawValue))) {
-            date = new Date(`${String(rawValue).replace(" ", "T")}Z`);
-        }
-        const dateStr = new Intl.DateTimeFormat("en-BD", {
-            timeZone: "Asia/Dhaka",
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-        }).format(date);
-        const isOwner = currentUserId === comment.user_id;
-        
-        return `
-            <div class="comment-item" data-comment-id="${comment.id}">
-                <div class="comment-avatar">${comment.user_initial}</div>
-                <div class="comment-content-wrap">
-                    <div class="comment-header">
-                        <span class="comment-author">${comment.user_name}</span>
-                        <span class="comment-date">${dateStr}</span>
-                    </div>
-                    <p class="comment-text">${escapeHtml(comment.content)}</p>
-                    ${isOwner ? `<button class="btn-delete-comment" data-id="${comment.id}">Delete</button>` : ''}
-                </div>
-            </div>
-        `;
-    }).join("");
-    
-    commentsList.querySelectorAll(".btn-delete-comment").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
-            await deleteComment(e.target.dataset.id);
+
+    commentsList.innerHTML = comments.map(comment => renderCommentItem(comment)).join("");
+
+    commentsList.querySelectorAll(".btn-reply-comment").forEach(btn => {
+        btn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            openReplyForm(this.dataset.id, this.dataset.name);
         });
     });
+
+    commentsList.querySelectorAll(".btn-delete-comment").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            await deleteComment(e.currentTarget.dataset.id);
+        });
+    });
+
+    commentsList.querySelectorAll(".mention-chip").forEach(chip => {
+        chip.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const username = chip.dataset.username;
+            if (!username) return;
+
+            // Known mention: the user id was included at render time, so we can
+            // jump straight to their profile (accounting for the current user).
+            const userId = Number(chip.dataset.userId);
+            if (userId) {
+                window.location.href = profileUrlForUser(userId);
+                return;
+            }
+
+            // Unknown mention (user not resolved when comment loaded): fall back
+            // to a live username search to find their profile.
+            try {
+                const token = localStorage.getItem("token");
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                const response = await fetch(`${API_URL}/user/search?q=${encodeURIComponent(username)}&limit=5`, { headers });
+                if (response.ok) {
+                    const users = await response.json();
+                    const match = users.find(u => u.name.toLowerCase() === username.toLowerCase());
+                    if (match) {
+                        window.location.href = `/profile/${match.id}`;
+                        return;
+                    }
+                }
+            } catch (error) {
+                // ignore, fall through to no-op
+            }
+        });
+    });
+}
+
+function formatCommentDate(value) {
+    let date = new Date(value);
+    const rawValue = value;
+    if (rawValue && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(String(rawValue))) {
+        date = new Date(`${String(rawValue).replace(" ", "T")}Z`);
+    }
+    return new Intl.DateTimeFormat("en-BD", {
+        timeZone: "Asia/Dhaka",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    }).format(date);
+}
+
+// Turns "@username" occurrences into clickable mention chips.
+// Known mentions (resolved users) get a data-user-id so clicking can jump
+// straight to their profile without an extra lookup.
+function renderCommentText(content, mentions = null) {
+    const safe = escapeHtml(content);
+    const mentionsById = new Map((mentions || []).map(m => [m.mentioned_user_name, m.mentioned_user_id]));
+
+    // Multi-word names are supported: capture "@" + the first word, then keep
+    // consuming each following capitalized word (e.g. "John Doe", "Ann Marie")
+    // while stopping at punctuation, lowercase prose words, or the end.
+    return safe.replace(/@([\w]+(?: [A-Z][\w]*)*)/g, (match, username) => {
+        const userId = mentionsById.get(username);
+        const known = userId ? "" : " unknown";
+        const dataUserId = userId ? ` data-user-id="${Number(userId)}"` : "";
+        return `<span class="mention-chip${known}" data-username="${escapeHtml(username)}"${dataUserId}>@${escapeHtml(username)}</span>`;
+    });
+}
+
+function profileUrlForUser(userId) {
+    if (!userId) return "#";
+    try {
+        const token = localStorage.getItem("token");
+        let currentId = null;
+        if (token) {
+            const parsed = JSON.parse(atob(token.split(".")[1] || ""));
+            currentId = Number(parsed?.sub || parsed?.user_id || parsed?.id || 0);
+        }
+        return currentId && currentId === Number(userId) ? ROUTES.PROFILE : `/profile/${userId}`;
+    } catch {
+        return `/profile/${userId}`;
+    }
+}
+
+// Flatten nested reply chains: a reply to a reply is rendered as a sibling
+// directly below its parent (prefixed with "@name") instead of being nested
+// ever deeper, so long reply threads never run out of space.
+function renderFlatReplies(comment) {
+    const parts = [];
+    const walk = (parentNode, depth) => {
+        (parentNode.replies || []).forEach(reply => {
+            const isReplyToReply = depth > 0;
+            // includeReplies=false prevents the reply from re-rendering its own
+            // children (they are collected here as flat siblings instead).
+            parts.push(renderCommentItem(reply, true, isReplyToReply ? parentNode : null, false));
+            walk(reply, depth + 1);
+        });
+    };
+    walk(comment, 0);
+    return parts.join("");
+}
+
+function renderCommentItem(comment, isReply = false, replyTo = null, includeReplies = true) {
+    const dateStr = formatCommentDate(comment.created_at);
+    const isOwner = currentUserId === comment.user_id;
+    const replyText = includeReplies ? renderFlatReplies(comment) : "";
+    // The "@name" prefix on a reply-to-reply points at who was replied to, and
+    // links through to that user's profile.
+    const atPrefix = replyTo
+        ? `<a class="comment-at-label" href="${profileUrlForUser(replyTo.user_id)}">@${escapeHtml(replyTo.user_name)}</a> `
+        : "";
+
+    return `
+        <div class="${isReply ? "comment-reply" : "comment-item"}" id="comment-${comment.id}" data-comment-id="${comment.id}">
+            <a class="comment-avatar" href="${profileUrlForUser(comment.user_id)}" aria-label="View ${escapeHtml(comment.user_name)}'s profile">
+                ${comment.user_profile_picture_url
+                    ? `<img src="${escapeHtml(comment.user_profile_picture_url)}" alt="${escapeHtml(comment.user_name)}" class="comment-avatar-image" loading="lazy" onerror="this.parentElement.textContent='${comment.user_initial}'">`
+                    : comment.user_initial}
+            </a>
+            <div class="comment-content-wrap">
+                <div class="comment-header">
+                    <a class="comment-author" href="${profileUrlForUser(comment.user_id)}">${comment.user_name}</a>
+                    <span class="comment-date">${dateStr}</span>
+                </div>
+                <p class="comment-text">${atPrefix}${renderCommentText(comment.content, comment.mentions)}</p>
+                <div class="comment-actions">
+                    <button type="button" class="btn-reply-comment" data-id="${comment.id}" data-name="${comment.user_name}">↩ Reply</button>
+                    ${isOwner ? `<button class="btn-delete-comment" data-id="${comment.id}">Delete</button>` : ''}
+                </div>
+                ${replyText ? `<div class="comment-replies">${replyText}</div>` : ""}
+            </div>
+        </div>
+    `;
+}
+function openReplyForm(commentId, userName) {
+    const targetComment = document.getElementById(`comment-${commentId}`);
+    if (!targetComment) return;
+
+    // Remove any open reply forms first
+    document.querySelectorAll(".comment-reply-form").forEach(f => f.remove());
+
+    const formWrap = document.createElement("form");
+    formWrap.className = "comment-reply-form";
+    formWrap.innerHTML = `
+        <textarea class="comment-input reply-input" rows="2" placeholder="Reply to ${escapeHtml(userName)}..." data-parent-id="${commentId}"></textarea>
+        <div class="reply-form-actions">
+            <button type="button" class="btn-reply-cancel">Cancel</button>
+            <button type="submit" class="btn-submit-comment">Reply</button>
+        </div>
+    `;
+    targetComment.querySelector(".comment-content-wrap").appendChild(formWrap);
+
+    const textarea = formWrap.querySelector("textarea");
+    textarea.focus();
+    setupMentionAutocomplete(textarea);
+
+    formWrap.querySelector(".btn-reply-cancel").addEventListener("click", () => {
+        formWrap.remove();
+    });
+
+    formWrap.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await submitReply(textarea, formWrap);
+    });
+}
+
+async function submitReply(textarea, formWrap) {
+    const token = localStorage.getItem("token");
+    if (!token || !currentUserId) {
+        localStorage.removeItem("token");
+        notify({ type: "info", title: "Login Required", text: "Please login to reply." });
+        window.location.href = ROUTES.LOGIN;
+        return;
+    }
+
+    // Prevent accidental double posts: block further submits while posting
+    if (textarea.dataset.posting === "1") return;
+    textarea.dataset.posting = "1";
+
+    const submitBtn = formWrap.querySelector(".btn-submit-comment");
+    if (submitBtn) submitBtn.disabled = true;
+
+    const parentId = textarea.dataset.parentId;
+    const content = textarea.value.trim();
+    if (!content) {
+        if (submitBtn) submitBtn.disabled = false;
+        delete textarea.dataset.posting;
+        notify({ type: "error", title: "Empty Reply", text: "Please write something before replying." });
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/interact/comment`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            credentials: "include",
+            body: JSON.stringify({ blog_id: blogId, content, parent_id: Number(parentId) })
+        });
+
+        if (response.ok) {
+            formWrap.remove();
+            await loadComments();
+            notify({ type: "success", title: "Reply Posted", text: "Your reply has been added." });
+        } else if (response.status === 401) {
+            localStorage.removeItem("token");
+            notify({ type: "info", title: "Login Required", text: "Please login to reply." });
+            window.location.href = ROUTES.LOGIN;
+        } else {
+            const err = await response.json();
+            notify({ type: "error", title: "Error", text: err.detail || "Could not post reply." });
+        }
+    } catch (error) {
+        console.error("Error posting reply:", error);
+        notify({ type: "error", title: "Error", text: "Could not post reply." });
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        delete textarea.dataset.posting;
+    }
 }
 
 function escapeHtml(text) {
@@ -511,7 +761,6 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
-
 async function submitComment(event) {
     event.preventDefault();
 
@@ -536,14 +785,14 @@ async function submitComment(event) {
 
     try {
         const response = await fetch(`${API_URL}/interact/comment`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            credentials: "include",
-            body: JSON.stringify({ blog_id: blogId, content })
-        });
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        credentials: "include",
+        body: JSON.stringify({ blog_id: blogId, content })
+    });
 
         if (response.ok) {
             commentInput.value = "";
@@ -616,12 +865,49 @@ function toggleCommentsSection() {
 function setupInteractionListeners() {
     const likeBtn = document.getElementById("btn-like");
     if (likeBtn) likeBtn.addEventListener("click", toggleLike);
-    
+
     const commentsToggle = document.getElementById("btn-comments-toggle");
     if (commentsToggle) commentsToggle.addEventListener("click", toggleCommentsSection);
-    
+
     const commentForm = document.getElementById("comment-form");
     if (commentForm) commentForm.addEventListener("submit", submitComment);
+
+    const mainInput = document.getElementById("comment-input");
+    if (mainInput) setupMentionAutocomplete(mainInput);
+}
+
+// ========================
+// Mention Autocomplete
+// ========================
+// (provides setupMentionAutocomplete, imported from ./mention-autocomplete.js)
+// ========================
+// Scroll to comment from notification
+// ========================
+
+function scrollToCommentFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const commentId = params.get("comment");
+    if (!commentId) return;
+
+    const commentsSection = document.getElementById("comments-section");
+    if (commentsSection && commentsSection.classList.contains("hidden")) {
+        commentsSection.classList.remove("hidden");
+    }
+
+    let attempts = 0;
+    const timer = setInterval(() => {
+        attempts += 1;
+        const target = document.getElementById(`comment-${commentId}`);
+        if (target) {
+            clearInterval(timer);
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+            target.classList.add("highlight-comment");
+            setTimeout(() => target.classList.remove("highlight-comment"), 2600);
+        } else if (attempts > 20) {
+            clearInterval(timer);
+        }
+    }, 250);
 }
 
 initInteraction();
+scrollToCommentFromUrl();
