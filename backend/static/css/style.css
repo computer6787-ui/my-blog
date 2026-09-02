@@ -198,6 +198,12 @@ body.dark-mode .header {
     filter: brightness(1.05);
 }
 
+/* The mobile-only "Home" link lives inside the logo row; hidden on desktop,
+   shown only within the mobile media query below. */
+.mobile-home {
+    display: none;
+}
+
 #dark-mode-toggle {
     width: 40px;
     height: 40px;
@@ -3447,8 +3453,61 @@ body.dark-mode .mention-option.active {
 }
 
 @media (max-width: 600px) {
+    /* ---- Mobile header: logo & utils on separate rows ---- */
+    .header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .logo {
+        order: 1;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0.45rem;
+    }
+
+    .logo img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .logo_text h1 {
+        font-size: 1.2rem;
+    }
+
+    .logo_text p {
+        display: none;
+    }
+
+    /* Mobile "Home" link placed in the logo row, far right corner */
+    .mobile-home {
+        display: inline-flex !important;
+        margin-left: auto;
+    }
+
+    .nav {
+        order: 2;
+        width: 100%;
+        justify-content: flex-end;
+        gap: 0.9rem;
+        padding: 0.55rem 0.25rem 0;
+        border-top: 1px solid var(--line);
+    }
+
+    /* Hide the redundant Home link that sits inside the utils row (.nav);
+       the mobile Home button lives in the logo row instead. */
+    .nav .nav_button {
+        display: none;
+    }
+
     .notif-drawer {
         width: 94vw;
+        right: -96vw;
     }
     .comment-replies {
         margin-left: 0.5rem;
