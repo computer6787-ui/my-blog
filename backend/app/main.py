@@ -156,7 +156,7 @@ def sitemap_xml():
 
         # Blog pages
         for blog_item in blogs:
-            lastmod = blog_item.created_at.strftime("%Y-%m-%d") if blog_item.created_at else datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            lastmod = blog_item.created_at.strftime("%Y-%m-%d") if blog_item.created_at is not None else datetime.now(timezone.utc).strftime("%Y-%m-%d")
             urls_xml += f"""
     <url>
         <loc>https://lumora-2g3u.onrender.com/blogs/{blog_item.id}</loc>
