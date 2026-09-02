@@ -1,12 +1,13 @@
 from fastapi import Depends, FastAPI, Request
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from sqlalchemy import text, inspect
+from datetime import datetime, timezone
 from . import models
-from .database import engine
+from .database import engine, SessionLocal
 from ..routers import blog, user, auth, verify, interact
 
 Parent_DIR = Path(__file__).resolve().parent.parent.parent
@@ -107,6 +108,71 @@ app.mount(
 @app.get("/googlecd638c7d6a56159d.html")
 def google_site_verification():
     return PlainTextResponse("google-site-verification: googlecd638c7d6a56159d.html")
+
+
+@app.get("/robots.txt")
+def robots_txt():
+    content = """User-agent: *
+Allow: /
+Disallow: /create-blog
+Disallow: /edit-blog/
+Disallow: /my-blogs
+Disallow: /user
+Disallow: /login
+Disallow: /register
+Disallow: /verify
+Disallow: /resetPass
+Disallow: /Verify_user
+Disallow: /Update_pass
+
+Sitemap: https://lumora-2g3u.onrender.com/sitemap.xml
+"""
+    return PlainTextResponse(content, media_type="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml():
+    db = SessionLocal()
+    try:
+        blogs = db.query(models.Blog).filter(models.Blog.published == True).order_by(models.Blog.id.desc()).all()
+
+        urls_xml = ""
+        # Homepage
+        urls_xml += f"""
+    <url>
+        <loc>https://lumora-2g3u.onrender.com/</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>"""
+
+        # Static pages
+        for path in ["/privacy-policy", "/terms-of-service"]:
+            urls_xml += f"""
+    <url>
+        <loc>https://lumora-2g3u.onrender.com{path}</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.3</priority>
+    </url>"""
+
+        # Blog pages
+        for blog_item in blogs:
+            lastmod = blog_item.created_at.strftime("%Y-%m-%d") if blog_item.created_at else datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            urls_xml += f"""
+    <url>
+        <loc>https://lumora-2g3u.onrender.com/blogs/{blog_item.id}</loc>
+        <lastmod>{lastmod}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>"""
+
+        xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {urls_xml}
+</urlset>"""
+        return HTMLResponse(content=xml, media_type="application/xml")
+    finally:
+        db.close()
+
 
 @app.get("/")
 def Home_page(request: Request):

@@ -18,6 +18,43 @@
 
     <title>{% block title %}Lumora{% endblock %}</title>
 
+    <meta name="description" content="{% block meta_description %}Lumora is a modern blog and thought space where ideas spark and stories unfold. Read freely, write boldly, and discover unique perspectives.{% endblock %}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://lumora-2g3u.onrender.com{{ request.url.path }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lumora-2g3u.onrender.com{{ request.url.path }}">
+    <meta property="og:title" content="{% block og_title %}Lumora - Where Ideas Come to Light{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}A modern blog and thought space where ideas spark and stories unfold.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}https://lumora-2g3u.onrender.com/static/images/favicon/apple-touch-icon.png{% endblock %}">
+    <meta property="og:site_name" content="Lumora">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}Lumora - Where Ideas Come to Light{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}A modern blog and thought space where ideas spark and stories unfold.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}https://lumora-2g3u.onrender.com/static/images/favicon/apple-touch-icon.png{% endblock %}">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        "name": "Lumora",
+        "url": "https://lumora-2g3u.onrender.com",
+        "description": "A modern blog and thought space where ideas spark and stories unfold.",
+        "publisher": {
+            "@type": "Organization",
+            "name": "Lumora",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://lumora-2g3u.onrender.com/static/images/favicon/apple-touch-icon.png"
+            }
+        }
+    }
+    </script>
+
     <link rel="stylesheet" href="{{ url_for('static', path='css/variables.css') }}?v=20260902">
     <link rel="stylesheet" href="{{ url_for('static', path='css/nav.css') }}?v=20260902">
     <link rel="stylesheet" href="{{ url_for('static', path='css/hero.css') }}?v=20260902">
