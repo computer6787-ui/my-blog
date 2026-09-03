@@ -59,25 +59,98 @@ function detectTheme(title, body) {
     return bestTheme;
 }
 
-// Generate smart cover image based on content
-function generateSmartCoverImage(title, body) {
-    const theme = detectTheme(title, body);
-    const queries = THEME_IMAGE_QUERIES[theme] || THEME_IMAGE_QUERIES.default;
+// Theme-to-prompt descriptors for rich AI cover generation
+const THEME_PROMPT_DESCRIPTORS = {
+    tech: "futuristic technology, digital circuits, glowing code",
+    life: "serene natural landscape, golden hour, peaceful scenery",
+    creative: "abstract art, vibrant colors, flowing shapes",
+    ideas: "inspiring light rays, cosmic vision, abstract concept",
+    insights: "wisdom, open book, luminous knowledge, zen calm",
+    thoughts: "reflective mood, misty atmosphere, contemplation",
+    design: "modern architecture, clean geometric shapes, minimalist aesthetic",
+    story: "epic journey, winding road, adventurous horizon",
+    default: "beautiful aesthetic landscape, elegant composition"
+};
 
+// Deterministic string hash (cyr-like, no external deps) → 32-bit positive int
+function hashString(str = "") {
     let hash = 0;
-    for (let i = 0; i < title.length; i++) {
-        hash = (hash << 5) - hash + title.charCodeAt(i);
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
         hash |= 0;
     }
+    return Math.abs(hash);
+}
 
-    const queryIndex = Math.abs(hash) % queries.length;
-    const selectedQuery = queries[queryIndex];
+// Simple stopword list so we extract meaningful content keywords, not filler words
+const STOPWORDS = new Set([
+    "the", "and", "that", "for", "are", "was", "with", "this", "have", "from",
+    "not", "but", "they", "you", "his", "her", "she", "will", "would", "there",
+    "their", "what", "about", "which", "when", "who", "your", "more", "been",
+    "were", "can", "out", "just", "than", "then", "them", "some", "into", "only",
+    "over", "also", "after", "where", "how", "our", "because", "very", "really",
+    "just", "like", "know", "get", "got", "one", "two", "many", "much", "every",
+    "still", "even", "again", "its", "it's", "i'm", "i've", "isn't", "aren't"
+]);
 
-    // Use a different random seed each time so the same post can regenerate to a new image.
-    const imageId = `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.abs(hash)}`;
-    const picsumUrl = `https://picsum.photos/seed/${encodeURIComponent(imageId)}/800/500`;
+// Extract the most descriptive, content-relevant keywords from title + body so
+// the AI actually "reads" the story rather than serving a generic illustration.
+function extractContentKeywords(title, body, max = 6) {
+    const rawText = `${title || ""} ${body || ""}`;
+    // Strip HTML tags and normalize
+    const plainText = rawText
+        .replace(/<[^>]*>/g, " ")
+        .replace(/[^a-zA-Z0-9\s'-]/g, " ")
+        .toLowerCase();
 
-    return { url: picsumUrl, query: selectedQuery, theme: theme };
+    const wordCount = new Map();
+    const words = plainText.match(/[a-zA-Z][a-zA-Z'-]{2,}/g) || [];
+    for (const w of words) {
+        if (STOPWORDS.has(w)) continue;
+        wordCount.set(w, (wordCount.get(w) || 0) + 1);
+    }
+
+    // Sort by frequency, tie-break by length (longer = more descriptive)
+    const sorted = [...wordCount.entries()]
+        .sort((a, b) => b[1] - a[1] || b[0].length - a[0].length)
+        .map(([w]) => w);
+
+    return sorted.slice(0, max);
+}
+
+// Generate smart cover image using Pollination AI (free, no API key required)
+// It "reads" the blog post by extracting content keywords from the title/body
+// and feeds them to Pollination so the cover reflects the actual story. If the
+// user provides a custom prompt via the UI, that prompt is used directly (and
+// also becomes the deterministic seed source). By default the seed is
+// deterministic — identical content + prompt always yields the same cover.
+// Pass useRandomSeed=true (e.g. when the user clicks "Surprise Image") to get
+// a fresh, different image on every click.
+function generateSmartCoverImage(title, body, customPrompt, useRandomSeed) {
+    const contentKeywords = extractContentKeywords(title, body);
+    const keywordsStr = contentKeywords.length
+        ? contentKeywords.join(", ")
+        : "beautiful aesthetic landscape";
+
+    // Build a concise but descriptive prompt for AI image generation
+    const cleanTitle = (title || "beautiful cover").replace(/[{}()]/g, "").slice(0, 60);
+
+    // If user supplied a custom prompt, it fully drives the generation;
+    // otherwise craft a prompt that reads the story's content keywords.
+    const prompt = customPrompt
+        ? customPrompt.slice(0, 300)
+        : `digital art illustration for an article titled "${cleanTitle}": ${keywordsStr}, vibrant colors, cinematic lighting, high quality, 4k, no text`;
+
+    // Deterministic seed by default (same content => same cover). When the user
+    // explicitly requests regeneration (Surprise button), use a fresh random
+    // seed so each click produces a different image.
+    const seed = useRandomSeed
+        ? Math.floor(Math.random() * 2147483647)
+        : hashString(customPrompt ? customPrompt : `${cleanTitle} ${keywordsStr}`);
+
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1200&height=630&seed=${seed}&nologo=true`;
+
+    return { url, query: prompt, theme: detectTheme(title, body) };
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -91,6 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const adjustBtn = document.getElementById("btn-adjust-img");
     const surpriseBtn = document.getElementById("btn-surprise-img");
     const clearImgBtn = document.getElementById("btn-clear-img");
+    const aiCoverPrompt = document.getElementById("ai_cover_prompt");
     const previewPlaceholder = document.getElementById("image_preview_placeholder");
     const previewImgWrap = document.getElementById("image_preview_img_wrap");
     const previewImg = document.getElementById("preview_img");
@@ -388,10 +462,26 @@ document.addEventListener("DOMContentLoaded", function () {
         surpriseBtn.addEventListener("click", () => {
             const title = titleInput.value.trim();
             const body = bodyInput.value.trim();
-            const smartCover = generateSmartCoverImage(title || "beautiful", body || "");
+            const customPrompt = aiCoverPrompt ? aiCoverPrompt.value.trim() : "";
+
+            // Show generating state while Pollination AI creates the image
+            const originalText = surpriseBtn.textContent;
+            surpriseBtn.disabled = true;
+            surpriseBtn.textContent = "🎨 Generating…";
+
+            // useRandomSeed = true so each click gives a NEW different image
+            const smartCover = generateSmartCoverImage(title || "beautiful", body || "", customPrompt || undefined, true);
             imageInput.value = smartCover.url;
             updateImagePreview(smartCover.url);
             if (adjustBtn) adjustBtn.classList.add("hidden");
+
+            // Reset button once the image loads or fails (once: auto-cleanup)
+            const resetBtn = () => {
+                surpriseBtn.disabled = false;
+                surpriseBtn.textContent = originalText;
+            };
+            previewImg.addEventListener("load", resetBtn, { once: true });
+            previewImg.addEventListener("error", resetBtn, { once: true });
         });
     }
 
@@ -457,8 +547,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const token = localStorage.getItem("token");
         const newTitle = titleInput.value.trim();
         const newBody = bodyInput.value;
-        const newImageUrl = imageInput ? imageInput.value.trim() : null;
+        let newImageUrl = imageInput ? imageInput.value.trim() : null;
         const newCategory = categoryInput ? categoryInput.value.trim() : null;
+
+        // Auto-generate a deterministic AI cover when no image is present
+        // The AI reads the blog content (or honors a user-supplied prompt).
+        if (!newImageUrl) {
+            const customPrompt = aiCoverPrompt ? aiCoverPrompt.value.trim() : "";
+            const autoCover = generateSmartCoverImage(newTitle, newBody, customPrompt || undefined);
+            newImageUrl = autoCover.url;
+            if (imageInput) {
+                imageInput.value = newImageUrl;
+                updateImagePreview(newImageUrl);
+            }
+        }
 
         showLoading("Saving changes...");
 

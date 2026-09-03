@@ -66,12 +66,28 @@
                     >
                 </div>
 
+                <div class="ai-cover-prompt-group">
+                    <label for="ai_cover_prompt" class="form-label">
+                        🎨 AI Cover Prompt <span class="optional-pill">Optional</span>
+                    </label>
+                    <textarea
+                        id="ai_cover_prompt"
+                        name="ai_cover_prompt"
+                        class="ai-cover-prompt-input"
+                        rows="2"
+                        maxlength="300"
+                        placeholder="Describe what you want the AI cover to show (e.g. 'a misty mountain at sunrise with a lone traveler'). Leave blank to auto-detect from your story."
+                    ></textarea>
+                    <span class="ai-cover-hint">If left blank, the AI reads your story title &amp; content to generate a matching cover.</span>
+                </div>
+
+
                 <div id="image_preview_box" class="image-preview-card">
                     <div id="image_preview_placeholder" class="preview-placeholder">
                         <span class="preview-icon">✨</span>
                         <div class="preview-text">
-                            <strong>Dynamic Gradient Cover</strong>
-                            <span>If no custom image is provided, a vibrant dynamic gradient cover will be auto-generated.</span>
+                            <strong>AI-Generated Cover</strong>
+                            <span>If no custom image is provided, the AI reads your story and generates a matching cover.</span>
                         </div>
                     </div>
                     <div id="image_preview_img_wrap" class="preview-img-wrap hidden">
@@ -157,7 +173,7 @@
     </div>
 </main>
 
-<script type="module" src="{{ url_for('static', path='js/create-blog.js') }}?v=20260909"></script>
+<script type="module" src="{{ url_for('static', path='js/create-blog.js') }}?v=20260912"></script>
 <script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
 
 {% endblock %}

@@ -456,3 +456,42 @@
     transform: translateY(-2px);
     box-shadow: 0 14px 28px rgba(122, 92, 242, 0.4);
 }
+
+/* AI Cover Prompt input (custom Pollination generation instructions) */
+.ai-cover-prompt-group {
+    margin-top: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.ai-cover-prompt-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface-alt);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-cover-prompt-input::placeholder {
+    color: var(--muted);
+}
+
+.ai-cover-prompt-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(122, 92, 242, 0.12);
+}
+
+.ai-cover-hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.4;
+}
+

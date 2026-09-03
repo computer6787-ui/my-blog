@@ -1,12 +1,43 @@
-import { API_URL, ROUTES, notify } from "./config.js?v=20260818";
+import { API_URL, ROUTES, notify, confirmDialog } from "./config.js?v=20260818";
 
 // Global functions for inline onclick handlers - must be defined before DOMContentLoaded
 window.edit_blog = function (id) {
     window.location.href = `/edit-blog/${id}`;
 };
 
-window.delete_blog = function (id) {
-    window.location.href = `/delete-blog/${id}`;
+window.delete_blog = async function (id) {
+    const confirmed = await confirmDialog({
+        title: "Delete Story",
+        text: "Are you sure you want to delete this story? This action cannot be undone.",
+        confirmText: "Delete",
+        cancelText: "Cancel"
+    });
+
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("token");
+    try {
+        const response = await fetch(`${API_URL}/blog/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            await notify({ type: "success", title: "Story Deleted", text: "Your story has been removed." });
+            window.location.reload();
+        } else if (response.status === 401) {
+            localStorage.removeItem("token");
+            await notify({ type: "warning", title: "Login Required", text: "Please log in again." });
+            window.location.href = ROUTES.LOGIN;
+        } else if (response.status === 403) {
+            await notify({ type: "error", title: "Permission Denied", text: "You can only delete your own stories." });
+        } else {
+            await notify({ type: "error", title: "Delete Failed", text: "Could not delete the story." });
+        }
+    } catch (error) {
+        console.error("Delete error:", error);
+        await notify({ type: "error", title: "Connection Error", text: "Could not connect to the server." });
+    }
 };
 
 
