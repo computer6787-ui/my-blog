@@ -57,6 +57,8 @@ class Show_user(BaseModel):
     id: int
     name: str
     email: str
+    role: str = "user"
+    is_owner: bool = False
     profile_picture_url: Optional[str] = None
     bio: Optional[str] = None
     location: Optional[str] = None

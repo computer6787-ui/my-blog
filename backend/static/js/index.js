@@ -6,7 +6,7 @@
 
     
     function showLogin() { authLink.textContent = "Login"; } 
-    function showLogout() { authLink.textContent = "Logout"; authLink.href="#" }
+    function showLogout() { authLink.textContent = "Sign Out"; authLink.href="#" }
     async function checkLogin() {
     const token = localStorage.getItem("token");
 
@@ -40,10 +40,10 @@
 
   authLink.addEventListener("click", async function (e) {
 
-    if (authLink.textContent === "Logout") {
+    if (authLink.textContent === "Sign Out") {
     const confirmed = await confirmDialog({
-        title: "Logout",
-        text: "You cannot access blogs while logged out.",
+        title: "Sign Out",
+        text: "You cannot access blogs while signed out.",
         confirmText: "Confirm",
         cancelText: "Cancel"
     });
@@ -51,6 +51,7 @@
 
         e.preventDefault();
         localStorage.removeItem("token");
+        localStorage.removeItem("admin_token");
         window.location.reload();
     }
 });

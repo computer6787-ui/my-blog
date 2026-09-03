@@ -47,8 +47,8 @@
 
     <a href="/user">Profile</a>
     <a href="/my-blogs">My Blogs</a>
+    <a href="/admin" id="admin-panel-link" class="hidden">🔧 Admin Panel</a>
     <a href="#" id="drawer-notif-link">Notifications</a>
-    <a id="auth-link" href="/login">Login</a>
 
     <button type="button" id="drawer-theme-toggle" class="drawer-theme-toggle" aria-label="Toggle dark mode">
         <span class="drawer-theme-icon" id="drawer-theme-icon">🌙</span>
@@ -57,6 +57,9 @@
             <span class="drawer-theme-knob"></span>
         </span>
     </button>
+
+    <!-- Auth toggle is placed at the very bottom of the menu -->
+    <a id="auth-link" href="/login">Login</a>
 </aside>
 
 <script>
@@ -92,31 +95,12 @@
                 document.body.classList.toggle('dark-mode', isDark);
                 const label = document.getElementById('drawer-theme-label');
                 const icon = document.getElementById('drawer-theme-icon');
+                if (label) label.textContent = isDark ? 'Dark mode' : 'Light mode';
                 if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-                if (label) {
-                    label.textContent = isDark ? 'Dark mode' : 'Light mode';
-                    // Restart the slide animation so the label visibly slides each toggle
-                    label.style.animation = 'none';
-                    void label.offsetWidth;
-                    label.style.animation = '';
-                }
-                try {
-                    localStorage.setItem('lumora-theme', isDark ? 'dark' : 'light');
-                } catch (error) {
-                    // no-op if storage is unavailable
-                }
+                try { localStorage.setItem('lumora-theme', isDark ? 'dark' : 'light'); } catch (e) {}
             }
-
-            const savedTheme = (() => {
-                try {
-                    return localStorage.getItem('lumora-theme');
-                } catch (error) {
-                    return null;
-                }
-            })();
-
+            const savedTheme = (() => { try { return localStorage.getItem('lumora-theme'); } catch (e) { return null; } })();
             applyTheme(savedTheme === 'dark');
-
             toggleBtn.addEventListener('click', function() {
                 applyTheme(!document.body.classList.contains('dark-mode'));
             });
@@ -126,20 +110,11 @@
     (function() {
         const avatar = document.getElementById('nav-avatar');
         if (!avatar) return;
-
-        // Never show the profile shortcut when there is no logged-in user.
         let token = null;
-        try {
-            token = localStorage.getItem('token');
-        } catch (error) {
-            token = null;
-        }
+        try { token = localStorage.getItem('token'); } catch (e) { token = null; }
         if (!token) return;
-
         const initialEl = document.getElementById('nav-avatar-initial');
         const imgEl = document.getElementById('nav-avatar-img');
-
-        // Navigate to the profile page, closing any open menu drawer first.
         avatar.addEventListener('click', function(event) {
             const drawer = document.getElementById('drawer');
             const menuBtn = document.getElementById('menu-btn');
@@ -147,30 +122,18 @@
             if (drawer) drawer.classList.remove('open');
             if (menuBtn) menuBtn.classList.remove('open');
             if (overlay) overlay.classList.remove('visible');
-            // Let the anchor's native navigation to /user proceed.
         });
-
-        const API_URL =
-            window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
-                ? 'http://localhost:8000'
-                : 'https://lumora-2g3u.onrender.com';
-
-        fetch(API_URL + '/user/me', {
-            headers: { Authorization: 'Bearer ' + token },
-            credentials: 'include'
-        })
+        const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+            ? 'http://localhost:8000' : 'https://lumora-2g3u.onrender.com';
+        fetch(API_URL + '/user/me', { headers: { Authorization: 'Bearer ' + token }, credentials: 'include' })
             .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Unauthorized'))))
             .then((user) => {
                 const picture = user && user.profile_picture_url ? user.profile_picture_url : '';
                 const name = (user && user.name) || '';
                 avatar.title = name || 'Profile';
                 if (imgEl && picture) {
-                    // Fall back to the initial letter if the image fails to load.
                     if (initialEl) initialEl.textContent = (name[0] || 'U').toUpperCase();
-                    imgEl.onerror = function() {
-                        imgEl.classList.add('hidden');
-                        if (initialEl) initialEl.classList.remove('hidden');
-                    };
+                    imgEl.onerror = function() { imgEl.classList.add('hidden'); if (initialEl) initialEl.classList.remove('hidden'); };
                     imgEl.src = picture;
                     imgEl.classList.remove('hidden');
                     if (initialEl) initialEl.classList.add('hidden');
@@ -180,10 +143,11 @@
                     initialEl.classList.remove('hidden');
                 }
                 avatar.classList.remove('hidden');
+                if (user && (user.role === 'admin' || user.role === 'moderator')) {
+                    var adminLink = document.getElementById('admin-panel-link');
+                    if (adminLink) adminLink.classList.remove('hidden');
+                }
             })
-            .catch(function() {
-                // If the profile cannot be loaded, do not clutter the navbar.
-            });
+            .catch(function() {});
     })();
 </script>
-

@@ -4,6 +4,7 @@ from ..app import models
 from ..app.encryption import Encrypting
 from ..app import schemas
 from ..app.database import engine,SessionLocal,get_db
+from ..app.config import MAIN_ADMIN_EMAIL
 from sqlalchemy.orm import Session
 from ..repository import user_repository
 from ..app import oath2
@@ -21,7 +22,9 @@ async def create_pending_user(request:schemas.User,db: Session = Depends(get_db)
 
 @router.get("/me", response_model=schemas.Show_user)
 def me(current_user: models.User = Depends(oath2.get_current_user)):
-    return current_user
+    data = schemas.Show_user.model_validate(current_user)
+    data.is_owner = current_user.email.lower() == MAIN_ADMIN_EMAIL.lower()
+    return data
 
 @router.get("/search", response_model=list[schemas.Show_user])
 def search_users(q: str, db: Session = Depends(get_db), limit: int = 8):

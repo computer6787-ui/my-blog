@@ -8,7 +8,9 @@ from sqlalchemy import text, inspect
 from datetime import datetime, timezone
 from . import models
 from .database import engine, SessionLocal
-from ..routers import blog, user, auth, verify, interact
+from .encryption import Encrypting
+from .config import MAIN_ADMIN_EMAIL
+from ..routers import blog, user, auth, verify, interact, admin
 
 Parent_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -25,6 +27,37 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def seed_default_staff():
+    """Create the default admin + moderator accounts if they do not exist yet."""
+    try:
+        db = SessionLocal()
+        try:
+            DEFAULT_STAFF = [
+                {"name": "Admin", "email": MAIN_ADMIN_EMAIL, "password": "admin123", "role": "admin"},
+                {"name": "Moderator One", "email": "mod1@lumora.com", "password": "mod123", "role": "moderator"},
+                {"name": "Moderator Two", "email": "mod2@lumora.com", "password": "mod123", "role": "moderator"},
+                {"name": "Moderator Three", "email": "mod3@lumora.com", "password": "mod123", "role": "moderator"},
+            ]
+            for staff in DEFAULT_STAFF:
+                existing = db.query(models.User).filter(
+                    models.User.email.ilike(staff["email"])
+                ).first()
+                if not existing:
+                    new_user = models.User(
+                        name=staff["name"],
+                        email=staff["email"].lower(),
+                        hashed_password=Encrypting.bcrypt(staff["password"]),
+                        role=staff["role"],
+                        is_active=True,
+                    )
+                    db.add(new_user)
+            db.commit()
+        finally:
+            db.close()
+    except Exception as e:
+        print("Default staff seed notice:", e)
+
 
 def init_db():
     try:
@@ -80,11 +113,15 @@ def init_db():
                 "education": "ALTER TABLE users ADD COLUMN education VARCHAR;",
                 "facebook": "ALTER TABLE users ADD COLUMN facebook VARCHAR;",
                 "instagram": "ALTER TABLE users ADD COLUMN instagram VARCHAR;",
+                "role": "ALTER TABLE users ADD COLUMN role VARCHAR DEFAULT 'user';",
+                "is_active": "ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT true;",
             }.items():
                 if column_name not in user_cols:
                     with engine.connect() as conn:
                         conn.execute(text(column_sql))
                         conn.commit()
+
+        seed_default_staff()
     # Trim older notifications that exceed the retention limit for each user
         interact.prune_all_notifications()
     except Exception as e:
@@ -97,6 +134,7 @@ app.include_router(user.router)
 app.include_router(auth.router)
 app.include_router(verify.router)
 app.include_router(interact.router)
+app.include_router(admin.router)
 
 
 app.mount(
@@ -220,6 +258,14 @@ def my_blogs_page(request: Request):
         request=request,
         name="my-blogs.html",
         context={"is_own_profile": True, "profile_user_id": None}
+    )
+
+@app.get("/admin")
+def admin_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="admin.html",
+        context={}
     )
 
 @app.get("/profile/{user_id}")

@@ -80,6 +80,8 @@ class User(base):
     name=Column(String)
     email=Column(String)
     hashed_password=Column(String)
+    role=Column(String, default="user")  # "admin", "moderator", "user"
+    is_active=Column(Boolean, default=True)
     profile_picture_url=Column(String, nullable=True)
     bio=Column(String, nullable=True)
     location=Column(String, nullable=True)

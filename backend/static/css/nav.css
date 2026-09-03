@@ -216,6 +216,14 @@ body.dark-mode .drawer a:hover {
     color: #ffffff;
 }
 
+/* Login / Sign Out link pinned to the very bottom of the drawer.
+   margin-top: auto pushes it below the theme toggle and all menu items. */
+.drawer #auth-link {
+    margin-top: auto;
+    margin-bottom: 0.5rem;
+}
+
+
 /* Dark mode toggle inside the drawer (slide switch) */
 .drawer-theme-toggle {
     display: flex;
