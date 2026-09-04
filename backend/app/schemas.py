@@ -257,3 +257,57 @@ class NotificationResponse(BaseModel):
 
 class MarkNotificationRead(BaseModel):
     notification_id: int
+
+
+# Chat schemas
+class ChatUserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    role: str = "user"
+    profile_picture_url: Optional[str] = None
+    is_online: bool = False
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+class GlobalMessageResponse(BaseModel):
+    id: int
+    user_id: Optional[int] = None
+    author_name: Optional[str] = None
+    author_role: Optional[str] = "user"
+    author_avatar: Optional[str] = None
+    message_body: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+class PrivateMessageResponse(BaseModel):
+    id: int
+    sender_id: int
+    receiver_id: int
+    message_body: str
+    is_read: bool = False
+    created_at: datetime
+    sender_name: Optional[str] = None
+    sender_avatar: Optional[str] = None
+    receiver_name: Optional[str] = None
+    receiver_avatar: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+class ConversationResponse(BaseModel):
+    user: ChatUserResponse
+    last_message: str
+    last_message_time: datetime
+    unread_count: int = 0
+    last_sender_id: int
+

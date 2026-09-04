@@ -11,6 +11,10 @@
 
     <nav class="nav">
             <a class="nav_button" href="/">Home</a>
+            <button id="nav-chat-btn" class="notif-bell" type="button" aria-label="Direct Messages" onclick="window.dispatchEvent(new CustomEvent('lumora:toggle-direct-chat'))" title="Direct Messages">
+                <span class="bell-icon">💬</span>
+                <span id="nav-chat-badge" class="notif-badge lumora-chat-unread-badge hidden">0</span>
+            </button>
             <button id="notif-bell" class="notif-bell" type="button" aria-label="Notifications">
                 <span class="bell-icon">🔔</span>
                 <span id="notif-badge" class="notif-badge hidden">0</span>
@@ -47,6 +51,8 @@
 
     <a href="/user">Profile</a>
     <a href="/my-blogs">My Blogs</a>
+    <a href="#" onclick="window.dispatchEvent(new CustomEvent('lumora:toggle-direct-chat')); closeMenu(); return false;">Direct Messages <span class="lumora-chat-unread-badge hidden" style="background:#6366f1;color:white;padding:2px 7px;border-radius:9999px;font-size:11px;margin-left:6px;font-weight:bold;">0</span></a>
+    <a href="#" onclick="window.dispatchEvent(new CustomEvent('lumora:toggle-global-chat')); closeMenu(); return false;">Global Live Room</a>
     <a href="/admin" id="admin-panel-link" class="hidden">🔧 Admin Panel</a>
     <a href="#" id="drawer-notif-link">Notifications</a>
 

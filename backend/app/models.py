@@ -96,6 +96,33 @@ class User(base):
     comments=relationship("Comment", back_populates="user")
     mentions_received=relationship("Mention", foreign_keys=[Mention.mentioned_user_id], back_populates="mentioned_user")
     notifications=relationship("Notification", back_populates="user")
+    global_messages=relationship("GlobalMessage", foreign_keys="[GlobalMessage.user_id]", back_populates="user")
+    sent_private_messages=relationship("PrivateMessage", foreign_keys="[PrivateMessage.sender_id]", back_populates="sender")
+    received_private_messages=relationship("PrivateMessage", foreign_keys="[PrivateMessage.receiver_id]", back_populates="receiver")
+
+
+class GlobalMessage(base):
+    __tablename__ = "global_messages"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    author_name = Column(String, nullable=True)
+    message_body = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utcnow)
+
+    user = relationship("User", foreign_keys=[user_id], back_populates="global_messages")
+
+
+class PrivateMessage(base):
+    __tablename__ = "private_messages"
+    id = Column(Integer, primary_key=True, index=True)
+    sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    receiver_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    message_body = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False, index=True)
+    created_at = Column(DateTime(timezone=True), default=utcnow, index=True)
+
+    sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_private_messages")
+    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
 
 
 class PendingUser(base):

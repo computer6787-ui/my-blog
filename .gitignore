@@ -2,6 +2,8 @@
 blog-env/
 venv/
 .venv/
+.clinerules
+
 
 # Environment variables
 .env

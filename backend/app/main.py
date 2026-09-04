@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import FileResponse, PlainTextResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -10,7 +11,8 @@ from . import models
 from .database import engine, SessionLocal
 from .encryption import Encrypting
 from .config import MAIN_ADMIN_EMAIL
-from ..routers import blog, user, auth, verify, interact, admin
+from .cleanup_service import start_cleanup_scheduler, stop_cleanup_scheduler
+from ..routers import blog, user, auth, verify, interact, admin, chat
 
 Parent_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -18,7 +20,36 @@ BASE_DIR = Parent_DIR / "backend"
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    FastAPI lifespan context manager
+    Startup: Initialize database and start cleanup scheduler
+    Shutdown: Stop cleanup scheduler
+    """
+    # Startup
+    print("\n" + "="*60)
+    print("🚀 STARTING CHAT APPLICATION")
+    print("="*60)
+    init_db()
+    seed_default_staff()
+    start_cleanup_scheduler()
+    print("✅ Application started successfully")
+    print("="*60 + "\n")
+    
+    yield
+    
+    # Shutdown
+    print("\n" + "="*60)
+    print("⏹️  SHUTTING DOWN CHAT APPLICATION")
+    print("="*60)
+    stop_cleanup_scheduler()
+    print("✅ Application shutdown complete")
+    print("="*60 + "\n")
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -121,6 +152,28 @@ def init_db():
                         conn.execute(text(column_sql))
                         conn.commit()
 
+        # Ensure private_messages has all required columns
+        if "private_messages" in insp.get_table_names():
+            pm_cols = [c["name"] for c in insp.get_columns("private_messages")]
+            for col_name, col_sql in {
+                "is_read": "ALTER TABLE private_messages ADD COLUMN is_read BOOLEAN DEFAULT FALSE;",
+            }.items():
+                if col_name not in pm_cols:
+                    with engine.connect() as conn:
+                        conn.execute(text(col_sql))
+                        conn.commit()
+
+        # Ensure global_messages has all required columns
+        if "global_messages" in insp.get_table_names():
+            gm_cols = [c["name"] for c in insp.get_columns("global_messages")]
+            for col_name, col_sql in {
+                "author_name": "ALTER TABLE global_messages ADD COLUMN author_name VARCHAR;",
+            }.items():
+                if col_name not in gm_cols:
+                    with engine.connect() as conn:
+                        conn.execute(text(col_sql))
+                        conn.commit()
+
         seed_default_staff()
     # Trim older notifications that exceed the retention limit for each user
         interact.prune_all_notifications()
@@ -135,6 +188,7 @@ app.include_router(auth.router)
 app.include_router(verify.router)
 app.include_router(interact.router)
 app.include_router(admin.router)
+app.include_router(chat.router)
 
 
 app.mount(

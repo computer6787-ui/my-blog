@@ -302,6 +302,24 @@ async function loadBlog() {
 
         const footerAvatarEl = document.getElementById("footer-author-avatar");
         const footerNameEl = document.getElementById("footer-author-name");
+        const dmStoryAuthorBtn = document.getElementById("btn-dm-story-author");
+
+        if (dmStoryAuthorBtn && blog.creator) {
+            dmStoryAuthorBtn.addEventListener("click", () => {
+                window.dispatchEvent(new CustomEvent('lumora:open-direct-chat', {
+                    detail: {
+                        user: {
+                            id: blog.creator.id,
+                            name: blog.creator.name,
+                            email: blog.creator.email,
+                            role: blog.creator.role,
+                            profile_picture_url: blog.creator.profile_picture_url,
+                            is_online: false
+                        }
+                    }
+                }));
+            });
+        }
         if (footerAvatarEl) {
             if (authorProfilePicture) {
                 footerAvatarEl.innerHTML = `<img src="${authorProfilePicture}" alt="${authorName}" class="profile-avatar-image">`;

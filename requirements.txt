@@ -28,6 +28,7 @@ jwt==1.4.0
 MarkupSafe==3.0.3
 mypy_extensions==1.1.0
 passlib==1.7.4
+Pillow==12.3.0
 psycopg==3.3.4
 psycopg-binary==3.3.4
 psycopg2-binary==2.9.12

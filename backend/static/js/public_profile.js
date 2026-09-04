@@ -36,6 +36,24 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (emailEl) emailEl.textContent = user.email || "No email";
             if (bioEl) bioEl.textContent = user.bio || "No bio yet.";
 
+            const dmBtn = document.getElementById("btn-dm-profile");
+            if (dmBtn) {
+                dmBtn.addEventListener("click", () => {
+                    window.dispatchEvent(new CustomEvent('lumora:open-direct-chat', {
+                        detail: {
+                            user: {
+                                id: user.id,
+                                name: user.name,
+                                email: user.email,
+                                role: user.role,
+                                profile_picture_url: user.profile_picture_url,
+                                is_online: false
+                            }
+                        }
+                    }));
+                });
+            }
+
             const profilePicture = user.profile_picture_url || "";
             if (avatarEl) {
                 if (profilePicture) {
