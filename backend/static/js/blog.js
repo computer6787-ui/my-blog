@@ -374,6 +374,16 @@ function buildPaginationNavigation() {
 async function goToPage(page) {
     if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
     await loadBlogs(currentSearch, page, currentCategory);
+
+    // Scroll the first blog post into view below the fixed header so the
+    // reader lands on the freshly-loaded page instead of staying at the
+    // bottom of the previous one.
+    const section = document.getElementById("blog_section");
+    if (section) {
+        const headerOffset = 82; // fixed header height (see nav.css)
+        const top = section.getBoundingClientRect().top + window.scrollY - headerOffset;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }
 }
 
 async function loadBlogs(search = "", page = 1, category = currentCategory) {

@@ -13,9 +13,10 @@ if not DATABASE_URL:
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,        # detect stale/pooled-away connections
-    pool_size=4,                # base connections kept open
-    max_overflow=4,             # allow brief bursts up to 8 total
+    pool_size=2,                # base connections kept open per process
+    max_overflow=2,             # allow brief bursts up to 4 per process
     pool_recycle=300,           # recycle after 5 min (Supabase idle timeout ~5 min)
+    connect_args={"connect_timeout": 10},
 )
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)

@@ -379,6 +379,36 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // Upload a final cover image (data URL → Blob) to the backend, which
+    // streams it into Supabase Storage and returns a public URL. The DB then
+    // stores a small URL instead of a multi-hundred-KB base64 string.
+    // Returns { ok: true, url } on success or { ok: false, error } on failure.
+    async function uploadImageToStorage(dataUrl) {
+        const token = localStorage.getItem("token");
+        if (!dataUrl || !dataUrl.startsWith("data:image/") || !token) {
+            return { ok: false, error: "missing auth token or invalid image" };
+        }
+        try {
+            const blob = await (await fetch(dataUrl)).blob();
+            if (!blob || !blob.size) return { ok: false, error: "empty image" };
+            const formData = new FormData();
+            formData.append("file", blob, "cover.webp");
+            const response = await fetch(`${API_URL}/blog/upload-image`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData
+            });
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                return { ok: false, error: err.detail || `Upload failed (HTTP ${response.status})` };
+            }
+            const data = await response.json();
+            return { ok: true, url: data.url };
+        } catch (error) {
+            return { ok: false, error: (error && error.message) || "network error" };
+        }
+    }
+
     function resetImageState() {
         pendingImageSource = "";
         pendingImageFile = null;
@@ -442,8 +472,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     );
 
                     const croppedWebp = cropCanvas.toDataURL("image/webp", 0.74);
-                    imageInput.value = croppedWebp;
+                    pendingImageSource = croppedWebp;
                     updateImagePreview(croppedWebp);
+
+                    // Upload the final cropped image to Supabase Storage so the DB
+                    // stores a short URL (not a large base64 blob). On failure we
+                    // fall back to the previous inline behaviour.
+                    const uploadResult = await uploadImageToStorage(croppedWebp);
+                    if (uploadResult.ok) {
+                        imageInput.value = uploadResult.url;
+                    } else {
+                        imageInput.value = croppedWebp;
+                        console.warn("[cover-upload]", uploadResult.error);
+                        notify({
+                            type: "warning",
+                            title: "Cloud Upload Failed",
+                            text: "Your cover image will be saved inline. Cloud storage is unavailable right now."
+                        });
+                    }
+
                     closeCropEditorDialog();
                 };
                 sourceImage.src = pendingImageSource;
@@ -547,6 +594,19 @@ document.addEventListener("DOMContentLoaded", function () {
             if (imageInput) {
                 imageInput.value = finalImageUrl;
                 updateImagePreview(finalImageUrl);
+            }
+        }
+
+        // Safety net: if the image is still an inline data URI (previous upload
+        // failed, or the crop dialog was cancelled), retry the Storage upload
+        // now so we never persist new base64 into the database.
+        if (finalImageUrl && finalImageUrl.startsWith("data:image/")) {
+            const retryUpload = await uploadImageToStorage(finalImageUrl);
+            if (retryUpload.ok) {
+                finalImageUrl = retryUpload.url;
+                if (imageInput) imageInput.value = retryUpload.url;
+            } else {
+                console.warn("[cover-upload retry]", retryUpload.error);
             }
         }
 

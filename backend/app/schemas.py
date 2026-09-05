@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Optional
 
 
@@ -122,7 +122,11 @@ class BlogCardResponse(BaseModel):
     blogs (and their large base64 images) are NOT serialized per card.
     ``creator`` is optional because a deleted/orphaned user leaves the blog
     without a valid creator; the front-end already falls back to a generic
-    author label via optional chaining."""
+    author label via optional chaining.
+
+    The full article body is NOT sent in listings — only a short preview. The
+    front-end uses it purely for a snippet + read-time estimate, so a 400-char
+    head is sufficient and keeps each card's payload tiny."""
     id: int
     title: str
     body: str
@@ -132,6 +136,13 @@ class BlogCardResponse(BaseModel):
     creator: Optional[CreatorInfo] = None
     likes_count: int = 0
     comments_count: int = 0
+
+    @field_validator("body", mode="before")
+    @classmethod
+    def truncate_body(cls, v):
+        if isinstance(v, str) and len(v) > 400:
+            return v[:400]
+        return v
 
     class Config:
         from_attributes = True

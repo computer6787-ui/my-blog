@@ -21,7 +21,7 @@
 }
 
 body.dark-mode .header {
-    background: rgba(15, 22, 32, 0.88);
+    background: rgba(23, 16, 19, 0.88);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
 }

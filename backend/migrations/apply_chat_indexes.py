@@ -49,8 +49,13 @@ def apply_indexes():
     print("🔧 Applying chat performance indexes...")
     
     with engine.connect() as conn:
-        # Split and execute each CREATE INDEX statement
-        statements = [s.strip() for s in indexes_sql.split(';') if s.strip() and not s.strip().startswith('--')]
+        # Strip `--` comment lines BEFORE splitting on ';' so comment-prefixed
+        # statements are not dropped (each chunk previously began with a comment
+        # line, so every statement was filtered out and nothing was applied).
+        clean = "\n".join(
+            line for line in indexes_sql.splitlines() if not line.strip().startswith('--')
+        )
+        statements = [s.strip() for s in clean.split(';') if s.strip()]
         
         for i, statement in enumerate(statements, 1):
             try:

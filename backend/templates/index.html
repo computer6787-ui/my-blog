@@ -2,6 +2,10 @@
 
 {% block title %}Lumora - Where Ideas Come to Light{% endblock %}
 
+{% block extra_head %}
+<link rel="preload" as="image" href="/static/images/sakura/hero-scene-bg.webp" fetchpriority="high">
+{% endblock %}
+
 {% block content %}
 <meta name="strix-verification" content="strix-verify-611e2ba7faf4e44731389461034ab075">
 <div id="sakura-poster-root"></div>
@@ -66,7 +70,7 @@
     <nav id="blog_pagination" class="blog-pagination" aria-label="Blog navigation"></nav>
 </section>
 
-<script type="module" src="{{ url_for('static', path='js/blog.js') }}?v=20260905"></script>
+<script type="module" src="{{ url_for('static', path='js/blog.js') }}?v=20260905b"></script>
 <script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
 <script type="module" src="{{ url_for('static', path='js/home.js') }}?v=20260901"></script>
 

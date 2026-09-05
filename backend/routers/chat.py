@@ -1,10 +1,7 @@
 import html
 import json
 import os
-import re
-import uuid
 from datetime import datetime, timezone
-from urllib.parse import quote
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, cast
@@ -22,10 +19,10 @@ from fastapi import (
 )
 from jose import JWTError
 from PIL import Image
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, case, func, or_
+from sqlalchemy.orm import Session, joinedload
 
-from backend.app import models, schemas
+from backend.app import models, schemas, supabase_storage
 from backend.app.database import SessionLocal, get_db
 from backend.app.oath2 import get_current_user
 from backend.app.token import verify_token
@@ -435,7 +432,7 @@ def get_global_history(
         query = query.filter(models.GlobalMessage.id < before_id)
     
     raw_messages = (
-        query
+        query.options(joinedload(models.GlobalMessage.user))
         .order_by(models.GlobalMessage.created_at.desc())
         .limit(limit)
         .all()
@@ -500,42 +497,62 @@ def get_conversations(
     users = db.query(models.User).filter(models.User.id.in_(peer_ids)).all()
     user_map = {u.id: u for u in users}
 
+    PM = models.PrivateMessage
+
+    # Latest message per conversation pair in ONE query. A row-numbered window
+    # over the unordered (sender, receiver) pair picks the newest message per
+    # conversation; `CASE` keeps the pair key portable (Postgres + SQLite).
+    # This replaces the previous per-peer last-message query (N round-trips).
+    sender, receiver = PM.sender_id, PM.receiver_id
+    pair_a = case((sender <= receiver, sender), else_=receiver)
+    pair_b = case((sender <= receiver, receiver), else_=sender)
+    rn = func.row_number().over(
+        partition_by=(pair_a, pair_b),
+        order_by=PM.created_at.desc(),
+    ).label("rn")
+
+    last_sub = (
+        db.query(
+            pair_a.label("pa"),
+            pair_b.label("pb"),
+            PM.message_body.label("last_body"),
+            PM.created_at.label("last_at"),
+            PM.sender_id.label("last_sender"),
+            rn,
+        )
+        .filter(or_(sender == current_user_id, receiver == current_user_id))
+        .subquery()
+    )
+    last_rows = db.query(last_sub).filter(last_sub.c.rn == 1).all()
+    last_map = {}
+    for pa, pb, last_body, last_at, last_sender, _ in last_rows:
+        peer = pb if pa == current_user_id else pa
+        last_map[peer] = (last_body, last_at, last_sender)
+
+    # Unread counts for every peer in ONE grouped query (replaces one query
+    # per peer).
+    unread_map = {
+        row[0]: row[1]
+        for row in db.query(PM.sender_id, func.count(PM.id))
+        .filter(
+            PM.receiver_id == current_user_id,
+            PM.is_read == False,
+            PM.sender_id.in_(list(last_map.keys())),
+        )
+        .group_by(PM.sender_id)
+        .all()
+    }
+
     conversations = []
     for pid in peer_ids:
         peer = user_map.get(pid)
         if not peer:
             continue
 
-        last_msg = (
-            db.query(models.PrivateMessage)
-            .filter(
-                or_(
-                    and_(
-                        models.PrivateMessage.sender_id == current_user_id,
-                        models.PrivateMessage.receiver_id == pid,
-                    ),
-                    and_(
-                        models.PrivateMessage.sender_id == pid,
-                        models.PrivateMessage.receiver_id == current_user_id,
-                    ),
-                )
-            )
-            .order_by(models.PrivateMessage.created_at.desc())
-            .first()
-        )
-
-        if not last_msg:
+        last = last_map.get(pid)
+        if last is None:
             continue
-
-        unread_count = (
-            db.query(models.PrivateMessage)
-            .filter(
-                models.PrivateMessage.sender_id == pid,
-                models.PrivateMessage.receiver_id == current_user_id,
-                models.PrivateMessage.is_read == False,
-            )
-            .count()
-        )
+        last_body, last_created, last_sender = last
 
         is_online = manager.is_online(cast(int, peer.id))
 
@@ -549,10 +566,10 @@ def get_conversations(
                     profile_picture_url=cast(Optional[str], peer.profile_picture_url),
                     is_online=is_online,
                 ),
-                last_message=cast(str, last_msg.message_body),
-                last_message_time=(cast(datetime, last_msg.created_at) if last_msg.created_at is not None else datetime.now(timezone.utc)),
-                unread_count=unread_count,
-                last_sender_id=cast(int, last_msg.sender_id),
+                last_message=cast(str, last_body),
+                last_message_time=(cast(datetime, last_created) if last_created is not None else datetime.now(timezone.utc)),
+                unread_count=unread_map.get(pid, 0),
+                last_sender_id=cast(int, last_sender),
             )
         )
 
@@ -707,13 +724,28 @@ def get_total_unread_count(
     return {"unread_count": total_unread}
 
 
+# Content types served from Storage for chat attachments (matches allowed_exts).
+CHAT_CONTENT_TYPES = {
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+    ".pdf": "application/pdf",
+    ".txt": "text/plain",
+    ".zip": "application/zip",
+}
+
+
 @router.post("/upload")
 async def upload_chat_file(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Upload an image or document attachment for chat. Images auto-convert to WebP."""
+    """Upload an image or document attachment for chat. Images auto-convert to WebP.
+
+    Files are stored in Supabase Storage (durable across redeploys) and the
+    returned public URL goes into the message body — the old local-disk
+    `static/uploads/chat/` path was wiped on every Render redeploy.
+    """
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file selected")
 
@@ -722,53 +754,49 @@ async def upload_chat_file(
     if ext not in allowed_exts:
         raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}")
 
-    upload_dir = Path(__file__).resolve().parent.parent / "static" / "uploads" / "chat"
-    upload_dir.mkdir(parents=True, exist_ok=True)
-
     contents = await file.read()
     if len(contents) > 10 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File exceeds 10MB limit")
 
-    def _safe_chat_name(raw_name: str) -> str:
-        """Build a URL-safe, unique-ish filename: [hex12]_sanitized.ext (lowercased ext)."""
-        p = Path(raw_name)
-        stem = re.sub(r"[^\w.-]+", "_", p.stem, flags=re.UNICODE).strip("._") or "file"
-        suffix = re.sub(r"[^a-z0-9]", "", p.suffix.lower())
-        return f"{uuid.uuid4().hex[:12]}_{stem}.{suffix}" if suffix else f"{uuid.uuid4().hex[:12]}_{stem}"
-
-    # Auto-convert raster images to WebP for better compression
+    # Auto-convert raster images to WebP for better compression.
     convertible_images = {".png", ".jpg", ".jpeg", ".gif"}
     if ext in convertible_images:
         try:
-            # Open and convert to WebP
             img = Image.open(BytesIO(contents))
-            
-            # Convert RGBA to RGB if saving as WebP (transparency handled by WebP)
             if img.mode in ("RGBA", "LA", "P"):
-                # WebP supports transparency, so keep alpha channel
                 img = img.convert("RGBA")
             elif img.mode != "RGB":
                 img = img.convert("RGB")
-            
-            # Save as WebP with high quality
             output = BytesIO()
             img.save(output, format="WEBP", quality=85, method=6)
             contents = output.getvalue()
-            
-            # Update extension and filename
             ext = ".webp"
-            unique_name = _safe_chat_name(f"{Path(file.filename).stem}.webp")
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Image conversion failed: {str(e)}")
-    else:
-        # Keep original for SVG, PDF, TXT, ZIP, and already-WebP files
-        unique_name = _safe_chat_name(file.filename)
 
-    dest_path = upload_dir / unique_name
-    with open(dest_path, "wb") as f:
-        f.write(contents)
+    if not supabase_storage.is_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="File storage is not configured on the server.",
+        )
 
-    file_url = f"/static/uploads/chat/{quote(unique_name)}"
+    # Extension-safe display name so the stored object keeps the right suffix
+    # (e.g. `photo.png` -> `photo.webp` after conversion).
+    storage_filename = f"{Path(file.filename).stem}{ext}"
+
+    try:
+        file_url = await supabase_storage.upload_chat_file(
+            user_id=cast(int, current_user.id),
+            file_bytes=contents,
+            original_filename=storage_filename,
+            content_type=CHAT_CONTENT_TYPES.get(ext, "application/octet-stream"),
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Failed to upload file to storage. Please try again later.",
+        )
+
     is_image = ext in {".webp", ".svg"}
 
     return {

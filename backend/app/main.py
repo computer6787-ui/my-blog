@@ -1,9 +1,12 @@
+import gzip
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import FileResponse, PlainTextResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 from pathlib import Path
 from sqlalchemy import text, inspect
 from datetime import datetime, timezone
@@ -12,6 +15,7 @@ from .database import engine, SessionLocal
 from .encryption import Encrypting
 from .config import MAIN_ADMIN_EMAIL
 from .cleanup_service import start_cleanup_scheduler, stop_cleanup_scheduler
+from .supabase_storage import ensure_bucket
 from ..routers import blog, user, auth, verify, interact, admin, chat
 
 Parent_DIR = Path(__file__).resolve().parent.parent.parent
@@ -35,6 +39,7 @@ async def lifespan(app: FastAPI):
     init_db()
     seed_default_staff()
     start_cleanup_scheduler()
+    await ensure_bucket()
     print("✅ Application started successfully")
     print("="*60 + "\n")
     
@@ -58,6 +63,89 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ---------------------------------------------------------------------------
+# Response compression middleware
+# Gzip-compresses text-like payloads (JSON/HTML/CSS/JS/SVG). Binary media
+# (images, fonts, uploads) is skipped so we don't waste CPU compressing data
+# that's already compressed. No-op for clients without gzip support, and for
+# responses already carrying a content-encoding.
+# ---------------------------------------------------------------------------
+COMPRESSIBLE_TYPES = {
+    "application/json",
+    "application/ld+json",
+    "application/javascript",
+    "application/x-javascript",
+    "text/html",
+    "text/plain",
+    "text/css",
+    "text/javascript",
+    "text/xml",
+    "application/xml",
+    "application/xhtml+xml",
+    "image/svg+xml",
+}
+GZIP_MIN_SIZE = 1024
+
+
+class CompressMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+
+        if "gzip" not in request.headers.get("accept-encoding", ""):
+            return response
+        if response.headers.get("content-encoding"):
+            return response
+        if response.status_code in (204, 304):
+            return response
+
+        content_type = response.headers.get("content-type", "").split(";")[0].strip()
+        if content_type not in COMPRESSIBLE_TYPES:
+            return response
+
+        body = await _collect_response_body(response)
+        if len(body) < GZIP_MIN_SIZE:
+            return Response(
+                body,
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                media_type=content_type,
+            )
+
+        compressed = gzip.compress(body, compresslevel=5)
+        headers = dict(response.headers)
+        headers["content-encoding"] = "gzip"
+        headers["content-length"] = str(len(compressed))
+        vary = headers.get("vary")
+        headers["vary"] = "Accept-Encoding" if not vary else f"{vary}, Accept-Encoding"
+        return Response(
+            compressed,
+            status_code=response.status_code,
+            headers=headers,
+            media_type=content_type,
+        )
+
+
+app.add_middleware(CompressMiddleware)
+
+
+async def _collect_response_body(response) -> bytes:
+    """Return the full response body as bytes.
+
+    In modern Starlette the base ``Response`` holds ``.body`` (bytes) while
+    only ``StreamingResponse`` exposes ``.body_iterator``. Older Starlette had
+    ``body_iterator`` on the base class too. Handle both so gzip compression
+    works regardless of response type or Starlette version.
+    """
+    body_iter = getattr(response, "body_iterator", None)
+    if body_iter is not None:
+        return b"".join([chunk async for chunk in body_iter])
+    body = getattr(response, "body", None)
+    if isinstance(body, memoryview):
+        return body.tobytes()
+    return body if isinstance(body, bytes) else b""
+
 
 def seed_default_staff():
     """Create the default admin + moderator accounts if they do not exist yet."""
@@ -191,9 +279,24 @@ app.include_router(admin.router)
 app.include_router(chat.router)
 
 
+class CacheStaticFiles(StaticFiles):
+    """StaticFiles that tells browsers/CDNs to cache versioned assets.
+
+    Every asset is referenced with a `?v=...` cache-buster in the templates,
+    so a new deployment ships a new URL — making `immutable` safe and giving
+    one-year browser caching (files fetched once, never revalidated).
+    """
+
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code == 200:
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
+
 app.mount(
     "/static",
-    StaticFiles(directory=str(BASE_DIR / "static")),
+    CacheStaticFiles(directory=str(BASE_DIR / "static")),
     name="static"
 )
 

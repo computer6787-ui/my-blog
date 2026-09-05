@@ -17,7 +17,25 @@ TO TRANSFER OWNERSHIP when selling the site:
   3. The old owner account (if demoted to user) can then be removed.
 """
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 # The email address of the single main admin (owner) of this site.
 # This account has absolute power and can never be removed, demoted,
 # or deactivated through the admin panel by any other user.
-MAIN_ADMIN_EMAIL = "admin@lumora.com"
+MAIN_ADMIN_EMAIL = os.getenv("MAIN_ADMIN_EMAIL", "admin@lumora.com")
+
+# ---------------------------------------------------------------------------
+# Supabase Storage (blog cover images)
+# ---------------------------------------------------------------------------
+# These values live only server-side (read from .env). The service_role key
+# must NEVER be exposed to the frontend or included in any template/static file.
+SUPABASE_URL = (os.getenv("SUPABASE_URL", "") or "").strip().rstrip("/")
+SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "blog-images").strip()
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+
+# Hard upload cap (bytes). Client downscales to ~1200x675 WebP (~50-200KB),
+# so anything larger than this is rejected server-side.
+MAX_IMAGE_UPLOAD_BYTES = int(os.getenv("MAX_IMAGE_UPLOAD_BYTES", "5242880"))  # 5 MB

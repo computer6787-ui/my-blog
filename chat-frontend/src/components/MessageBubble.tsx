@@ -105,8 +105,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       return renderAttachmentImage(trimmed, 'Attachment');
     }
 
-    // Local uploaded file
-    if (trimmed.startsWith('/static/uploads/chat/')) {
+    // Uploaded file — old local-disk paths, or Supabase Storage URLs.
+    // Storage image URLs are already caught by IMAGE_REGEX above; this branch
+    // keeps the download-chip UI for documents uploaded to either location.
+    if (
+      trimmed.startsWith('/static/uploads/chat/') ||
+      trimmed.includes('/storage/v1/object/public/')
+    ) {
       const fileName =
         trimmed
           .split('/')

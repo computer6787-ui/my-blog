@@ -3,6 +3,7 @@ from backend.app import models
 from typing import List
 from fastapi.responses import FileResponse
 from sqlalchemy import desc, or_
+from backend.app.supabase_storage import is_storage_url, delete_from_storage
 
 
 CATEGORY_KEYWORDS = {
@@ -135,15 +136,29 @@ def all_blog(limit: int, skip: int, db, q=None, category=None):
         for blog in blogs:
             blog.likes_count = likes_counts.get(blog.id, 0)
             blog.comments_count = comments_counts.get(blog.id, 0)
-            # The card grid does not use the heavy base64 image; omitting it
-            # slashes the listing payload from many hundreds of KB per row to
-            # ~1-2 KB. Full images are still served on the individual blog page.
-            blog.image_url = None
 
     return {
         "blogs": blogs,
         "total": total,
     }
+
+
+import asyncio
+
+
+def delete_storage_image_sync(url_or_object_name: str):
+    """
+    Best-effort cleanup of a Storage image during blog deletion.
+    Runs the async delete_from_storage call in a fresh event loop (safe here
+    because sync request handlers run in a worker thread with no live loop).
+    Failures are logged only — DB deletion is never rolled back for this.
+    """
+    if not url_or_object_name:
+        return
+    try:
+        asyncio.run(delete_from_storage(url_or_object_name))
+    except Exception as exc:
+        print(f"[blog_repository] Failed to delete storage image {url_or_object_name}: {exc}")
 
 
 def destroy(id: int, db, current_user):
@@ -158,8 +173,12 @@ def destroy(id: int, db, current_user):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You cant delete this blog",
         )
+    image_url = blog.image_url or ""
     db.query(models.Blog).filter(models.Blog.id == id).delete(synchronize_session=False)
     db.commit()
+    # Clean up the file from Supabase Storage too (only for URLs we uploaded).
+    if is_storage_url(image_url):
+        delete_storage_image_sync(image_url)
     return "The content has been deleted successfully"
 
 
