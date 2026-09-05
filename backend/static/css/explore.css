@@ -122,9 +122,9 @@
 }
 
 body.dark-mode .category-filter-shell {
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.24), rgba(194, 109, 132, 0.18));
-    border-color: rgba(232, 183, 195, 0.42);
-    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.52);
+    background: linear-gradient(135deg, rgba(194, 109, 132, 0.15), rgba(194, 109, 132, 0.1));
+    border-color: rgba(232, 183, 195, 0.35);
+    box-shadow: 0 18px 34px rgba(194, 109, 132, 0.25);
 }
 
 body.dark-mode .category-filter-wrap {
@@ -154,11 +154,11 @@ body.dark-mode .category-filter-select option {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, rgba(194, 109, 132, 0.08), rgba(79, 70, 229, 0.04));
+    background: linear-gradient(135deg, rgba(194, 109, 132, 0.08), rgba(194, 109, 132, 0.04));
     border: 1px solid rgba(194, 109, 132, 0.18);
     border-radius: 999px;
     padding: 0.35rem 0.6rem 0.35rem 0.8rem;
-    box-shadow: 0 10px 26px rgba(217, 143, 160, 0.08);
+    box-shadow: 0 10px 26px rgba(194, 109, 132, 0.08);
     overflow: visible;
     isolation: isolate;
     z-index: 30;
@@ -166,9 +166,9 @@ body.dark-mode .category-filter-select option {
 }
 
 .category-filter-shell.is-open {
-    border-color: rgba(124, 58, 237, 0.22);
+    border-color: rgba(194, 109, 132, 0.3);
     transform: translateY(-1px);
-    box-shadow: 0 18px 30px rgba(217, 143, 160, 0.12);
+    box-shadow: 0 18px 30px rgba(194, 109, 132, 0.15);
 }
 
 .category-filter-label,
@@ -214,10 +214,10 @@ body.dark-mode .category-filter-select option {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
     color: white;
     font-size: 0.72rem;
-    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25);
+    box-shadow: 0 6px 16px rgba(194, 109, 132, 0.3);
 }
 
 .category-filter-button {
@@ -239,7 +239,7 @@ body.dark-mode .category-filter-select option {
 }
 
 .category-filter-button:focus-visible {
-    outline: 2px solid rgba(124, 58, 237, 0.4);
+    outline: 2px solid rgba(194, 109, 132, 0.4);
     outline-offset: 2px;
 }
 

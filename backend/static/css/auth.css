@@ -90,7 +90,44 @@
     color: var(--muted);
     font-size: 1.1rem;
     cursor: pointer;
-    padding: 0;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: var(--accent);
+}
+
+.password-toggle .eye-open {
+    display: block;
+}
+
+.password-toggle .eye-closed {
+    display: none;
+}
+
+/* When password is visible (type="text"), show closed eye */
+.password-container input[type="text"] + .password-toggle .eye-open {
+    display: none;
+}
+
+.password-container input[type="text"] + .password-toggle .eye-closed {
+    display: block;
+}
+
+/* For update_pass.html which has label wrapper */
+.input-group.password-container {
+    position: relative;
+}
+
+.input-group.password-container > .password-toggle {
+    position: absolute;
+    right: 12px;
+    top: calc(100% - 12px);
+    transform: translateY(-50%);
 }
 
 .auth-links {

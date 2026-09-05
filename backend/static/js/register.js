@@ -62,15 +62,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Password toggle functionality
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
-    
+
     if(togglePassword && passwordInput) {
-        const monkey = document.getElementById('monkeyFigure');
         togglePassword.addEventListener('click', function(event) {
             event.preventDefault();
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
-            this.textContent = type === 'password' ? '🙈' : '🙉';
-            if (monkey) monkey.classList.toggle('monkey--revealed', type === 'text');
+            this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+            // Eye SVGs are toggled via CSS
         });
     }
 

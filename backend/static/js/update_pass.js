@@ -3,7 +3,8 @@ import { API_URL, showLoading, hideLoading, notify } from "./config.js?v=2026081
 const form = document.getElementById("updatePassForm");
 const password = document.getElementById("password");
 const confirmPassword = document.getElementById("confirmPassword");
-const showPassword = document.getElementById("showPassword");
+const togglePassword = document.getElementById("togglePassword");
+const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
 const message = document.getElementById("message");
 
 const email = localStorage.getItem("userEmail");
@@ -14,14 +15,19 @@ if (!email) {
     form.querySelector("button[type='submit']").disabled = true;
 }
 
+// Password toggle functionality
+function setupPasswordToggle(toggleBtn, inputEl) {
+    if (!toggleBtn || !inputEl) return;
+    toggleBtn.addEventListener('click', function(event) {
+        event.preventDefault();
+        const type = inputEl.getAttribute('type') === 'password' ? 'text' : 'password';
+        inputEl.setAttribute('type', type);
+        this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+    });
+}
 
-// Show / hide password
-showPassword.addEventListener("change", () => {
-    const type = showPassword.checked ? "text" : "password";
-
-    password.type = type;
-    confirmPassword.type = type;
-});
+setupPasswordToggle(togglePassword, password);
+setupPasswordToggle(toggleConfirmPassword, confirmPassword);
 
 
 // Update password
