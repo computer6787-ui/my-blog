@@ -9,12 +9,12 @@ interface UserAvatarProps {
 }
 
 const GRADIENTS = [
-  'from-purple-500 to-indigo-600',
+  'from-blossom-500 to-blossom-600',
   'from-pink-500 to-rose-600',
-  'from-blue-500 to-cyan-600',
+  'from-blossom-500 to-cyan-600',
   'from-emerald-500 to-teal-600',
   'from-amber-500 to-orange-600',
-  'from-violet-500 to-fuchsia-600',
+  'from-blossom-500 to-fuchsia-600',
 ];
 
 function getInitialAndGradient(name?: string | null): { initial: string; gradient: string } {

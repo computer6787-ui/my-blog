@@ -177,8 +177,8 @@
     justify-content: center;
     padding: 0.38rem 0.7rem;
     border-radius: 999px;
-    background: rgba(122, 92, 242, 0.1);
-    border: 1px solid rgba(122, 92, 242, 0.18);
+    background: rgba(194, 109, 132, 0.1);
+    border: 1px solid rgba(194, 109, 132, 0.18);
     color: var(--accent-strong);
     font-size: 0.76rem;
     font-weight: 700;
@@ -291,7 +291,7 @@
 }
 
 .shimmer {
-    background: linear-gradient(90deg, rgba(122, 92, 242, 0.05) 0%, rgba(122, 92, 242, 0.12) 50%, rgba(122, 92, 242, 0.05) 100%);
+    background: linear-gradient(90deg, rgba(194, 109, 132, 0.05) 0%, rgba(194, 109, 132, 0.12) 50%, rgba(194, 109, 132, 0.05) 100%);
     background-size: 200% 100%;
     animation: shimmerWave 1.6s infinite;
 }
@@ -422,7 +422,7 @@ body.dark-mode .shimmer {
 
 .load-more-btn:hover, #load_more:hover {
     transform: translateY(-3px);
-    box-shadow: 0 14px 28px rgba(122, 92, 242, 0.15);
+    box-shadow: 0 14px 28px rgba(194, 109, 132, 0.15);
     border-color: var(--card-border-hover);
     color: var(--accent);
 }

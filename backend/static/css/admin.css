@@ -79,13 +79,13 @@
     background: var(--accent-gradient);
     color: #fff;
     font-weight: 700;
-    box-shadow: 0 6px 16px rgba(122, 92, 242, 0.25);
+    box-shadow: 0 6px 16px rgba(194, 109, 132, 0.25);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .admin-gate-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 22px rgba(122, 92, 242, 0.35);
+    box-shadow: 0 10px 22px rgba(194, 109, 132, 0.35);
 }
 
 /* ---- Layout shell ---- */
@@ -139,7 +139,7 @@ main:has(> .admin-shell) {
     justify-content: center;
     font-weight: 800;
     font-size: 1.4rem;
-    box-shadow: 0 6px 14px rgba(122, 92, 242, 0.25);
+    box-shadow: 0 6px 14px rgba(194, 109, 132, 0.25);
 }
 
 .admin-brand-text h1 {
@@ -553,7 +553,7 @@ body.dark-mode .admin-nav-item.is-active {
 .admin-search:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(122, 92, 242, 0.2);
+    box-shadow: 0 0 0 2px rgba(194, 109, 132, 0.2);
 }
 
 .admin-search::placeholder {
@@ -574,7 +574,7 @@ body.dark-mode .admin-nav-item.is-active {
 .admin-select:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(122, 92, 242, 0.2);
+    box-shadow: 0 0 0 2px rgba(194, 109, 132, 0.2);
 }
 
 /* ---- Tables ---- */

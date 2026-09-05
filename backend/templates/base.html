@@ -14,7 +14,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
 
     <title>{% block title %}Lumora{% endblock %}</title>
 
@@ -67,7 +67,7 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/components.css') }}?v=20260902">
     <link rel="stylesheet" href="{{ url_for('static', path='css/footer.css') }}?v=20260902">
     <link rel="stylesheet" href="{{ url_for('static', path='css/responsive.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='chat/chat-bundle.css') }}?v=20260912">
+    <link rel="stylesheet" href="{{ url_for('static', path='chat/chat-bundle.css') }}?v=20260905">
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -86,9 +86,7 @@
         })();
     </script>
 
-    <header>
-        {% include "partials/navbar.html" %}
-    </header>
+    {% include "partials/navbar.html" %}
 
     <main>
         {% block content %}
@@ -114,7 +112,7 @@
     {% endblock %}
 
     <script src="{{ url_for('static', path='js/notifications.js') }}?v=20260906"></script>
-    <script type="module" src="{{ url_for('static', path='chat/chat-bundle.js') }}?v=20260912"></script>
+    <script type="module" src="{{ url_for('static', path='chat/chat-bundle.js') }}?v=20260905"></script>
 
 </body>
 

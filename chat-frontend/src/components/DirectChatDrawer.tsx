@@ -33,8 +33,9 @@ export const DirectChatDrawer: React.FC<DirectChatDrawerProps> = ({ isOpen, onCl
           <div className="flex-1 flex flex-col p-6 items-center justify-center text-center">
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              className="btn-touch absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               title="Close drawer"
+              aria-label="Close drawer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -50,7 +51,7 @@ export const DirectChatDrawer: React.FC<DirectChatDrawerProps> = ({ isOpen, onCl
             <div className="mt-6 flex flex-col gap-2.5 w-full max-w-xs">
               <a
                 href="/login"
-                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 text-white font-semibold text-sm shadow hover:bg-blue-700 transition-colors"
+                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blossom-600 text-white font-semibold text-sm shadow hover:bg-blossom-700 transition-colors"
               >
                 <LogIn className="w-4 h-4" />
                 Sign In to Message

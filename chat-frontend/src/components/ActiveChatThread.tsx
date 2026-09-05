@@ -104,10 +104,11 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="btn-touch text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             title="Back to conversations"
+            aria-label="Back to conversations"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
           <UserAvatar
             name={recipient.name}
@@ -132,16 +133,19 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setSoundEnabled(!isSoundEnabled)}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="btn-touch text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             title={isSoundEnabled ? 'Mute chime' : 'Unmute chime'}
+            aria-label={isSoundEnabled ? 'Mute chime' : 'Unmute chime'}
           >
-            {isSoundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {isSoundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </button>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="btn-touch text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            title="Close Direct Messages"
+            aria-label="Close Direct Messages"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -187,9 +191,9 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
         {isPartnerTyping && (
           <div className="flex items-center gap-2 mb-2">
             <div className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 typing-dot-1" />
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 typing-dot-2" />
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 typing-dot-3" />
+              <span className="w-1.5 h-1.5 rounded-full bg-blossom-500 typing-dot-1" />
+              <span className="w-1.5 h-1.5 rounded-full bg-blossom-500 typing-dot-2" />
+              <span className="w-1.5 h-1.5 rounded-full bg-blossom-500 typing-dot-3" />
               <span className="ml-1 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                 {recipient.name} is typing...
               </span>
@@ -211,7 +215,8 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
                 setInputVal((p) => p + emoji);
                 setShowEmojiPicker(false);
               }}
-              className="text-lg p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors"
+              className="btn-touch text-xl hover:bg-blossom-50 dark:hover:bg-slate-700"
+              aria-label={`Insert ${emoji}`}
             >
               {emoji}
             </button>
@@ -221,7 +226,7 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
 
       {/* Direct Input */}
       <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <input
             ref={fileInputRef}
             type="file"
@@ -233,18 +238,21 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="p-2 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+            className="btn-touch text-slate-500 hover:text-blossom-600 hover:bg-blossom-50 dark:hover:bg-slate-800 disabled:opacity-50"
             title="Attach file"
+            aria-label="Attach file"
           >
-            <Paperclip className="w-4 h-4" />
+            <Paperclip className="w-5 h-5" />
           </button>
 
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="p-2 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 transition-colors"
+            className="btn-touch text-slate-500 hover:text-blossom-600 hover:bg-blossom-50 dark:hover:bg-slate-800"
+            title="Insert emoji"
+            aria-label="Insert emoji"
           >
-            <Smile className="w-4 h-4" />
+            <Smile className="w-5 h-5" />
           </button>
 
           <input
@@ -253,16 +261,18 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={`Message ${recipient.name}...`}
-            className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 px-3.5 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="flex-1 min-w-0 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blossom-500/50 transition-all"
           />
 
           <button
             type="button"
             onClick={handleSend}
             disabled={!inputVal.trim()}
-            className="p-2.5 rounded-xl bg-blue-600 text-white shadow hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+            className="btn-touch bg-blossom-600 text-white shadow hover:bg-blossom-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            title="Send message"
+            aria-label="Send message"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5" />
           </button>
         </div>
       </div>

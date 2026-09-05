@@ -2,46 +2,60 @@
 
 @custom-variant dark (&:where(.dark-mode, .dark-mode *, .dark, .dark *));
 
+@theme {
+  --color-blossom-50: #faf1f3;
+  --color-blossom-100: #f5e2e7;
+  --color-blossom-200: #eccad3;
+  --color-blossom-300: #e0a9b8;
+  --color-blossom-400: #d98fa0;
+  --color-blossom-500: #c26d84;
+  --color-blossom-600: #a2526b;
+  --color-blossom-700: #8a4359;
+  --color-blossom-800: #6d3649;
+  --color-blossom-900: #572c3a;
+  --color-blossom-950: #3b212b;
+}
+
 @layer base {
   :root {
-    --lumora-accent: #7a5cf2;
-    --lumora-accent-hover: #6347d4;
-    --lumora-accent-light: rgba(122, 92, 242, 0.12);
+    --lumora-accent: #c26d84;
+    --lumora-accent-hover: #9d5669;
+    --lumora-accent-light: rgba(194, 109, 132, 0.12);
   }
 
   .dark-mode, .dark {
-    --lumora-accent: #a78bfa;
-    --lumora-accent-hover: #8b5cf6;
-    --lumora-accent-light: rgba(167, 139, 250, 0.15);
+    --lumora-accent: #e8b7c3;
+    --lumora-accent-hover: #d98fa0;
+    --lumora-accent-light: rgba(232, 183, 195, 0.15);
   }
 }
 
 /* Glassmorphism surfaces */
 .lumora-glass-surface {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 253, 249, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(122, 92, 242, 0.14);
+  border: 1px solid rgba(194, 109, 132, 0.14);
 }
 
 .dark-mode .lumora-glass-surface,
 .dark .lumora-glass-surface {
-  background: rgba(20, 27, 38, 0.92);
+  background: rgba(32, 24, 27, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .lumora-glass-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 253, 249, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(122, 92, 242, 0.08);
+  border: 1px solid rgba(194, 109, 132, 0.08);
 }
 
 .dark-mode .lumora-glass-card,
 .dark .lumora-glass-card {
-  background: rgba(26, 35, 50, 0.8);
+  background: rgba(36, 29, 32, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -50,7 +64,7 @@
 /* Custom sleek scrollbars */
 .scroller-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgba(122, 92, 242, 0.25) transparent;
+  scrollbar-color: rgba(194, 109, 132, 0.25) transparent;
 }
 
 .scroller-thin::-webkit-scrollbar {
@@ -63,17 +77,17 @@
 }
 
 .scroller-thin::-webkit-scrollbar-thumb {
-  background-color: rgba(122, 92, 242, 0.25);
+  background-color: rgba(194, 109, 132, 0.25);
   border-radius: 9999px;
 }
 
 .dark-mode .scroller-thin::-webkit-scrollbar-thumb,
 .dark .scroller-thin::-webkit-scrollbar-thumb {
-  background-color: rgba(167, 139, 250, 0.3);
+  background-color: rgba(232, 183, 195, 0.3);
 }
 
 .scroller-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(122, 92, 242, 0.5);
+  background-color: rgba(194, 109, 132, 0.5);
 }
 
 /* Kinetic typing indicator bounce */
@@ -119,5 +133,125 @@
 
 .live-pulse-dot {
   animation: live-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* ===== Sakura Editorial Poster — CSS-driven reveal animation =====
+ *
+ * The poster toggles a `data-revealed` attribute on the section. Everything
+ * below is a pure CSS transition, so the animation is GPU-composited and
+ * runs regardless of the OS `prefers-reduced-motion` setting (the previous
+ * RAF loop snapped instantly whenever the OS had animations disabled).
+ */
+
+/* Title characters burst outward from behind the branch on reveal.
+   Each char carries its own horizontal/vertical offset so the word fans out. */
+.sakura-poster .sakura-char {
+  display: inline-block;
+  transform-origin: center bottom;
+  transition-property: opacity, transform;
+  transition-duration: 0.72s;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hidden state: tiny, pushed out to the side and down, invisible */
+.sakura-poster:not([data-revealed="true"]) .sakura-char {
+  opacity: 0;
+  transform: translate3d(var(--x-off), var(--y-off), 0) scale(0.3);
+}
+
+/* Revealed state: full size, centered */
+.sakura-poster[data-revealed="true"] .sakura-char {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+/* Stagger each character so the fan-out feels organic. */
+.sakura-poster .sakura-char:nth-child(1) { transition-delay: 0.02s; }
+.sakura-poster .sakura-char:nth-child(2) { transition-delay: 0.05s; }
+.sakura-poster .sakura-char:nth-child(3) { transition-delay: 0.08s; }
+.sakura-poster .sakura-char:nth-child(4) { transition-delay: 0.11s; }
+.sakura-poster .sakura-char:nth-child(5) { transition-delay: 0.14s; }
+.sakura-poster .sakura-char:nth-child(6) { transition-delay: 0.17s; }
+.sakura-poster .sakura-char:nth-child(7) { transition-delay: 0.20s; }
+.sakura-poster .sakura-char:nth-child(8) { transition-delay: 0.23s; }
+.sakura-poster .sakura-char:nth-child(9) { transition-delay: 0.26s; }
+.sakura-poster .sakura-char:nth-child(10) { transition-delay: 0.29s; }
+.sakura-poster .sakura-char:nth-child(11) { transition-delay: 0.32s; }
+.sakura-poster .sakura-char:nth-child(12) { transition-delay: 0.35s; }
+.sakura-poster .sakura-char:nth-child(13) { transition-delay: 0.38s; }
+.sakura-poster .sakura-char:nth-child(14) { transition-delay: 0.41s; }
+.sakura-poster .sakura-char:nth-child(15) { transition-delay: 0.44s; }
+.sakura-poster .sakura-char:nth-child(16) { transition-delay: 0.47s; }
+.sakura-poster .sakura-char:nth-child(17) { transition-delay: 0.50s; }
+.sakura-poster .sakura-char:nth-child(18) { transition-delay: 0.53s; }
+.sakura-poster .sakura-char:nth-child(19) { transition-delay: 0.56s; }
+.sakura-poster .sakura-char:nth-child(20) { transition-delay: 0.59s; }
+
+/* Editorial copy shell: slides up from the bottom on reveal. */
+.sakura-poster .sakura-copy-shell {
+  transition-property: transform;
+  transition-duration: 0.82s;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sakura-poster:not([data-revealed="true"]) .sakura-copy-shell {
+  transform: translate3d(0, 110%, 0);
+}
+
+.sakura-poster[data-revealed="true"] .sakura-copy-shell {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Each copy row rises in turn for a layered entrance. */
+.sakura-poster .sakura-copy-row {
+  transition-property: opacity, transform;
+  transition-duration: 0.62s;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sakura-poster:not([data-revealed="true"]) .sakura-copy-row {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+.sakura-poster[data-revealed="true"] .sakura-copy-row {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sakura-poster .sakura-copy-row:nth-child(1) { transition-delay: 0.12s; }
+.sakura-poster .sakura-copy-row:nth-child(2) { transition-delay: 0.22s; }
+.sakura-poster .sakura-copy-row:nth-child(3) { transition-delay: 0.32s; }
+.sakura-poster .sakura-copy-row:nth-child(4) { transition-delay: 0.42s; }
+.sakura-poster .sakura-copy-row:nth-child(5) { transition-delay: 0.52s; }
+.sakura-poster .sakura-copy-row:nth-child(6) { transition-delay: 0.62s; }
+
+/* ------------------------------------------------------------------ */
+/* Touch targets — guaranteed 44px (mobile) / 48px (desktop) hit area  */
+/* ------------------------------------------------------------------ */
+.btn-touch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;   /* 44px */
+  height: 2.75rem;  /* 44px */
+  flex-shrink: 0;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-touch:active {
+  transform: scale(0.9);
+}
+
+@media (min-width: 640px) {
+  .btn-touch {
+    width: 3rem;    /* 48px */
+    height: 3rem;   /* 48px */
+  }
 }
 

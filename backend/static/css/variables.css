@@ -1,28 +1,28 @@
-﻿/* ==========================================================================
-   LUMORA - MODERN BLOG & PUBLISHING DESIGN SYSTEM
+/* ==========================================================================
+   SAKURA EDITORIAL — WARM ROSE / BLUSH / CREAM DESIGN SYSTEM
    ========================================================================== */
 
 :root {
-    --bg: #f8f7fd;
-    --bg-strong: #efe9ff;
-    --surface: #ffffff;
-    --surface-alt: #f4f1fa;
-    --surface-card: #ffffff;
-    --card-border: rgba(123, 92, 242, 0.12);
-    --card-border-hover: rgba(123, 92, 242, 0.38);
-    --primary: #4b3b6b;
-    --primary-deep: #251c38;
-    --primary-soft: #eae2ff;
-    --accent: #7a5cf2;
-    --accent-strong: #6347d4;
-    --accent-gradient: linear-gradient(135deg, #7a5cf2 0%, #a855f7 50%, #6366f1 100%);
-    --text: #1a1b26;
-    --text-heading: #1f1b2e;
-    --muted: #646b82;
-    --line: rgba(123, 92, 242, 0.1);
-    --shadow-soft: 0 18px 45px rgba(82, 60, 136, 0.08);
-    --shadow-card: 0 10px 28px -4px rgba(40, 29, 62, 0.06), 0 4px 10px -2px rgba(40, 29, 62, 0.03);
-    --shadow-card-hover: 0 22px 45px -8px rgba(75, 45, 140, 0.14), 0 8px 18px -4px rgba(75, 45, 140, 0.06);
+    --bg: #faf6f0;
+    --bg-strong: #f3ece3;
+    --surface: #fffdf9;
+    --surface-alt: #f7f1ea;
+    --surface-card: #fffdf9;
+    --card-border: rgba(194, 109, 132, 0.12);
+    --card-border-hover: rgba(194, 109, 132, 0.38);
+    --primary: #6d4a4e;
+    --primary-deep: #3b2f31;
+    --primary-soft: #f5e9ec;
+    --accent: #c26d84;
+    --accent-strong: #9d5669;
+    --accent-gradient: linear-gradient(135deg, #c26d84 0%, #e8b7c3 50%, #d98fa0 100%);
+    --text: #2d2527;
+    --text-heading: #3b2f31;
+    --muted: #8a7a7c;
+    --line: rgba(194, 109, 132, 0.1);
+    --shadow-soft: 0 18px 45px rgba(109, 74, 78, 0.08);
+    --shadow-card: 0 10px 28px -4px rgba(59, 47, 49, 0.06), 0 4px 10px -2px rgba(59, 47, 49, 0.03);
+    --shadow-card-hover: 0 22px 45px -8px rgba(109, 74, 78, 0.14), 0 8px 18px -4px rgba(109, 74, 78, 0.06);
     --radius-xl: 28px;
     --radius-lg: 20px;
     --radius-md: 14px;
@@ -31,26 +31,26 @@
 }
 
 body.dark-mode {
-    --bg: #0b0f17;
-    --bg-strong: #121824;
-    --surface: #141b26;
-    --surface-alt: #1a2332;
-    --surface-card: #161e2c;
+    --bg: #171013;
+    --bg-strong: #221a1d;
+    --surface: #20181b;
+    --surface-alt: #2a2124;
+    --surface-card: #241d20;
     --card-border: rgba(255, 255, 255, 0.08);
-    --card-border-hover: rgba(147, 112, 255, 0.38);
-    --primary: #e6edf8;
-    --primary-deep: #ffffff;
-    --primary-soft: #1d2738;
-    --accent: #a78bfa;
-    --accent-strong: #8b5cf6;
-    --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #6366f1 100%);
-    --text: #e2e8f0;
-    --text-heading: #f8fafc;
-    --muted: #94a3b8;
+    --card-border-hover: rgba(232, 183, 195, 0.38);
+    --primary: #f5e8e4;
+    --primary-deep: #fbf5f2;
+    --primary-soft: #2d2326;
+    --accent: #e8b7c3;
+    --accent-strong: #d98fa0;
+    --accent-gradient: linear-gradient(135deg, #d98fa0 0%, #e8b7c3 50%, #c26d84 100%);
+    --text: #eadfd8;
+    --text-heading: #f8f0ed;
+    --muted: #b09497;
     --line: rgba(255, 255, 255, 0.08);
     --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.5);
     --shadow-card: 0 10px 30px -4px rgba(0, 0, 0, 0.4);
-    --shadow-card-hover: 0 22px 48px -6px rgba(0, 0, 0, 0.65), 0 0 20px rgba(139, 92, 246, 0.15);
+    --shadow-card-hover: 0 22px 48px -6px rgba(0, 0, 0, 0.65), 0 0 20px rgba(232, 183, 195, 0.15);
 }
 
 * {
@@ -67,8 +67,8 @@ body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--bg);
     background-image:
-        radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.12), transparent 32%),
-        radial-gradient(circle at 90% 20%, rgba(99, 102, 241, 0.08), transparent 35%),
+        radial-gradient(circle at 10% 0%, rgba(194, 109, 132, 0.12), transparent 32%),
+        radial-gradient(circle at 90% 20%, rgba(217, 143, 160, 0.08), transparent 35%),
         linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
     color: var(--text);
     line-height: 1.65;
@@ -81,9 +81,9 @@ body {
 
 body.dark-mode {
     background-image:
-        radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.08), transparent 30%),
-        radial-gradient(circle at 90% 20%, rgba(59, 130, 246, 0.06), transparent 32%),
-        linear-gradient(180deg, #0b0f17 0%, #0d121c 100%);
+        radial-gradient(circle at 10% 0%, rgba(232, 183, 195, 0.08), transparent 30%),
+        radial-gradient(circle at 90% 20%, rgba(194, 109, 132, 0.06), transparent 32%),
+        linear-gradient(180deg, #171013 0%, #1a1416 100%);
 }
 
 a, button, input, textarea {
@@ -109,7 +109,7 @@ main {
     flex: 1;
     width: min(100%, var(--container));
     margin: 0 auto;
-    padding: clamp(1.2rem, 3vw, 2.5rem);
+    padding: clamp(5.5rem, 8vw, 6.5rem) clamp(1.2rem, 3vw, 2.5rem) clamp(1.2rem, 3vw, 2.5rem);
     display: flex;
     flex-direction: column;
 }

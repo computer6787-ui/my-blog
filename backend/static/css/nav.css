@@ -1,8 +1,10 @@
 ﻿/* ===== HEADER & NAVIGATION ===== */
 
 .header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
     display: flex;
     justify-content: space-between;
@@ -35,7 +37,7 @@ body.dark-mode .header {
     height: 48px;
     border-radius: 14px;
     object-fit: cover;
-    box-shadow: 0 6px 14px rgba(122, 92, 242, 0.2);
+    box-shadow: 0 6px 14px rgba(194, 109, 132, 0.2);
 }
 
 .logo_text h1 {
@@ -72,14 +74,14 @@ body.dark-mode .header {
     color: #ffffff !important;
     font-weight: 700;
     font-size: 0.9rem;
-    box-shadow: 0 6px 16px rgba(122, 92, 242, 0.22);
+    box-shadow: 0 6px 16px rgba(194, 109, 132, 0.22);
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
     border: none;
 }
 
 .nav_button:hover, .nav_link:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 22px rgba(122, 92, 242, 0.32);
+    box-shadow: 0 10px 22px rgba(194, 109, 132, 0.32);
     filter: brightness(1.05);
 }
 
@@ -267,8 +269,8 @@ body.dark-mode .drawer a:hover {
     height: 24px;
     flex-shrink: 0;
     border-radius: 999px;
-    background: rgba(122, 92, 242, 0.18);
-    border: 1px solid rgba(122, 92, 242, 0.35);
+    background: rgba(194, 109, 132, 0.18);
+    border: 1px solid rgba(194, 109, 132, 0.35);
     transition: background 0.25s ease;
 }
 

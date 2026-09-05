@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useWebSocket } from '../context/WebSocketContext';
 import { MessageBubble } from './MessageBubble';
+import { SakuraEditorialPoster } from './ui/sakura-editorial-poster';
 import type { ChatUser } from '../types';
 
 const QUICK_EMOJIS = ['👋', '🔥', '❤️', '👏', '🎉', '💡', '🚀', '✨', '👍', '😊'];
@@ -153,7 +154,7 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-blue-600 text-white shadow-sm">
+          <div className="p-1.5 rounded-lg bg-blossom-600 text-white shadow-sm">
             <MessageSquare className="w-4 h-4" />
           </div>
           <div>
@@ -173,24 +174,27 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setSoundEnabled(!isSoundEnabled)}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="btn-touch text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             title={isSoundEnabled ? 'Mute notification sound' : 'Unmute notification sound'}
+            aria-label={isSoundEnabled ? 'Mute notification sound' : 'Unmute notification sound'}
           >
-            {isSoundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {isSoundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </button>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="hidden sm:inline-flex p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="btn-touch hidden sm:inline-flex text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             title={isExpanded ? 'Collapse size' : 'Expand size'}
+            aria-label={isExpanded ? 'Collapse size' : 'Expand size'}
           >
-            {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isExpanded ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
           </button>
           <button
             onClick={onToggle}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="btn-touch text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             title="Close Global Chat"
+            aria-label="Close Global Chat"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -203,14 +207,20 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
         className="flex-1 overflow-y-auto p-4 scroller-thin bg-slate-50/50 dark:bg-slate-900/50 space-y-1 relative"
       >
         {globalMessages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 dark:text-slate-500">
-            <MessageSquare className="w-10 h-10 mb-2 opacity-40 text-slate-400" />
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
-              Welcome to the Global Live Stream!
-            </p>
-            <p className="text-xs mt-1 max-w-xs">
-              Say hello, share ideas, or join the conversation with Lumora readers and writers worldwide.
-            </p>
+          <div className="h-full relative overflow-hidden rounded-xl">
+            <SakuraEditorialPoster
+              preview
+              height="100%"
+              className="absolute inset-0 h-full"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-40 flex flex-col items-center justify-end p-6 text-center">
+              <p className="text-sm font-medium text-white drop-shadow-md">
+                Welcome to the Global Live Stream!
+              </p>
+              <p className="text-xs mt-1 max-w-xs text-white/80 drop-shadow-sm">
+                Say hello, share ideas, or join the conversation.
+              </p>
+            </div>
           </div>
         ) : (
           globalMessages.map((msg) => {
@@ -239,9 +249,9 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
         {hasScrolledUp && (
           <button
             onClick={() => scrollToBottom('smooth')}
-            className="sticky bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 text-white text-xs font-semibold shadow-lg hover:bg-blue-700 transition-transform active:scale-95"
+            className="sticky bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-blossom-600 text-white text-xs font-semibold shadow-lg hover:bg-blossom-700 transition-transform active:scale-95"
           >
-            <ChevronDown className="w-3.5 h-3.5" />
+            <ChevronDown className="w-4 h-4" />
             New messages below
           </button>
         )}
@@ -254,7 +264,8 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
             <button
               key={emoji}
               onClick={() => handleEmojiClick(emoji)}
-              className="text-lg p-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+              className="btn-touch text-xl hover:bg-blossom-50 dark:hover:bg-slate-700"
+              aria-label={`Insert ${emoji}`}
             >
               {emoji}
             </button>
@@ -264,7 +275,7 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
 
       {/* Input Box */}
       <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           {currentUser && (
             <>
               <input
@@ -278,10 +289,11 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="p-2 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                className="btn-touch text-slate-500 hover:text-blossom-600 hover:bg-blossom-50 dark:hover:bg-slate-800 disabled:opacity-50"
                 title="Attach file"
+                aria-label="Attach file"
               >
-                <Paperclip className="w-4 h-4" />
+                <Paperclip className="w-5 h-5" />
               </button>
             </>
           )}
@@ -289,10 +301,11 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="p-2 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors"
+            className="btn-touch text-slate-500 hover:text-blossom-600 hover:bg-blossom-50 dark:hover:bg-slate-800"
             title="Insert emoji"
+            aria-label="Insert emoji"
           >
-            <Smile className="w-4 h-4" />
+            <Smile className="w-5 h-5" />
           </button>
 
           <input
@@ -305,17 +318,18 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
                 ? `Message global room as ${currentUser.name}...`
                 : 'Join live discussion (Guest)...'
             }
-            className="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 px-3.5 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+            className="flex-1 min-w-0 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blossom-500/50 transition-all"
           />
 
           <button
             type="button"
             onClick={handleSend}
             disabled={!inputVal.trim()}
-            className="p-2.5 rounded-xl bg-blue-600 text-white shadow hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+            className="btn-touch bg-blossom-600 text-white shadow hover:bg-blossom-700 disabled:opacity-40 disabled:cursor-not-allowed"
             title="Send message"
+            aria-label="Send message"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5" />
           </button>
         </div>
       </div>

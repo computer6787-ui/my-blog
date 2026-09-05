@@ -74,7 +74,7 @@ export const ChatRoot: React.FC = () => {
             title="Open Private Messages"
             aria-label="Open Private Messages"
           >
-            <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:rotate-6 transition-transform" />
+            <MessageSquare className="w-5 h-5 text-blossom-600 dark:text-blossom-400 group-hover:rotate-6 transition-transform" />
             {totalUnreadCount > 0 && (
               <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white shadow-sm ring-2 ring-white dark:ring-slate-900 animate-pulse">
                 {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
@@ -87,7 +87,7 @@ export const ChatRoot: React.FC = () => {
         {!isGlobalOpen && (
           <button
             onClick={() => setIsGlobalOpen(true)}
-            className="relative flex items-center gap-2 py-2.5 px-4 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all"
+            className="relative flex items-center gap-2 py-3 px-5 min-h-12 rounded-full bg-blossom-600 text-white shadow-lg hover:bg-blossom-700 hover:scale-105 active:scale-95 transition-all"
             title="Open Global Live Discussion"
             aria-label="Open Global Chat"
           >

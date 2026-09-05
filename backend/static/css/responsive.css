@@ -11,6 +11,18 @@
         margin-bottom: 2.5rem;
     }
 
+    .hero-cta-strip {
+        flex-direction: column;
+        gap: 0.6rem;
+        padding: 1rem 1rem;
+    }
+
+    .hero-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.9rem 1.4rem;
+    }
+
     .section-header {
         flex-direction: column;
         align-items: stretch;
@@ -34,5 +46,12 @@
 
     .single-story-body-wrap {
         padding: 1.5rem 1.2rem;
+    }
+}
+
+/* Header wraps to 2 rows on small screens — extra top padding for fixed nav */
+@media (max-width: 600px) {
+    main {
+        padding-top: 7.5rem;
     }
 }

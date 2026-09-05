@@ -36,7 +36,7 @@
 
 #login_form input:focus, #register input:focus, .verify_form input:focus, .update-password-container input:focus, #reset_pass_form input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(122, 92, 242, 0.12);
+    box-shadow: 0 0 0 4px rgba(194, 109, 132, 0.12);
 }
 
 #login_button, #register input[type="submit"], .verify_form button, #resendBtn, .update-password-container button, #reset_pass_form button {
@@ -48,7 +48,7 @@
     color: #ffffff;
     font-weight: 800;
     font-size: 1rem;
-    box-shadow: 0 8px 18px rgba(122, 92, 242, 0.25);
+    box-shadow: 0 8px 18px rgba(194, 109, 132, 0.25);
     margin-top: 0.5rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     justify-content: center;
@@ -66,7 +66,7 @@
 
 #login_button:hover, #register input[type="submit"]:hover, .verify_form button:hover, #resendBtn:hover, .update-password-container button:hover, #reset_pass_form button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(122, 92, 242, 0.35);
+    box-shadow: 0 12px 24px rgba(194, 109, 132, 0.35);
 }
 
 .password-container {

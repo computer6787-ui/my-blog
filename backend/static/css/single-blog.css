@@ -65,7 +65,7 @@
 }
 
 .story-category-pill {
-    background: rgba(122, 92, 242, 0.12);
+    background: rgba(194, 109, 132, 0.12);
     color: var(--accent);
     font-weight: 800;
     font-size: 0.8rem;
@@ -127,7 +127,7 @@
     color: #ffffff;
     font-weight: 800;
     font-size: 1.1rem;
-    box-shadow: 0 4px 14px rgba(122, 92, 242, 0.25);
+    box-shadow: 0 4px 14px rgba(194, 109, 132, 0.25);
 }
 
 .author-meta-text {

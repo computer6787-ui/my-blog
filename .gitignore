@@ -3,7 +3,9 @@ blog-env/
 venv/
 .venv/
 .clinerules
-
+.claude
+.agents
+skills-lock.json
 
 # Environment variables
 .env

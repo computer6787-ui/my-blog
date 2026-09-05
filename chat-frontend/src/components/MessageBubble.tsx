@@ -6,6 +6,7 @@ import {
   FileText,
   Download,
   ExternalLink,
+  ImageOff,
 } from 'lucide-react';
 
 import { RoleBadge } from './RoleBadge';
@@ -52,6 +53,35 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 }) => {
   const timeFormatted = formatTime(createdAt);
 
+  // Renders an image with a graceful placeholder if the attachment is
+  // missing or fails to load (e.g. a file that no longer exists on disk).
+  const renderAttachmentImage = (
+    src: string,
+    alt: string
+  ) => (
+    <div className="mt-1 overflow-hidden rounded-xl border border-black/10 dark:border-white/10 shadow-sm max-w-xs">
+      <img
+        src={src}
+        alt={alt}
+        className="block w-full max-h-60 object-cover cursor-pointer hover:opacity-95 transition-opacity"
+        onClick={() => window.open(src, '_blank')}
+        onError={(e) => {
+          const target = e.currentTarget;
+          target.style.display = 'none';
+          const placeholder = target.nextElementSibling as HTMLElement | null;
+          if (placeholder) placeholder.style.display = 'flex';
+        }}
+      />
+      <div
+        className="hidden items-center gap-2.5 px-4 py-3 text-xs text-slate-500 dark:text-slate-400 bg-black/5 dark:bg-white/5"
+        aria-hidden="true"
+      >
+        <ImageOff className="w-4 h-4 flex-shrink-0" />
+        <span className="truncate">This image is no longer available</span>
+      </div>
+    </div>
+  );
+
   const renderContent = () => {
     const trimmed = messageBody.trim();
 
@@ -64,16 +94,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       const alt = markdownImgMatch[1];
       const src = markdownImgMatch[2];
 
-      return (
-        <div className="mt-1 overflow-hidden rounded-xl border border-black/10 dark:border-white/10 shadow-sm max-w-xs">
-          <img
-            src={src}
-            alt={alt || 'Image'}
-            className="block w-full max-h-60 object-cover cursor-pointer hover:opacity-95 transition-opacity"
-            onClick={() => window.open(src, '_blank')}
-          />
-        </div>
-      );
+      return renderAttachmentImage(src, alt || 'Image');
     }
 
     // Direct image URL
@@ -81,16 +102,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       IMAGE_REGEX.test(trimmed) &&
       trimmed.split(/\s+/).length === 1
     ) {
-      return (
-        <div className="mt-1 overflow-hidden rounded-xl border border-black/10 dark:border-white/10 shadow-sm max-w-xs">
-          <img
-            src={trimmed}
-            alt="Attachment"
-            className="block w-full max-h-60 object-cover cursor-pointer hover:opacity-95 transition-opacity"
-            onClick={() => window.open(trimmed, '_blank')}
-          />
-        </div>
-      );
+      return renderAttachmentImage(trimmed, 'Attachment');
     }
 
     // Local uploaded file
@@ -105,16 +117,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(trimmed);
 
       if (isImg) {
-        return (
-          <div className="mt-1 overflow-hidden rounded-xl border border-black/10 dark:border-white/10 shadow-sm max-w-xs">
-            <img
-              src={trimmed}
-              alt={fileName}
-              className="block w-full max-h-60 object-cover cursor-pointer hover:opacity-95 transition-opacity"
-              onClick={() => window.open(trimmed, '_blank')}
-            />
-          </div>
-        );
+        return renderAttachmentImage(trimmed, fileName);
       }
 
       return (
@@ -124,7 +127,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           rel="noopener noreferrer"
           className="flex items-center gap-2.5 p-2 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 transition-colors text-xs font-medium max-w-full"
         >
-          <FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+          <FileText className="w-4 h-4 text-blossom-500 flex-shrink-0" />
 
           <span className="truncate max-w-[140px]">
             {fileName}
@@ -251,7 +254,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 truncate
                 ${
                   onAuthorClick
-                    ? 'cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors'
+                    ? 'cursor-pointer hover:text-blossom-600 dark:hover:text-blossom-400 transition-colors'
                     : ''
                 }
               `}
@@ -282,7 +285,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             shadow-sm
             break-words
             ${isSelf
-              ? 'bg-blue-600 text-white rounded-br-md'
+              ? 'bg-blossom-600 text-white rounded-br-md'
               : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-bl-md'
             }
           `}

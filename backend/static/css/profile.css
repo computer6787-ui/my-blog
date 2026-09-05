@@ -57,7 +57,7 @@
     justify-content: center;
     font-size: 2rem;
     font-weight: 800;
-    box-shadow: 0 8px 24px rgba(122, 92, 242, 0.3);
+    box-shadow: 0 8px 24px rgba(194, 109, 132, 0.3);
     flex-shrink: 0;
 }
 
@@ -78,7 +78,7 @@
     gap: 0.65rem;
     padding: 0.4rem;
     border-radius: 999px;
-    background: rgba(122, 92, 242, 0.08);
+    background: rgba(194, 109, 132, 0.08);
     border: 1px solid var(--line);
     margin-bottom: 1.5rem;
 }
@@ -97,7 +97,7 @@
 .profile-tab.is-active {
     background: var(--accent-gradient);
     color: #ffffff;
-    box-shadow: 0 10px 24px rgba(122, 92, 242, 0.3);
+    box-shadow: 0 10px 24px rgba(194, 109, 132, 0.3);
 }
 
 .profile-name-row {
@@ -152,8 +152,8 @@
     gap: 0.45rem;
     padding: 0.42rem 0.7rem;
     border-radius: 999px;
-    background: rgba(122, 92, 242, 0.08);
-    border: 1px solid rgba(122, 92, 242, 0.12);
+    background: rgba(194, 109, 132, 0.08);
+    border: 1px solid rgba(194, 109, 132, 0.12);
     color: var(--primary-deep);
     font-size: 0.82rem;
     font-weight: 700;
@@ -232,7 +232,7 @@
 .profile-picture-input:focus,
 .inline-name-input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(122, 92, 242, 0.12);
+    box-shadow: 0 0 0 4px rgba(194, 109, 132, 0.12);
 }
 
 .profile-edit-inline {
@@ -295,7 +295,7 @@
 }
 
 .badge-count {
-    background: rgba(122, 92, 242, 0.12);
+    background: rgba(194, 109, 132, 0.12);
     color: var(--accent);
     font-weight: 800;
     font-size: 0.8rem;

@@ -1,8 +1,10 @@
 import html
 import json
 import os
+import re
 import uuid
 from datetime import datetime, timezone
+from urllib.parse import quote
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, cast
@@ -710,6 +712,13 @@ async def upload_chat_file(
     if len(contents) > 10 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File exceeds 10MB limit")
 
+    def _safe_chat_name(raw_name: str) -> str:
+        """Build a URL-safe, unique-ish filename: [hex12]_sanitized.ext (lowercased ext)."""
+        p = Path(raw_name)
+        stem = re.sub(r"[^\w.-]+", "_", p.stem, flags=re.UNICODE).strip("._") or "file"
+        suffix = re.sub(r"[^a-z0-9]", "", p.suffix.lower())
+        return f"{uuid.uuid4().hex[:12]}_{stem}.{suffix}" if suffix else f"{uuid.uuid4().hex[:12]}_{stem}"
+
     # Auto-convert raster images to WebP for better compression
     convertible_images = {".png", ".jpg", ".jpeg", ".gif"}
     if ext in convertible_images:
@@ -731,19 +740,18 @@ async def upload_chat_file(
             
             # Update extension and filename
             ext = ".webp"
-            original_name = Path(file.filename).stem
-            unique_name = f"{uuid.uuid4().hex[:12]}_{original_name}.webp"
+            unique_name = _safe_chat_name(f"{Path(file.filename).stem}.webp")
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Image conversion failed: {str(e)}")
     else:
         # Keep original for SVG, PDF, TXT, ZIP, and already-WebP files
-        unique_name = f"{uuid.uuid4().hex[:12]}_{Path(file.filename).name}"
+        unique_name = _safe_chat_name(file.filename)
 
     dest_path = upload_dir / unique_name
     with open(dest_path, "wb") as f:
         f.write(contents)
 
-    file_url = f"/static/uploads/chat/{unique_name}"
+    file_url = f"/static/uploads/chat/{quote(unique_name)}"
     is_image = ext in {".webp", ".svg"}
 
     return {
