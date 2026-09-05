@@ -340,6 +340,7 @@ export function SakuraEditorialPoster({
 }: SakuraEditorialPosterProps) {
   useSakuraEditorialFonts();
 
+  const sectionRef = useRef<HTMLElement>(null);
   const keywordItems = keywords.filter((item) => item.label.trim().length > 0);
 
   const locked = forceProgress != null && Number.isFinite(forceProgress);
@@ -361,15 +362,23 @@ export function SakuraEditorialPoster({
      The poster mounts in its hidden state, then flips to revealed a short
      beat later so the entrance animation actually plays. There is no longer
      any click / tap / hover to reveal the text (preview / externally-driven
-     instances keep their current behaviour). */
+     instances keep their current behaviour).
+
+     Force a reflow (offsetHeight) right before flipping so the browser has
+     definitely committed the hidden styles — this guarantees the CSS
+     transition starts from the hidden state instead of a flash-of-instant. */
   useEffect(() => {
     if (locked || preview) return;
-    const id = window.setTimeout(() => setIsRevealed(true), 120);
+    const id = window.setTimeout(() => {
+      if (sectionRef.current) void sectionRef.current.offsetHeight;
+      setIsRevealed(true);
+    }, 120);
     return () => window.clearTimeout(id);
   }, [locked, preview]);
 
   return (
     <section
+      ref={sectionRef}
       data-revealed={isRevealed}
       className={cn(
         "sakura-poster relative isolate w-full overflow-hidden",

@@ -393,13 +393,19 @@
    All characters transition at the SAME time (no stagger), so the whole word
    expands outward from both sides as one fluid unit instead of revealing
    character-by-character. Outer chars travel slightly further, which reads
-   as a smooth stretch away from the center. */
+   as a smooth stretch away from the center.
+
+   The `!important` flags re-assert these durations over the global
+   `prefers-reduced-motion` fallback below (which sets
+   `transition-duration: 0.01ms !important` on every element). The poster's
+   entrance is intentionally meant to always play — see the comment at the top
+   of this section. */
 .sakura-poster[data-revealed="true"] .sakura-char {
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
-  transition-property: opacity, transform;
-  transition-duration: 1.6s;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: opacity, transform !important;
+  transition-duration: 1.6s !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* Editorial copy shell: slides up from the bottom on reveal.
@@ -417,8 +423,8 @@
   transform: translate3d(0, 0, 0);
   transition-property: transform;
   transition-delay: 0.6s;
-  transition-duration: 2.2s;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 2.2s !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* Each copy row slides up and fades in for a layered entrance.
@@ -436,9 +442,9 @@
 .sakura-poster[data-revealed="true"] .sakura-copy-row {
   opacity: 1;
   transform: translateY(0);
-  transition-property: opacity, transform;
-  transition-duration: 1.8s;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-property: opacity, transform !important;
+  transition-duration: 1.8s !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .sakura-poster[data-revealed="true"] .sakura-copy-row:nth-child(1) { transition-delay: 0.7s; }
