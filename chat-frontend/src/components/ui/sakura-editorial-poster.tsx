@@ -364,7 +364,10 @@ export function SakuraEditorialPoster({
 
   const toggleReveal = useCallback(() => {
     if (!interactiveReveal || locked || preview) return;
-    setIsRevealed((prev) => !prev);
+    // First click reveals the text. Subsequent clicks are a no-op — the text
+    // stays visible until the page is refreshed. (The previous toggle behavior
+    // allowed a second click/tap to hide it again, which is no longer wanted.)
+    setIsRevealed(true);
   }, [interactiveReveal, locked, preview]);
 
   const handlePointerEnter = useCallback(() => {
