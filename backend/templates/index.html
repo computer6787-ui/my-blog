@@ -63,15 +63,10 @@
         <!-- Blog cards loaded dynamically -->
     </div>
 
-    <div class="load-more-wrap">
-        <button id="load_more" class="load-more-btn">
-            <span>Load More Stories</span>
-            <span class="load-more-arrow">↓</span>
-        </button>
-    </div>
+    <nav id="blog_pagination" class="blog-pagination" aria-label="Blog navigation"></nav>
 </section>
 
-<script type="module" src="{{ url_for('static', path='js/blog.js') }}?v=20260901"></script>
+<script type="module" src="{{ url_for('static', path='js/blog.js') }}?v=20260905"></script>
 <script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
 <script type="module" src="{{ url_for('static', path='js/home.js') }}?v=20260901"></script>
 

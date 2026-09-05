@@ -1,7 +1,8 @@
-import { API_URL, ROUTES, notify } from "./config.js?v=20260902";
+import { API_URL, ROUTES, notify } from "./config.js?v=20260905";
 
-let skip = 0;
+let currentPage = 1;
 const limit = 6;
+let totalPages = 1;
 let currentSearch = "";
 let currentCategory = "";
 let isLoading = false;
@@ -298,28 +299,99 @@ export function createBlogCardElement(blog) {
     return article;
 }
 
-async function loadBlogs(search = "", append = false, category = currentCategory) {
+function buildPaginationNavigation() {
+    const nav = document.getElementById("blog_pagination");
+    if (!nav) return;
+
+    if (totalPages <= 1) {
+        nav.innerHTML = "";
+        nav.hidden = true;
+        return;
+    }
+
+    const makeBtn = (page, label, opts = {}) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "pagination-btn";
+        btn.innerHTML = opts.arrow
+            ? `<span class="pagination-arrow" aria-hidden="true">${label}</span>`
+            : label;
+        btn.setAttribute("aria-label", opts.arrow
+            ? (label === "←" ? "Previous page" : "Next page")
+            : `Go to page ${page}`);
+        if (opts.active) {
+            btn.classList.add("is-active");
+            btn.setAttribute("aria-current", "page");
+            btn.disabled = true;
+        }
+        if (opts.disabled) btn.disabled = true;
+        if (!opts.active && !opts.disabled) {
+            btn.addEventListener("click", () => goToPage(page));
+        }
+        return btn;
+    };
+
+    const frag = document.createDocumentFragment();
+
+    // Previous
+    frag.appendChild(makeBtn(currentPage - 1, "←", { arrow: true, disabled: currentPage <= 1 }));
+    frag.appendChild(makeBtn(1, "1", { active: currentPage === 1 }));
+
+    // Page window around the current page
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    if (start > 2) {
+        const ell = document.createElement("span");
+        ell.className = "pagination-ellipsis";
+        ell.textContent = "…";
+        frag.appendChild(ell);
+    }
+
+    for (let p = start; p <= end; p++) {
+        frag.appendChild(makeBtn(p, String(p), { active: p === currentPage }));
+    }
+
+    if (end < totalPages - 1) {
+        const ell = document.createElement("span");
+        ell.className = "pagination-ellipsis";
+        ell.textContent = "…";
+        frag.appendChild(ell);
+    }
+
+    if (totalPages > 1) {
+        frag.appendChild(makeBtn(totalPages, String(totalPages), { active: currentPage === totalPages }));
+    }
+
+    // Next
+    frag.appendChild(makeBtn(currentPage + 1, "→", { arrow: true, disabled: currentPage >= totalPages }));
+
+    nav.innerHTML = "";
+    nav.appendChild(frag);
+    nav.hidden = false;
+}
+
+async function goToPage(page) {
+    if (page < 1 || page > totalPages || page === currentPage || isLoading) return;
+    await loadBlogs(currentSearch, page, currentCategory);
+}
+
+async function loadBlogs(search = "", page = 1, category = currentCategory) {
     if (isLoading) return;
     isLoading = true;
 
-    const loadMoreButton = document.getElementById("load_more");
     const section = document.getElementById("blog_section");
 
-    if (!append) {
-        section.innerHTML = "";
-    }
+    // Smooth fade-out transition before swapping the grid
+    section.classList.add("pagenav-fading");
 
-    renderSkeletonCards(append ? 2 : 4);
-
-    if (loadMoreButton) {
-        loadMoreButton.disabled = true;
-        loadMoreButton.classList.add("loading");
-    }
+    renderSkeletonCards(4);
 
     try {
         const query = new URLSearchParams({
             limit: String(limit),
-            skip: String(skip),
+            skip: String((page - 1) * limit),
+            page: String(page),
             q: search || "",
             category: category || ""
         });
@@ -334,11 +406,13 @@ async function loadBlogs(search = "", append = false, category = currentCategory
         const blogs = Array.isArray(data.blogs) ? data.blogs : [];
         const total = typeof data.total === "number" ? data.total : blogs.length;
 
+        totalPages = Math.max(1, Math.ceil(total / limit));
+        currentPage = page > totalPages ? totalPages : page;
+
         removeSkeletonCards();
+        section.replaceChildren();
 
-        if (blogs.length === 0 && !append) {
-            if (loadMoreButton) loadMoreButton.style.display = "none";
-
+        if (blogs.length === 0) {
             const emptyState = document.createElement("div");
             emptyState.className = "empty-blog-state";
             const activeCategoryLabel = category ? ` in "${escapeHtml(category)}"` : "";
@@ -369,25 +443,23 @@ async function loadBlogs(search = "", append = false, category = currentCategory
                 });
             }
 
+            section.classList.remove("pagenav-fading");
+            buildPaginationNavigation();
             return;
         }
 
-        blogs.forEach(blog => {
+        // Staged entrance: stagger each card slightly for a graceful cascade
+        blogs.forEach((blog, index) => {
             const card = createBlogCardElement(blog);
+            card.style.animationDelay = `${Math.min(index * 0.07, 0.6)}s`;
             section.appendChild(card);
         });
 
-        skip += blogs.length;
-
-        if (loadMoreButton) {
-            if (skip >= total || blogs.length < limit) {
-                loadMoreButton.style.display = "none";
-            } else {
-                loadMoreButton.style.display = "inline-flex";
-            }
-        }
+        section.classList.remove("pagenav-fading");
+        buildPaginationNavigation();
     } catch (error) {
         removeSkeletonCards();
+        section.classList.remove("pagenav-fading");
         console.error("Failed to load blogs:", error);
         notify({
             type: "error",
@@ -396,10 +468,6 @@ async function loadBlogs(search = "", append = false, category = currentCategory
         });
     } finally {
         isLoading = false;
-        if (loadMoreButton) {
-            loadMoreButton.disabled = false;
-            loadMoreButton.classList.remove("loading");
-        }
     }
 }
 
@@ -420,12 +488,7 @@ async function performSearch() {
     const categoryFilter = document.getElementById("category_filter");
     currentSearch = searchBar ? searchBar.value.trim() : "";
     currentCategory = categoryFilter ? categoryFilter.value.trim() : "";
-    skip = 0;
-    await loadBlogs(currentSearch, false, currentCategory);
-}
-
-async function loadMore() {
-    await loadBlogs(currentSearch, true, currentCategory);
+    await loadBlogs(currentSearch, 1, currentCategory);
 }
 
 async function readMore(id) {
@@ -455,7 +518,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const searchBtn = document.getElementById("search_button");
     const searchBar = document.getElementById("search_bar");
     const clearSearchBtn = document.getElementById("clear_search");
-    const loadMoreBtn = document.getElementById("load_more");
     const categoryFilter = document.getElementById("category_filter");
 
     if (searchBtn) {
@@ -540,10 +602,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 setCategoryShellState(false);
             }
         });
-    }
-
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener("click", loadMore);
     }
 
     loadBlogs();

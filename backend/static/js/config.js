@@ -1,8 +1,8 @@
-export const API_URL =
-    window.location.hostname === "127.0.0.1" ||
-    window.location.hostname === "localhost"
-        ? "http://localhost:8000"
-        : "https://lumora-2g3u.onrender.com";
+// Use relative URLs — the API is served by the same FastAPI server as the
+// HTML pages, so no cross-origin requests are needed.  Previously the dev
+// value was "http://localhost:8000" which caused CORS errors when the page
+// was loaded via 127.0.0.1 (different hostname → cross-origin).
+export const API_URL = "";
 
 export const ROUTES = {
     HOME: "/",

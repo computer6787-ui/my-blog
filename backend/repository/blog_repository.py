@@ -67,27 +67,78 @@ def matches_category(blog, category):
 
 
 def all_blog(limit: int, skip: int, db, q=None, category=None):
-    query = db.query(models.Blog).filter(models.Blog.published == True)
+    from sqlalchemy import func
+    from sqlalchemy.orm import joinedload
+
+    base_query = db.query(models.Blog).filter(models.Blog.published == True)
 
     if q:
-        query = query.filter(
+        base_query = base_query.filter(
             or_(
                 models.Blog.title.ilike(f"%{q}%"),
                 models.Blog.body.ilike(f"%{q}%"),
             )
         )
 
-    blogs = query.order_by(desc(models.Blog.id)).all()
-
+    # --- Category filtering requires keyword matching on title/body ---
     if category:
-        blogs = [blog for blog in blogs if matches_category(blog, category)]
+        all_blogs = (
+            base_query
+            .options(joinedload(models.Blog.creator))
+            .order_by(desc(models.Blog.id))
+            .all()
+        )
+        blogs = [b for b in all_blogs if matches_category(b, category)]
+        total = len(blogs)
+        blogs = blogs[skip:skip + limit]
+        blog_ids = [b.id for b in blogs]
+    else:
+        total = base_query.count()
+        if total == 0:
+            return {"blogs": [], "total": 0}
+        id_rows = (
+            db.query(models.Blog.id)
+            .filter(models.Blog.published == True)
+        )
+        if q:
+            id_rows = id_rows.filter(
+                or_(
+                    models.Blog.title.ilike(f"%{q}%"),
+                    models.Blog.body.ilike(f"%{q}%"),
+                )
+            )
+        blog_ids = [r[0] for r in id_rows.order_by(desc(models.Blog.id)).offset(skip).limit(limit).all()]
+        if not blog_ids:
+            return {"blogs": [], "total": total}
+        blogs = (
+            db.query(models.Blog)
+            .options(joinedload(models.Blog.creator))
+            .filter(models.Blog.id.in_(blog_ids))
+            .order_by(desc(models.Blog.id))
+            .all()
+        )
 
-    total = len(blogs)
-    blogs = blogs[skip:skip + limit]
-
-    for blog in blogs:
-        blog.likes_count = db.query(models.Like).filter(models.Like.blog_id == blog.id).count()
-        blog.comments_count = db.query(models.Comment).filter(models.Comment.blog_id == blog.id).count()
+    # --- Bulk likes/comments counting (avoids N+1 per blog per page) ---
+    if blog_ids:
+        likes_counts = dict(
+            db.query(models.Like.blog_id, func.count(models.Like.id))
+            .filter(models.Like.blog_id.in_(blog_ids))
+            .group_by(models.Like.blog_id)
+            .all()
+        )
+        comments_counts = dict(
+            db.query(models.Comment.blog_id, func.count(models.Comment.id))
+            .filter(models.Comment.blog_id.in_(blog_ids))
+            .group_by(models.Comment.blog_id)
+            .all()
+        )
+        for blog in blogs:
+            blog.likes_count = likes_counts.get(blog.id, 0)
+            blog.comments_count = comments_counts.get(blog.id, 0)
+            # The card grid does not use the heavy base64 image; omitting it
+            # slashes the listing payload from many hundreds of KB per row to
+            # ~1-2 KB. Full images are still served on the individual blog page.
+            blog.image_url = None
 
     return {
         "blogs": blogs,

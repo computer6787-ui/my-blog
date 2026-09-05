@@ -119,14 +119,17 @@ class ShowBlog(BaseModel):
 class BlogCardResponse(BaseModel):
     """Lightweight blog card used by the public listing endpoint.
     Uses CreatorInfo instead of the full Show_user so that nested creator
-    blogs (and their large base64 images) are NOT serialized per card."""
+    blogs (and their large base64 images) are NOT serialized per card.
+    ``creator`` is optional because a deleted/orphaned user leaves the blog
+    without a valid creator; the front-end already falls back to a generic
+    author label via optional chaining."""
     id: int
     title: str
     body: str
     image_url: Optional[str] = None
     category: Optional[str] = None
     created_at: Optional[datetime] = None
-    creator: CreatorInfo
+    creator: Optional[CreatorInfo] = None
     likes_count: int = 0
     comments_count: int = 0
 
