@@ -86,6 +86,20 @@ class PendingUser(BaseModel):
         orm_mode = True
 
 
+class CreatorInfo(BaseModel):
+    """Lightweight creator info for blog listings – avoids sending the
+    creator's full profile (including nested blogs with their base64
+    images) in every blog card, which previously ballooned the response
+    to multiple megabytes and caused load errors."""
+    id: int
+    name: str
+    profile_picture_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
 class ShowBlog(BaseModel):
     id: int
     title: str
@@ -94,6 +108,25 @@ class ShowBlog(BaseModel):
     category: Optional[str] = None
     created_at: Optional[datetime] = None
     creator: Show_user
+    likes_count: int = 0
+    comments_count: int = 0
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+class BlogCardResponse(BaseModel):
+    """Lightweight blog card used by the public listing endpoint.
+    Uses CreatorInfo instead of the full Show_user so that nested creator
+    blogs (and their large base64 images) are NOT serialized per card."""
+    id: int
+    title: str
+    body: str
+    image_url: Optional[str] = None
+    category: Optional[str] = None
+    created_at: Optional[datetime] = None
+    creator: CreatorInfo
     likes_count: int = 0
     comments_count: int = 0
 
@@ -122,7 +155,7 @@ class VerifyUser(BaseModel):
 
 
 class BlogResponse(BaseModel):
-    blogs: list[ShowBlog]
+    blogs: list[BlogCardResponse]
     total: int
 
     class Config:

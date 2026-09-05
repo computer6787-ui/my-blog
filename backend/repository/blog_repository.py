@@ -67,7 +67,7 @@ def matches_category(blog, category):
 
 
 def all_blog(limit: int, skip: int, db, q=None, category=None):
-    query = db.query(models.Blog)
+    query = db.query(models.Blog).filter(models.Blog.published == True)
 
     if q:
         query = query.filter(

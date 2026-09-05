@@ -227,6 +227,18 @@
 .sakura-poster .sakura-copy-row:nth-child(6) { transition-delay: 0.62s; }
 
 /* ------------------------------------------------------------------ */
+/* Sakura poster — cap height on mobile so the branch image does not   */
+/* consume the entire viewport.  On small screens we clamp to 75svh   */
+/* (about 500–600 px) which keeps the poster visually tight without   */
+/* sacrificing the branch composition.                                */
+/* ------------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .sakura-poster {
+    max-height: 60svh; /* 700px */
+    height: 70svh; /* 700px */
+  }
+}
+
 /* Touch targets — guaranteed 44px (mobile) / 48px (desktop) hit area  */
 /* ------------------------------------------------------------------ */
 .btn-touch {

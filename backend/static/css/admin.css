@@ -736,10 +736,18 @@ body.dark-mode .admin-owner-badge {
 
     .admin-main {
         margin-left: 0;
+        padding-top: 4rem;
     }
 
     .admin-menu-toggle {
         display: flex;
+    }
+}
+
+/* Header wraps to 2 rows at ≤600 px — match the global main padding. */
+@media (max-width: 600px) {
+    .admin-main {
+        padding-top: 7.5rem;
     }
 }
 
