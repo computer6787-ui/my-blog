@@ -695,7 +695,7 @@ function openReplyForm(commentId, userName) {
     const formWrap = document.createElement("form");
     formWrap.className = "comment-reply-form";
     formWrap.innerHTML = `
-        <textarea class="comment-input reply-input" rows="2" placeholder="Reply to ${escapeHtml(userName)}..." data-parent-id="${commentId}"></textarea>
+        <textarea name="reply-input" class="comment-input reply-input" rows="2" placeholder="Reply to ${escapeHtml(userName)}..." data-parent-id="${commentId}"></textarea>
         <div class="reply-form-actions">
             <button type="button" class="btn-reply-cancel">Cancel</button>
             <button type="submit" class="btn-submit-comment">Reply</button>

@@ -166,11 +166,15 @@ async def websocket_chat_endpoint(
     websocket: WebSocket,
     token: Optional[str] = Query(None),
 ):
-    db: Session = SessionLocal()
     current_user: Optional[models.User] = None
     try:
         if token:
-            current_user = authenticate_token(token, db)
+            # Short-lived auth session: released immediately, not pinned for socket lifetime
+            auth_db: Session = SessionLocal()
+            try:
+                current_user = authenticate_token(token, auth_db)
+            finally:
+                auth_db.close()
 
         if current_user:
             await manager.connect_user(websocket, cast(int, current_user.id))
@@ -213,7 +217,11 @@ async def websocket_chat_endpoint(
 
             if msg_type == "authenticate":
                 auth_token = msg_payload.get("token")
-                user = authenticate_token(auth_token, db)
+                auth_db = SessionLocal()
+                try:
+                    user = authenticate_token(auth_token, auth_db)
+                finally:
+                    auth_db.close()
                 if user:
                     if not current_user:
                         manager.guest_sockets.discard(websocket)
@@ -256,15 +264,19 @@ async def websocket_chat_endpoint(
                 author_name = current_user.name if current_user else guest_name
                 user_id = current_user.id if current_user else None
 
-                db_msg = models.GlobalMessage(
-                    user_id=user_id,
-                    author_name=author_name,
-                    message_body=clean_body,
-                    created_at=datetime.now(timezone.utc),
-                )
-                db.add(db_msg)
-                db.commit()
-                db.refresh(db_msg)
+                ws_db: Session = SessionLocal()
+                try:
+                    db_msg = models.GlobalMessage(
+                        user_id=user_id,
+                        author_name=author_name,
+                        message_body=clean_body,
+                        created_at=datetime.now(timezone.utc),
+                    )
+                    ws_db.add(db_msg)
+                    ws_db.commit()
+                    ws_db.refresh(db_msg)
+                finally:
+                    ws_db.close()
 
                 out_event = {
                     "type": "global_message",
@@ -295,21 +307,24 @@ async def websocket_chat_endpoint(
                 if not recipient_id or not clean_body:
                     continue
 
-                recipient = db.query(models.User).filter(models.User.id == int(recipient_id)).first()
-                if not recipient:
-                    await websocket.send_json({"type": "error", "message": "Recipient not found."})
-                    continue
-
-                db_private = models.PrivateMessage(
-                    sender_id=current_user.id,
-                    receiver_id=recipient.id,
-                    message_body=clean_body,
-                    is_read=False,
-                    created_at=datetime.now(timezone.utc),
-                )
-                db.add(db_private)
-                db.commit()
-                db.refresh(db_private)
+                ws_db = SessionLocal()
+                try:
+                    recipient = ws_db.query(models.User).filter(models.User.id == int(recipient_id)).first()
+                    if not recipient:
+                        await websocket.send_json({"type": "error", "message": "Recipient not found."})
+                        continue
+                    db_private = models.PrivateMessage(
+                        sender_id=current_user.id,
+                        receiver_id=recipient.id,
+                        message_body=clean_body,
+                        is_read=False,
+                        created_at=datetime.now(timezone.utc),
+                    )
+                    ws_db.add(db_private)
+                    ws_db.commit()
+                    ws_db.refresh(db_private)
+                finally:
+                    ws_db.close()
 
                 out_event = {
                     "type": "private_message",
@@ -370,12 +385,16 @@ async def websocket_chat_endpoint(
                     continue
                 other_user_id = msg_payload.get("sender_id")
                 if other_user_id:
-                    db.query(models.PrivateMessage).filter(
-                        models.PrivateMessage.sender_id == int(other_user_id),
-                        models.PrivateMessage.receiver_id == current_user.id,
-                        models.PrivateMessage.is_read == False,
-                    ).update({"is_read": True}, synchronize_session=False)
-                    db.commit()
+                    ws_db = SessionLocal()
+                    try:
+                        ws_db.query(models.PrivateMessage).filter(
+                            models.PrivateMessage.sender_id == int(other_user_id),
+                            models.PrivateMessage.receiver_id == current_user.id,
+                            models.PrivateMessage.is_read == False,
+                        ).update({"is_read": True}, synchronize_session=False)
+                        ws_db.commit()
+                    finally:
+                        ws_db.close()
 
                     receipt_event = {
                         "type": "read_receipt",
@@ -392,8 +411,6 @@ async def websocket_chat_endpoint(
     except Exception as e:
         print("WebSocket chat session error:", e)
         await manager.disconnect(websocket)
-    finally:
-        db.close()
 
 
 

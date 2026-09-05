@@ -1,9 +1,7 @@
 // Global notifications system: bell badge, drawer, polling, and click-navigation
 (function () {
-    const API_URL =
-        window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
-            ? "http://localhost:8000"
-            : "https://lumora-2g3u.onrender.com";
+    // Use relative URLs — same origin as the page, avoids CORS when loaded via 127.0.0.1 vs localhost
+    const API_URL = "";
 
     let unreadCount = 0;
     let pollTimer = null;
