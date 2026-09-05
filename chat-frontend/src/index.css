@@ -99,12 +99,17 @@
     --border-glass: rgba(255, 255, 255, 0.08);
   }
 
-  /* Reduced motion support */
+  /* Reduced motion support.
+     Note: we intentionally do NOT force duration to 0.01ms here. That blanket
+     override snapped every entrance animation (sakura poster, CTA strip, blog
+     cards...) for any visitor with `prefers-reduced-motion: reduce` (e.g.
+     Windows "show animations" off), which made the site feel dead on those
+     machines while it animated fine elsewhere. The decorative hero entrances
+     are meant to always play. We keep the genuinely useful reduced-motion
+     bits: no smooth-scroll and no infinite loops. */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
-      animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
   }
