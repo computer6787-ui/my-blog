@@ -3,6 +3,7 @@
 @custom-variant dark (&:where(.dark-mode, .dark-mode *, .dark, .dark *));
 
 @theme {
+  /* Lumora Blossom — core brand scale (unchanged) */
   --color-blossom-50: #faf1f3;
   --color-blossom-100: #f5e2e7;
   --color-blossom-200: #eccad3;
@@ -14,62 +15,221 @@
   --color-blossom-800: #6d3649;
   --color-blossom-900: #572c3a;
   --color-blossom-950: #3b212b;
+
+  /* Night mode — deep blossom indigo scale for sophisticated dark UI */
+  --color-blossom-night-50: #fdf8f9;
+  --color-blossom-night-100: #f8edf0;
+  --color-blossom-night-200: #efe0e4;
+  --color-blossom-night-300: #e2c9cf;
+  --color-blossom-night-400: #d1a8b0;
+  --color-blossom-night-500: #be8591;
+  --color-blossom-night-600: #a86776;
+  --color-blossom-night-700: #8e4f5e;
+  --color-blossom-night-800: #74404f;
+  --color-blossom-night-900: #5e3641;
+  --color-blossom-night-950: #341c23;
+
+  /* Semantic surface tokens for consistent layering */
+  --color-surface-1: #ffffff;           /* Base page background (light) */
+  --color-surface-2: #fafafa;           /* Elevated card (light) */
+  --color-surface-3: #f5f5f5;           /* Hover/active states (light) */
+
+  --color-surface-dark-1: #0d0b0c;      /* Deep base — near-black with blossom tint */
+  --color-surface-dark-2: #161213;      /* Elevated card (dark) */
+  --color-surface-dark-3: #1f191a;      /* Hover/active (dark) */
+  --color-surface-dark-4: #2a2325;      /* Inputs, modals, dropdowns (dark) */
+
+  --color-border-light: rgba(194, 109, 132, 0.12);
+  --color-border-dark: rgba(255, 255, 255, 0.06);
+
+  /* Foreground tokens — meet 4.5:1 on both themes */
+  --color-text-primary-light: #1a1617;
+  --color-text-secondary-light: #4a3f41;
+  --color-text-muted-light: #7a6b6d;
+
+  --color-text-primary-dark: #faf5f6;
+  --color-text-secondary-dark: #d4c4c6;
+  --color-text-muted-dark: #9a888a;
 }
 
 @layer base {
   :root {
     --lumora-accent: #c26d84;
-    --lumora-accent-hover: #9d5669;
+    --lumora-accent-hover: #a2526b;
     --lumora-accent-light: rgba(194, 109, 132, 0.12);
+    --lumora-accent-glow: rgba(194, 109, 132, 0.35);
+
+    /* Semantic foreground (light) */
+    --text-primary: #1a1617;
+    --text-secondary: #4a3f41;
+    --text-muted: #7a6b6d;
+    --text-inverse: #ffffff;
+
+    /* Semantic backgrounds (light) */
+    --bg-page: #fdf8f9;
+    --bg-card: #ffffff;
+    --bg-elevated: #fafafa;
+    --bg-hover: #f5f5f5;
+    --bg-input: #ffffff;
+    --bg-glass: rgba(255, 253, 249, 0.92);
+    --border-subtle: rgba(194, 109, 132, 0.12);
+    --border-glass: rgba(194, 109, 132, 0.14);
   }
 
   .dark-mode, .dark {
-    --lumora-accent: #e8b7c3;
-    --lumora-accent-hover: #d98fa0;
+    --lumora-accent: #e8b7c3;           /* Softer, warmer pink for night */
+    --lumora-accent-hover: #f0c9d1;
     --lumora-accent-light: rgba(232, 183, 195, 0.15);
+    --lumora-accent-glow: rgba(232, 183, 195, 0.25);
+
+    /* Semantic foreground (dark) — all meet 4.5:1 on --bg-page-dark */
+    --text-primary: #faf5f6;
+    --text-secondary: #d4c4c6;
+    --text-muted: #9a888a;
+    --text-inverse: #0d0b0c;
+
+    /* Semantic backgrounds (dark) — layered depth */
+    --bg-page: #0d0b0c;
+    --bg-card: #161213;
+    --bg-elevated: #1f191a;
+    --bg-hover: #2a2325;
+    --bg-input: #1f191a;
+    --bg-glass: rgba(22, 18, 19, 0.92);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-glass: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-/* Glassmorphism surfaces */
+/* =========================================================================
+   NIGHT MODE — Atmospheric Color Grading
+   =========================================================================
+   A cohesive dark theme that:
+   • Maintains blossom brand identity with warmer, softer pink
+   • Uses layered surface depth (4 elevation levels)
+   • Meets WCAG AA (4.5:1) for all text
+   • Adds subtle atmospheric gradients for depth
+   • Improves glassmorphism with proper night-time optics
+   ========================================================================= */
+
+/* Page background — subtle radial vignette for depth */
+.dark-mode body,
+.dark body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%,
+      rgba(232, 183, 195, 0.04) 0%,
+      transparent 70%),
+    radial-gradient(ellipse 60% 60% at 80% 100%,
+      rgba(138, 67, 89, 0.03) 0%,
+      transparent 60%),
+    var(--bg-page);
+  min-height: 100vh;
+}
+
+/* Glassmorphism — night mode uses warmer, more transparent bases */
 .lumora-glass-surface {
-  background: rgba(255, 253, 249, 0.92);
+  background: var(--bg-glass);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(194, 109, 132, 0.14);
+  border: 1px solid var(--border-glass);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 8px 32px rgba(194, 109, 132, 0.04);
 }
 
 .dark-mode .lumora-glass-surface,
 .dark .lumora-glass-surface {
-  background: rgba(32, 24, 27, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 8px 32px rgba(232, 183, 195, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .lumora-glass-card {
   background: rgba(255, 253, 249, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(194, 109, 132, 0.08);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 16px rgba(194, 109, 132, 0.06);
 }
 
 .dark-mode .lumora-glass-card,
 .dark .lumora-glass-card {
-  background: rgba(36, 29, 32, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(22, 18, 19, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
 }
 
-/* Custom sleek scrollbars */
+/* Elevated card — stronger separation in night mode */
+.lumora-card-elevated {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow:
+    0 2px 8px rgba(194, 109, 132, 0.08),
+    0 8px 24px rgba(194, 109, 132, 0.04);
+}
+
+.dark-mode .lumora-card-elevated,
+.dark .lumora-card-elevated {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+/* Input surfaces — distinct in night mode */
+.lumora-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.lumora-input:focus {
+  outline: none;
+  border-color: var(--lumora-accent);
+  box-shadow: 0 0 0 3px var(--lumora-accent-light);
+}
+
+.dark-mode .lumora-input,
+.dark .lumora-input {
+  background: var(--bg-input);
+  border-color: var(--border-subtle);
+}
+
+.dark-mode .lumora-input:focus,
+.dark .lumora-input:focus {
+  box-shadow: 0 0 0 3px var(--lumora-accent-light);
+}
+
+/* Scrollbars — themed for both modes */
 .scroller-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgba(194, 109, 132, 0.25) transparent;
+  scrollbar-color: var(--lumora-accent) transparent;
 }
 
 .scroller-thin::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 .scroller-thin::-webkit-scrollbar-track {
@@ -77,18 +237,87 @@
 }
 
 .scroller-thin::-webkit-scrollbar-thumb {
-  background-color: rgba(194, 109, 132, 0.25);
+  background-color: var(--lumora-accent);
   border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 .dark-mode .scroller-thin::-webkit-scrollbar-thumb,
 .dark .scroller-thin::-webkit-scrollbar-thumb {
-  background-color: rgba(232, 183, 195, 0.3);
+  background-color: var(--lumora-accent);
+  border: 2px solid var(--bg-page);
+  background-clip: content-box;
 }
 
 .scroller-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(194, 109, 132, 0.5);
+  background-color: var(--lumora-accent-hover);
 }
+
+/* Selection colors — branded in both modes */
+::selection {
+  background: var(--lumora-accent-light);
+  color: var(--text-primary);
+}
+
+.dark-mode ::selection,
+.dark ::selection {
+  background: var(--lumora-accent-light);
+  color: var(--text-primary);
+}
+
+/* Focus ring — accessible on both backgrounds */
+.lumora-focus-ring:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--bg-page),
+    0 0 0 4px var(--lumora-accent);
+}
+
+.dark-mode .lumora-focus-ring:focus-visible,
+.dark .lumora-focus-ring:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--bg-page),
+    0 0 0 4px var(--lumora-accent);
+}
+
+
+/* =========================================================================
+   TEXT GRADIENTS — Accent text that works in both modes
+   ========================================================================= */
+
+.text-blossom-gradient {
+  background: linear-gradient(135deg, var(--lumora-accent), var(--lumora-accent-hover));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark-mode .text-blossom-gradient,
+.dark .text-blossom-gradient {
+  background: linear-gradient(135deg, var(--lumora-accent), #f0c9d1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* =========================================================================
+   UTILITY — Semantic color classes
+   ========================================================================= */
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.text-inverse { color: var(--text-inverse); }
+
+.bg-page { background-color: var(--bg-page); }
+.bg-card { background-color: var(--bg-card); }
+.bg-elevated { background-color: var(--bg-elevated); }
+.bg-hover:hover { background-color: var(--bg-hover); }
+.bg-glass { background-color: var(--bg-glass); }
+
+.border-subtle { border-color: var(--border-subtle); }
+.border-glass { border-color: var(--border-glass); }
 
 /* Kinetic typing indicator bounce */
 @keyframes typing-bounce {
@@ -143,88 +372,81 @@
  * RAF loop snapped instantly whenever the OS had animations disabled).
  */
 
-/* Title characters burst outward from behind the branch on reveal.
-   Each char carries its own horizontal/vertical offset so the word fans out. */
+/* ── Title characters: expand symmetrically from center ──
+   Characters start small, clustered at the center (pushed down + slightly
+   inward), and fan outward to their final positions. The hidden→revealed
+   transition is lazy and smooth; the revealed→hidden snap-back is instant
+   so re-triggering feels clean. */
 .sakura-poster .sakura-char {
   display: inline-block;
   transform-origin: center bottom;
-  transition-property: opacity, transform;
-  transition-duration: 0.72s;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Hidden state: tiny, pushed out to the side and down, invisible */
+/* Hidden state: instant snap — no transition so the page load starts clean */
 .sakura-poster:not([data-revealed="true"]) .sakura-char {
   opacity: 0;
   transform: translate3d(var(--x-off), var(--y-off), 0) scale(0.3);
+  transition: none;
 }
 
-/* Revealed state: full size, centered */
+/* Revealed state: slow, smooth expansion from center.
+   All characters transition at the SAME time (no stagger), so the whole word
+   expands outward from both sides as one fluid unit instead of revealing
+   character-by-character. Outer chars travel slightly further, which reads
+   as a smooth stretch away from the center. */
 .sakura-poster[data-revealed="true"] .sakura-char {
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
+  transition-property: opacity, transform;
+  transition-duration: 1.6s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Stagger each character so the fan-out feels organic. */
-.sakura-poster .sakura-char:nth-child(1) { transition-delay: 0.02s; }
-.sakura-poster .sakura-char:nth-child(2) { transition-delay: 0.05s; }
-.sakura-poster .sakura-char:nth-child(3) { transition-delay: 0.08s; }
-.sakura-poster .sakura-char:nth-child(4) { transition-delay: 0.11s; }
-.sakura-poster .sakura-char:nth-child(5) { transition-delay: 0.14s; }
-.sakura-poster .sakura-char:nth-child(6) { transition-delay: 0.17s; }
-.sakura-poster .sakura-char:nth-child(7) { transition-delay: 0.20s; }
-.sakura-poster .sakura-char:nth-child(8) { transition-delay: 0.23s; }
-.sakura-poster .sakura-char:nth-child(9) { transition-delay: 0.26s; }
-.sakura-poster .sakura-char:nth-child(10) { transition-delay: 0.29s; }
-.sakura-poster .sakura-char:nth-child(11) { transition-delay: 0.32s; }
-.sakura-poster .sakura-char:nth-child(12) { transition-delay: 0.35s; }
-.sakura-poster .sakura-char:nth-child(13) { transition-delay: 0.38s; }
-.sakura-poster .sakura-char:nth-child(14) { transition-delay: 0.41s; }
-.sakura-poster .sakura-char:nth-child(15) { transition-delay: 0.44s; }
-.sakura-poster .sakura-char:nth-child(16) { transition-delay: 0.47s; }
-.sakura-poster .sakura-char:nth-child(17) { transition-delay: 0.50s; }
-.sakura-poster .sakura-char:nth-child(18) { transition-delay: 0.53s; }
-.sakura-poster .sakura-char:nth-child(19) { transition-delay: 0.56s; }
-.sakura-poster .sakura-char:nth-child(20) { transition-delay: 0.59s; }
-
-/* Editorial copy shell: slides up from the bottom on reveal. */
+/* Editorial copy shell: slides up from the bottom on reveal.
+   Hidden = instant snap off-screen; revealed = slow, lazy slide-up. */
 .sakura-poster .sakura-copy-shell {
-  transition-property: transform;
-  transition-duration: 0.82s;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 
 .sakura-poster:not([data-revealed="true"]) .sakura-copy-shell {
   transform: translate3d(0, 110%, 0);
+  transition: none;
 }
 
 .sakura-poster[data-revealed="true"] .sakura-copy-shell {
   transform: translate3d(0, 0, 0);
+  transition-property: transform;
+  transition-delay: 0.6s;
+  transition-duration: 2.2s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Each copy row rises in turn for a layered entrance. */
+/* Each copy row slides up and fades in for a layered entrance.
+   Hidden = instant snap; revealed = slow, staggered reveal. */
 .sakura-poster .sakura-copy-row {
-  transition-property: opacity, transform;
-  transition-duration: 0.62s;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
 }
 
 .sakura-poster:not([data-revealed="true"]) .sakura-copy-row {
   opacity: 0;
   transform: translateY(22px);
+  transition: none;
 }
 
 .sakura-poster[data-revealed="true"] .sakura-copy-row {
   opacity: 1;
   transform: translateY(0);
+  transition-property: opacity, transform;
+  transition-duration: 1.8s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.sakura-poster .sakura-copy-row:nth-child(1) { transition-delay: 0.12s; }
-.sakura-poster .sakura-copy-row:nth-child(2) { transition-delay: 0.22s; }
-.sakura-poster .sakura-copy-row:nth-child(3) { transition-delay: 0.32s; }
-.sakura-poster .sakura-copy-row:nth-child(4) { transition-delay: 0.42s; }
-.sakura-poster .sakura-copy-row:nth-child(5) { transition-delay: 0.52s; }
-.sakura-poster .sakura-copy-row:nth-child(6) { transition-delay: 0.62s; }
+.sakura-poster[data-revealed="true"] .sakura-copy-row:nth-child(1) { transition-delay: 0.7s; }
+.sakura-poster[data-revealed="true"] .sakura-copy-row:nth-child(2) { transition-delay: 0.9s; }
+.sakura-poster[data-revealed="true"] .sakura-copy-row:nth-child(3) { transition-delay: 1.1s; }
+.sakura-poster[data-revealed="true"] .sakura-copy-row:nth-child(4) { transition-delay: 1.3s; }
+.sakura-poster[data-revealed="true"] .sakura-copy-row:nth-child(5) { transition-delay: 1.5s; }
+.sakura-poster[data-revealed="true"] .sakura-copy-row:nth-child(6) { transition-delay: 1.7s; }
 
 /* ------------------------------------------------------------------ */
 /* Sakura poster — mobile layout fixes                                 */
@@ -239,24 +461,21 @@
 /* breakpoint that imposes a height cap.                              */
 /* ------------------------------------------------------------------ */
 @media (max-width: 768px) {
+  /* Keep the hero at the same landscape ratio as desktop instead of
+     re-capping it to a shorter svh band. That band shrank cqh and dragged
+     the cherry branch left (left:42% + full-width override). With a fixed
+     ratio the container's cqh scales consistently, so the branch, title and
+     copy all keep the exact proportions they have on PC — no more leftward
+     branch shift on mobile. */
   .sakura-poster {
-    max-height: 60svh;
-    height: 70svh;
+    height: auto !important;  /* override inline `height: 100svh` */
+    max-height: none;
+    aspect-ratio: 16 / 9;
   }
 
-  /* --- inner wrapper: fill the capped section, not 100svh ---------- */
+  /* --- inner wrapper: fill the ratio box, not inline 100svh -------- */
   .sakura-poster > div {
-    height: 100% !important;   /* override inline `height: 100svh` */
-  }
-
-  /* --- cherry branch: centre properly, prevent clipping / drag-down */
-  .sakura-poster .sakura-branch {
-    left: 50%;
-    width: min(96%, 88vh);
-    max-width: 96%;
-    max-height: 100%;
-    transform: translateX(-50%);
-    bottom: 0;
+    height: 100% !important;  /* override inline `height: 100svh` */
   }
 
   /* --- editorial copy: tighten spacing so every row stays visible -- */
@@ -274,13 +493,6 @@
      absolutely-positioned social handle on narrow screens. */
   .sakura-poster .sakura-copy-shell p[class*="max-w-"] {
     max-width: 82%;
-  }
-}
-
-@media (max-width: 480px) {
-  .sakura-poster {
-    max-height: 70svh;
-    height: 70svh;
   }
 }
 

@@ -26,8 +26,8 @@ function mountSakuraPoster() {
       <SakuraEditorialPoster
         className="w-full"
         interactiveReveal
-        sceneSrc="/static/images/sakura/hero-scene-bg.jpg"
-        foregroundSrc="/static/images/sakura/hero-branch.png"
+        sceneSrc="/static/images/sakura/hero-scene-bg.webp"
+        foregroundSrc="/static/images/sakura/hero-branch.webp"
       />
     );
   }

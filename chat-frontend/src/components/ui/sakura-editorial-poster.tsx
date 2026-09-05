@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 export type SakuraEditorialKeyword = {
   label: string;
@@ -28,6 +22,11 @@ export type SakuraEditorialPosterProps = {
   foregroundAlt?: string;
   height?: string;
   forceProgress?: number;
+  /**
+   * Kept for backwards compatibility — no longer used. The poster now reveals
+   * itself automatically when the page loads; all click/tap/hover handling
+   * has been removed.
+   */
   interactiveReveal?: boolean;
   preview?: boolean;
   className?: string;
@@ -160,9 +159,13 @@ function SakuraFitTitle({ title }: { title: string }) {
         }}
       >
         {chars.map((item) => {
-          const side = item.index < chars.length / 2 ? 1 : -1;
+          // Characters expand symmetrically outward from the center:
+          // left-half chars slide left (negative), right-half slide right (positive)
+          const isLeftHalf = item.index < chars.length / 2;
           const xOff =
-            item.fromCenter > 0.01 ? item.fromCenter * 35 * side : 0;
+            item.fromCenter > 0.01
+              ? item.fromCenter * 22 * (isLeftHalf ? -1 : 1)
+              : 0;
           return (
             <span
               key={item.key}
@@ -205,6 +208,10 @@ function SakuraHeroVisual({
         <img
           src={sceneSrc}
           alt={sceneAlt}
+          width={1024}
+          height={1024}
+          fetchPriority="high"
+          decoding="async"
           className="absolute inset-0 h-full w-full scale-105 object-cover object-center"
           draggable={false}
         />
@@ -305,12 +312,11 @@ function SakuraEditorialCopy({
 }
 
 /**
- * Interactive Sakura Editorial Poster.
+ * Sakura Editorial Poster — the site hero.
  *
- * - Starts showing only the centered sakura branch scene
- * - On hover → the big "SAKURA" title bursts outward from behind the branch
- *   and the editorial copy slides up from the bottom (CSS transitions)
- * - Text stays revealed after hover; click / tap toggles back to the scene
+ * - The big "SAKURA" title bursts outward from behind the branch and the
+ *   editorial copy slides up automatically when the page loads (CSS transitions)
+ * - No click / tap / hover interaction — the reveal runs once on mount
  * - No scroll-based animation — no sticky, no scroll freeze
  */
 export function SakuraEditorialPoster({
@@ -323,19 +329,17 @@ export function SakuraEditorialPoster({
   footerCenter = "Vol. 01",
   footerRight = "03.26 2026",
   socialHandle = "@designlayer",
-  sceneSrc = "/static/images/sakura/hero-scene-bg.jpg",
+  sceneSrc = "/static/images/sakura/hero-scene-bg.webp",
   sceneAlt = "Soft bokeh cherry blossoms background",
-  foregroundSrc = "/static/images/sakura/hero-branch.png?v=2",
+  foregroundSrc = "/static/images/sakura/hero-branch.webp",
   foregroundAlt = "Cherry blossom branch in the foreground",
   height = "100svh",
   forceProgress,
-  interactiveReveal = true,
   preview = false,
   className,
 }: SakuraEditorialPosterProps) {
   useSakuraEditorialFonts();
 
-  const sectionRef = useRef<HTMLElement>(null);
   const keywordItems = keywords.filter((item) => item.label.trim().length > 0);
 
   const locked = forceProgress != null && Number.isFinite(forceProgress);
@@ -353,81 +357,29 @@ export function SakuraEditorialPoster({
     if (locked) setIsRevealed(clamp01(forceProgress ?? 0) < 0.5);
   }, [forceProgress, locked]);
 
-  /* ── Pointer / touch event handlers ── */
-  const coarsePointerRef = useRef(false);
-  const suppressClickRef = useRef(false);
-
+  /* ── Auto-reveal on page load ──
+     The poster mounts in its hidden state, then flips to revealed a short
+     beat later so the entrance animation actually plays. There is no longer
+     any click / tap / hover to reveal the text (preview / externally-driven
+     instances keep their current behaviour). */
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    coarsePointerRef.current = window.matchMedia?.("(hover: none)")?.matches ?? false;
-  }, []);
-
-  const toggleReveal = useCallback(() => {
-    if (!interactiveReveal || locked || preview) return;
-    // First click reveals the text. Subsequent clicks are a no-op — the text
-    // stays visible until the page is refreshed. (The previous toggle behavior
-    // allowed a second click/tap to hide it again, which is no longer wanted.)
-    setIsRevealed(true);
-  }, [interactiveReveal, locked, preview]);
-
-  const handlePointerEnter = useCallback(() => {
-    if (!interactiveReveal || locked || preview) return;
-    if (coarsePointerRef.current) return; // touch device — a tap would fire hover
-    setIsRevealed(true); // hover reveals the text — it stays after leaving
-  }, [interactiveReveal, locked, preview]);
-
-  const handlePointerLeave = useCallback(() => {
-    // Intentionally empty — text stays visible after hover reveal.
-    // Click / tap to collapse.
-  }, []);
-
-  const handleClick = useCallback(() => {
-    if (!interactiveReveal || locked || preview) return;
-    if (suppressClickRef.current) {
-      // Consume the synthetic click that follows a touch tap — the tap was
-      // already handled by handleTouchStart below.
-      suppressClickRef.current = false;
-      return;
-    }
-    toggleReveal();
-  }, [interactiveReveal, locked, preview, toggleReveal]);
-
-  const handleTouchStart = useCallback(
-    () => {
-      // Tap toggles — reveal text on first tap, collapse on the next.
-      if (!interactiveReveal || locked || preview) return;
-      suppressClickRef.current = true; // the synthetic click after this tap is a no-op
-      toggleReveal();
-    },
-    [interactiveReveal, locked, preview, toggleReveal],
-  );
-
-  const handleTouchEnd = useCallback(
-    () => {
-      // Intentionally empty — keep the current state after a tap.
-    },
-    [],
-  );
+    if (locked || preview) return;
+    const id = window.setTimeout(() => setIsRevealed(true), 120);
+    return () => window.clearTimeout(id);
+  }, [locked, preview]);
 
   return (
     <section
-      ref={sectionRef}
       data-revealed={isRevealed}
       className={cn(
         "sakura-poster relative isolate w-full overflow-hidden",
         fillViewport && "h-screen",
-        interactiveReveal && "cursor-pointer select-none",
         className,
       )}
       style={{
         height: fillViewport ? undefined : height,
         fontFamily: '"Jost", ui-sans-serif, sans-serif',
       }}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
-      onClick={handleClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
       <div
         className="box-border w-full h-full overflow-hidden"
