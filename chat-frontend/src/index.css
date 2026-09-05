@@ -227,18 +227,64 @@
 .sakura-poster .sakura-copy-row:nth-child(6) { transition-delay: 0.62s; }
 
 /* ------------------------------------------------------------------ */
-/* Sakura poster — cap height on mobile so the branch image does not   */
-/* consume the entire viewport.  On small screens we clamp to 75svh   */
-/* (about 500–600 px) which keeps the poster visually tight without   */
-/* sacrificing the branch composition.                                */
+/* Sakura poster — mobile layout fixes                                 */
+/*                                                                    */
+/* The section's CSS `height` / `max-height` caps the visible area    */
+/* but the inner wrapper div still carries the inline style            */
+/* `height: 100svh`.  When those two diverge the copy shell — which   */
+/* is absolutely positioned at the bottom of the article — ends up    */
+/* outside the visible clip region, hiding the footer text.           */
+/*                                                                    */
+/* Fix: force the wrapper div to 100% of the section on every         */
+/* breakpoint that imposes a height cap.                              */
 /* ------------------------------------------------------------------ */
 @media (max-width: 768px) {
   .sakura-poster {
-    max-height: 60svh; /* 700px */
-    height: 70svh; /* 700px */
+    max-height: 60svh;
+    height: 70svh;
+  }
+
+  /* --- inner wrapper: fill the capped section, not 100svh ---------- */
+  .sakura-poster > div {
+    height: 100% !important;   /* override inline `height: 100svh` */
+  }
+
+  /* --- cherry branch: centre properly, prevent clipping / drag-down */
+  .sakura-poster .sakura-branch {
+    left: 50%;
+    width: min(96%, 88vh);
+    max-width: 96%;
+    max-height: 100%;
+    transform: translateX(-50%);
+    bottom: 0;
+  }
+
+  /* --- editorial copy: tighten spacing so every row stays visible -- */
+  .sakura-poster .sakura-copy-shell > div {
+    padding-top: clamp(0.85rem, 3.5cqw, 1.3rem);
+    padding-bottom: clamp(0.85rem, 3.5cqw, 1.4rem);
+  }
+
+  /* Headline: pull closer to keywords so there's room below. */
+  .sakura-poster .sakura-copy-shell h2 {
+    margin-top: 0.35rem;
+  }
+
+  /* Body text: widen slightly so it doesn't collide with the
+     absolutely-positioned social handle on narrow screens. */
+  .sakura-poster .sakura-copy-shell p[class*="max-w-"] {
+    max-width: 82%;
   }
 }
 
+@media (max-width: 480px) {
+  .sakura-poster {
+    max-height: 70svh;
+    height: 70svh;
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Touch targets — guaranteed 44px (mobile) / 48px (desktop) hit area  */
 /* ------------------------------------------------------------------ */
 .btn-touch {

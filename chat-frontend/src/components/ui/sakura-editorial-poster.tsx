@@ -224,7 +224,7 @@ function SakuraHeroVisual({
         <img
           src={foregroundSrc}
           alt={foregroundAlt}
-          className="pointer-events-none absolute bottom-0 left-1/2 z-30 h-auto w-[min(92%,78cqh)] -translate-x-[40%] object-contain object-bottom drop-shadow-[0_10px_28px_rgba(40,20,20,0.18)]"
+          className="sakura-branch pointer-events-none absolute bottom-0 left-1/2 z-30 h-auto w-[min(92%,78cqh)] -translate-x-[40%] object-contain object-bottom drop-shadow-[0_10px_28px_rgba(40,20,20,0.18)]"
           draggable={false}
         />
       ) : null}
