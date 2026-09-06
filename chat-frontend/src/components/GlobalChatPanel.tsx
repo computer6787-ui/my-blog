@@ -44,6 +44,7 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasScrolledUp, setHasScrolledUp] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -92,10 +93,12 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
   const handleSend = () => {
     const trimmed = inputVal.trim();
     if (!trimmed) return;
+    setIsSending(true);
     sendGlobalMessage(trimmed);
     setInputVal('');
     setShowEmojiPicker(false);
     setTimeout(() => scrollToBottom('smooth'), 50);
+    setTimeout(() => setIsSending(false), 400);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -325,7 +328,9 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
             type="button"
             onClick={handleSend}
             disabled={!inputVal.trim()}
-            className="btn-touch bg-blossom-600 text-white shadow hover:bg-blossom-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            className={`btn-touch bg-blossom-600 text-white shadow hover:bg-blossom-700 disabled:opacity-40 disabled:cursor-not-allowed transition-transform ${
+              isSending ? 'send-pulse' : ''
+            }`}
             title="Send message"
             aria-label="Send message"
           >

@@ -347,11 +347,12 @@ async def websocket_chat_endpoint(
             if msg_type == "typing":
                 if not current_user:
                     continue
-                channel = msg_payload.get("channel", "global")
-                is_typing = bool(msg_payload.get("is_typing", True))
+                data_payload = msg_payload.get("data", {})
+                channel = data_payload.get("channel", msg_payload.get("channel", "global"))
+                is_typing = bool(data_payload.get("is_typing", msg_payload.get("is_typing", True)))
 
                 if channel == "private":
-                    recipient_id = msg_payload.get("recipient_id")
+                    recipient_id = data_payload.get("recipient_id") or msg_payload.get("recipient_id")
                     if recipient_id:
                         typing_event = {
                             "type": "typing",

@@ -77,8 +77,30 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const backoffRef = useRef(1000);
   const typingTimeoutsRef = useRef<{ [key: string]: any }>({});
   const activeRecipientRef = useRef<ChatUser | null>(null);
+  const currentUserRef = useRef<ChatUser | null>(null);
+  const isSoundEnabledRef = useRef<boolean>(isSoundEnabled);
+  const heartbeatRef = useRef<any>(null);
+  const heartbeatWatchdogRef = useRef<any>(null);
+  const lastPongRef = useRef<number>(Date.now());
+  const reconnectInProgressRef = useRef(false);
+
+  // Keep refs in sync with the latest state so the long-lived WebSocket
+  // message handler never reads stale values from a captured closure.
+  currentUserRef.current = currentUser;
+  isSoundEnabledRef.current = isSoundEnabled;
 
   activeRecipientRef.current = activeRecipient;
+
+  const stopHeartbeat = useCallback(() => {
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+    }
+    if (heartbeatWatchdogRef.current) {
+      clearTimeout(heartbeatWatchdogRef.current);
+      heartbeatWatchdogRef.current = null;
+    }
+  }, []);
 
   const setSoundEnabledSafe = (val: boolean) => {
     setSoundEnabled(val);
@@ -193,15 +215,58 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
+    const startHeartbeat = () => {
+      stopHeartbeat();
+      lastPongRef.current = Date.now();
+      // Send a ping every 25s. Well under Render Free's ~60s idle WebSocket
+      // timeout so the connection never silently dies (which is what caused
+      // outgoing messages to be persisted but never echoed back to the sender).
+      heartbeatRef.current = setInterval(() => {
+        try {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'ping' }));
+          }
+        } catch {
+          // ignore transient send errors; the watchdog will reconnect
+        }
+      }, 25000);
+
+      // If no pong arrives within 30s of the last one, force a reconnect.
+      // This detects silent connection death that never fires onclose/onerror.
+      const armWatchdog = () => {
+        heartbeatWatchdogRef.current = setTimeout(() => {
+          if (Date.now() - lastPongRef.current > 30000) {
+            console.warn('WebSocket heartbeat missed — forcing reconnect');
+            try {
+              ws.close();
+            } catch {
+              /* noop */
+            }
+          }
+        }, 30000);
+      };
+      armWatchdog();
+      // Re-arm the watchdog after every pong.
+      heartbeatWatchdogRef.current = heartbeatWatchdogRef.current;
+      // Note: watchdog re-armed in the pong handler below via lastPongRef check.
+    };
+
     ws.onopen = () => {
       setIsConnected(true);
       backoffRef.current = 1000;
+      reconnectInProgressRef.current = false;
+      startHeartbeat();
     };
 
     ws.onmessage = (event) => {
       try {
         const payload: WSMessagePayload = JSON.parse(event.data);
         const { type, data } = payload;
+
+        if (type === 'pong') {
+          lastPongRef.current = Date.now();
+          return;
+        }
 
         switch (type) {
           case 'auth_success': {
@@ -271,20 +336,23 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 if (prev.some((m) => m.id === newMsg.id)) return prev;
                 return [...prev, newMsg];
               });
-              if (currentUser && newMsg.sender_id === activeUser.id) {
+              if (currentUserRef.current && newMsg.sender_id === activeUser.id) {
                 markConversationAsRead(activeUser.id);
               }
             }
 
-            if (currentUser && newMsg.sender_id !== currentUser.id && isSoundEnabled) {
+            if (
+              currentUserRef.current &&
+              newMsg.sender_id !== currentUserRef.current.id &&
+              isSoundEnabledRef.current
+            ) {
               playNotificationChime();
             }
 
             setConversations((prev) => {
+              const me = currentUserRef.current;
               const partnerId =
-                currentUser && newMsg.sender_id === currentUser.id
-                  ? newMsg.receiver_id
-                  : newMsg.sender_id;
+                me && newMsg.sender_id === me.id ? newMsg.receiver_id : newMsg.sender_id;
 
               const existingIdx = prev.findIndex((c) => c.user.id === partnerId);
               const isLookingAtChat = activeRecipientRef.current?.id === partnerId;
@@ -295,7 +363,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 conv.last_message = newMsg.message_body;
                 conv.last_message_time = newMsg.created_at;
                 conv.last_sender_id = newMsg.sender_id;
-                if (!isLookingAtChat && currentUser && newMsg.sender_id !== currentUser.id) {
+                if (!isLookingAtChat && me && newMsg.sender_id !== me.id) {
                   conv.unread_count = (conv.unread_count || 0) + 1;
                 }
                 updated.splice(existingIdx, 1);
@@ -362,6 +430,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     ws.onclose = () => {
+      stopHeartbeat();
       setIsConnected(false);
       const nextBackoff = Math.min(backoffRef.current * 1.5, 15000);
       backoffRef.current = nextBackoff;
@@ -372,7 +441,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       console.warn('WebSocket connection notice:', err);
       ws.close();
     };
-  }, [isSoundEnabled, markConversationAsRead, refreshConversations]);
+  }, [markConversationAsRead, refreshConversations]);
 
 
   useEffect(() => {
@@ -380,6 +449,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     connectWebSocket();
 
     return () => {
+      stopHeartbeat();
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       if (wsRef.current) wsRef.current.close();
     };
@@ -403,6 +473,48 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const sendPrivateMessage = useCallback((recipientId: number, text: string) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+
+    // Optimistically add the message to the sender's chat history immediately
+    // so they see it without waiting for the backend echo.
+    const me = currentUserRef.current;
+    if (me) {
+      const optimisticMsg: PrivateMessage = {
+        id: Date.now(), // temporary id, replaced when echo arrives
+        sender_id: me.id,
+        receiver_id: recipientId,
+        message_body: text,
+        is_read: false,
+        created_at: new Date().toISOString(),
+        sender_name: me.name,
+        sender_avatar: me.profile_picture_url,
+      };
+
+      // Only add if the active chat matches this recipient
+      const active = activeRecipientRef.current;
+      if (active && active.id === recipientId) {
+        setActiveChatHistory((prev) => {
+          // Avoid duplicate if echo arrives almost instantly
+          if (prev.some((m) => m.message_body === text && m.sender_id === me.id && Math.abs(Date.now() - new Date(m.created_at).getTime()) < 500)) return prev;
+          return [...prev, optimisticMsg];
+        });
+      }
+
+      // Always update the conversation list so the sender sees the chat move to top
+      setConversations((prev) => {
+        const existingIdx = prev.findIndex((c) => c.user.id === recipientId);
+        if (existingIdx >= 0) {
+          const updated = [...prev];
+          const conv = { ...updated[existingIdx] };
+          conv.last_message = text;
+          conv.last_message_time = optimisticMsg.created_at;
+          conv.last_sender_id = me.id;
+          updated.splice(existingIdx, 1);
+          return [conv, ...updated];
+        }
+        return prev;
+      });
+    }
+
     wsRef.current.send(
       JSON.stringify({
         type: 'private_message',

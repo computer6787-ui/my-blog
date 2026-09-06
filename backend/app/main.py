@@ -331,7 +331,13 @@ Sitemap: https://lumora-2g3u.onrender.com/sitemap.xml
 def sitemap_xml():
     db = SessionLocal()
     try:
-        blogs = db.query(models.Blog).filter(models.Blog.published == True).order_by(models.Blog.id.desc()).all()
+        blogs = (
+        db.query(models.Blog)
+        .filter(models.Blog.published == True)
+        .order_by(models.Blog.id.desc())
+        .limit(5000)
+        .all()
+    )
 
         urls_xml = ""
         # Homepage
@@ -478,6 +484,15 @@ def resetPass_verEmail(request:Request):
     return templates.TemplateResponse(
         request=request,
         name="update_pass.html",
+        context={}
+    )
+
+
+@app.get("/chat")
+def chat_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="base.html",
         context={}
     )
 

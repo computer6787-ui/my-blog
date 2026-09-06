@@ -2,7 +2,8 @@ from fastapi import Path, status, Response, HTTPException
 from backend.app import models
 from typing import List
 from fastapi.responses import FileResponse
-from sqlalchemy import desc, or_
+from sqlalchemy import desc, or_, func
+from sqlalchemy.orm import joinedload
 from backend.app.supabase_storage import is_storage_url, delete_from_storage
 
 
@@ -183,14 +184,23 @@ def destroy(id: int, db, current_user):
 
 
 def get_blog(id: int, db):
-    blog = db.query(models.Blog).filter(models.Blog.id == id).first()
+    blog = (
+        db.query(models.Blog)
+        .options(joinedload(models.Blog.creator))
+        .filter(models.Blog.id == id)
+        .first()
+    )
     if not blog:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Blog with the id {id} is not available",
         )
-    blog.likes_count = db.query(models.Like).filter(models.Like.blog_id == blog.id).count()
-    blog.comments_count = db.query(models.Comment).filter(models.Comment.blog_id == blog.id).count()
+    blog.likes_count = db.query(func.count(models.Like.id)).filter(
+        models.Like.blog_id == blog.id
+    ).scalar() or 0
+    blog.comments_count = db.query(func.count(models.Comment.id)).filter(
+        models.Comment.blog_id == blog.id
+    ).scalar() or 0
     return blog
 
 

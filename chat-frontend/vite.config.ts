@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/static/chat/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -25,6 +26,11 @@ export default defineConfig({
           }
           return 'assets/[name][extname]';
         },
+        manualChunks: (id) => {
+        if (id.includes('react') || id.includes('react-dom')) {
+          return 'vendor-react';
+        }
+      },
       },
     },
   },

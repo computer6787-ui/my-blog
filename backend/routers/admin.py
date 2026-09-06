@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc, func
 from ..app import models
 from ..app.database import get_db
@@ -37,7 +37,25 @@ def require_staff(current_user: models.User = Depends(get_current_user)) -> mode
     return current_user
 
 
-def _user_summary(user):
+def _blog_counts_for(db: Session, user_ids: list) -> dict:
+    """One grouped query: blog count per user id.
+
+    Replaces lazy-loading each user's full ``blogs`` relationship (which
+    pulled every Blog row, including full bodies, into memory) whenever a
+    user summary is built.
+    """
+    if not user_ids:
+        return {}
+    rows = (
+        db.query(models.Blog.user_id, func.count(models.Blog.id))
+        .filter(models.Blog.user_id.in_(user_ids))
+        .group_by(models.Blog.user_id)
+        .all()
+    )
+    return {user_id: count for user_id, count in rows}
+
+
+def _user_summary(user, blog_count: int = 0):
     return {
         "id": user.id,
         "name": user.name,
@@ -46,7 +64,7 @@ def _user_summary(user):
         "is_active": bool(user.is_active),
         "is_owner": is_owner(user),
         "profile_picture_url": user.profile_picture_url,
-        "blogs_count": (user.blogs or []).__len__(),
+        "blogs_count": blog_count,
     }
 
 
@@ -63,7 +81,13 @@ def dashboard_stats(
     published_count = db.query(models.Blog).filter(models.Blog.published == True).count()
     moderators_count = db.query(models.User).filter(models.User.role == "moderator").count()
 
-    recent_blogs = db.query(models.Blog).order_by(desc(models.Blog.id)).limit(5).all()
+    recent_blogs = (
+        db.query(models.Blog)
+        .options(joinedload(models.Blog.creator))
+        .order_by(desc(models.Blog.id))
+        .limit(5)
+        .all()
+    )
     recent = []
     for blog in recent_blogs:
         recent.append({
@@ -111,6 +135,8 @@ def list_users(
     current_user: models.User = Depends(require_staff),
     q: str | None = None,
     role: str | None = None,
+    limit: int = 20,
+    skip: int = 0,
 ):
     query = db.query(models.User)
     if q:
@@ -121,8 +147,13 @@ def list_users(
     if role:
         query = query.filter(models.User.role == role)
 
-    users = query.order_by(models.User.id).all()
-    return [_user_summary(u) for u in users]
+    total = query.count()
+    users = query.order_by(models.User.id).offset(skip).limit(limit).all()
+    counts = _blog_counts_for(db, [u.id for u in users])
+    return {
+        "items": [_user_summary(u, counts.get(u.id, 0)) for u in users],
+        "total": total,
+    }
 
 
 @router.put("/users/{user_id}")
@@ -155,7 +186,10 @@ def update_user(
         # Nothing else can change for the owner; return current state
         db.commit()
         db.refresh(target)
-        return _user_summary(target)
+        blog_count = db.query(func.count(models.Blog.id)).filter(
+            models.Blog.user_id == target.id
+        ).scalar() or 0
+        return _user_summary(target, blog_count)
 
     # ---- Only the owner can manage OTHER admin accounts.
     # Regular admins can manage users and moderators, but not other admins ----
@@ -190,7 +224,10 @@ def update_user(
 
     db.commit()
     db.refresh(target)
-    return _user_summary(target)
+    blog_count = db.query(func.count(models.Blog.id)).filter(
+        models.Blog.user_id == target.id
+    ).scalar() or 0
+    return _user_summary(target, blog_count)
 
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -242,6 +279,8 @@ def list_blogs(
     current_user: models.User = Depends(require_staff),
     q: str | None = None,
     published: bool | None = None,
+    limit: int = 20,
+    skip: int = 0,
 ):
     query = db.query(models.Blog)
     if q:
@@ -252,7 +291,39 @@ def list_blogs(
     if published is not None:
         query = query.filter(models.Blog.published == published)
 
-    blogs = query.order_by(desc(models.Blog.id)).all()
+    total = query.count()
+    blogs = (
+        query.options(joinedload(models.Blog.creator))
+        .order_by(desc(models.Blog.id))
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+    # Bulk like/comment counts for the page — replaces two COUNT() queries per blog.
+    blog_ids = [b.id for b in blogs]
+    likes_counts: dict = {}
+    comments_counts: dict = {}
+    if blog_ids:
+        likes_counts = {
+            blog_id: count
+            for blog_id, count in db.query(
+                models.Like.blog_id, func.count(models.Like.id)
+            )
+            .filter(models.Like.blog_id.in_(blog_ids))
+            .group_by(models.Like.blog_id)
+            .all()
+        }
+        comments_counts = {
+            blog_id: count
+            for blog_id, count in db.query(
+                models.Comment.blog_id, func.count(models.Comment.id)
+            )
+            .filter(models.Comment.blog_id.in_(blog_ids))
+            .group_by(models.Comment.blog_id)
+            .all()
+        }
+
     result = []
     for blog in blogs:
         result.append({
@@ -264,14 +335,10 @@ def list_blogs(
             "image_url": blog.image_url,
             "author": blog.creator.name if blog.creator else "Unknown",
             "author_id": blog.user_id,
-            "likes_count": db.query(models.Like).filter(
-                models.Like.blog_id == blog.id
-            ).count(),
-            "comments_count": db.query(models.Comment).filter(
-                models.Comment.blog_id == blog.id
-            ).count(),
+            "likes_count": likes_counts.get(blog.id, 0),
+            "comments_count": comments_counts.get(blog.id, 0),
         })
-    return result
+    return {"items": result, "total": total}
 
 
 @router.put("/blogs/{blog_id}/publish")
@@ -310,9 +377,16 @@ def list_comments(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_staff),
 ):
-    comments = db.query(models.Comment).order_by(
-        desc(models.Comment.id)
-    ).limit(200).all()
+    comments = (
+        db.query(models.Comment)
+        .options(
+            joinedload(models.Comment.user),
+            joinedload(models.Comment.blog),
+        )
+        .order_by(desc(models.Comment.id))
+        .limit(200)
+        .all()
+    )
     result = []
     for comment in comments:
         result.append({

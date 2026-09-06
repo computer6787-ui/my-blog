@@ -100,6 +100,24 @@ class CreatorInfo(BaseModel):
         orm_mode = True
 
 
+class BlogCreator(BaseModel):
+    """Minimal creator for the single-blog detail endpoint.
+
+    The frontend only uses id, name, email, role, bio, profile_picture_url.
+    Using this instead of Show_user prevents lazy-loading the author's
+    entire blogs relationship (which includes full blog bodies)."""
+    id: int
+    name: str
+    email: str
+    role: str = "user"
+    bio: Optional[str] = None
+    profile_picture_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
 class ShowBlog(BaseModel):
     id: int
     title: str
@@ -107,7 +125,7 @@ class ShowBlog(BaseModel):
     image_url: Optional[str] = None
     category: Optional[str] = None
     created_at: Optional[datetime] = None
-    creator: Show_user
+    creator: BlogCreator
     likes_count: int = 0
     comments_count: int = 0
 

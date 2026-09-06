@@ -148,18 +148,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
     return (
       <p
-        className="
-          m-0
-          min-w-0
-          max-w-full
-          text-sm
-          leading-relaxed
-          whitespace-pre-wrap
-          break-words
-        "
+        className="m-0 max-w-full text-sm leading-relaxed"
         style={{
           overflowWrap: 'anywhere',
           wordBreak: 'break-word',
+          whiteSpace: 'pre-wrap',
         }}
       >
         {parts.map((part, i) => {
@@ -173,20 +166,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 href={part}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="
-                  underline
-                  inline-flex
-                  items-center
-                  gap-0.5
-                  font-medium
-                  hover:opacity-80
-                  break-all
-                  max-w-full
-                "
+                className="underline font-medium hover:opacity-80 break-all"
               >
-                <span className="break-all">{part}</span>
-
-                <ExternalLink className="w-2.5 h-2.5 inline flex-shrink-0" />
+                {part}
+                <ExternalLink className="w-2.5 h-2.5 inline ml-0.5 -mt-0.5" />
               </a>
             );
           }
@@ -202,14 +185,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   return (
     <div
       className={`
+        msg-enter
         group
         flex
         items-end
-        gap-2.5
-        mb-3.5
+        gap-3
+        mb-5
         transition-all
         min-w-0
-        w-full
+        px-1
         ${isSelf ? 'flex-row-reverse' : 'flex-row'}
       `}
     >
@@ -240,7 +224,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       <div
         className={`
           min-w-0
-          max-w-[75%]
+          max-w-[calc(100%-3rem)]
+          sm:max-w-[calc(75%-1.5rem)]
           flex
           flex-col
           ${isSelf ? 'items-end' : 'items-start'}
@@ -280,20 +265,20 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         <div
           className={`
             relative
-            w-fit
+            min-w-0
             max-w-full
-            min-w-[120px]
-            px-4
-            py-3.5
-            rounded-xl
+            px-5
+            py-3
+            rounded-2xl
             text-sm
+            leading-relaxed
             shadow-sm
-            break-words
             ${isSelf
               ? 'bg-blossom-600 text-white rounded-br-md'
               : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-bl-md'
             }
           `}
+          style={{ overflowWrap: 'anywhere' }}
         >
           {renderContent()}
 

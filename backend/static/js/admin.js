@@ -5,6 +5,8 @@ const admin = {
     user: null,
     currentView: 'dashboard',
 };
+let usersPage = { current: 1, limit: 20, total: 0 };
+let blogsPage = { current: 1, limit: 20, total: 0 };
 
 async function init() {
     const shell = document.getElementById('admin-shell');
@@ -112,12 +114,12 @@ function bindEvents() {
     const usersSearch = document.getElementById('users-search');
     const blogsSearch = document.getElementById('blogs-search');
     let usersTimer, blogsTimer;
-    if (usersSearch) usersSearch.addEventListener('input', (e) => { clearTimeout(usersTimer); usersTimer = setTimeout(() => loadUsers(), 350); });
+    if (usersSearch) usersSearch.addEventListener('input', (_e) => { clearTimeout(usersTimer); usersTimer = setTimeout(() => loadUsers(1), 350); });
     const usersRoleFilter = document.getElementById('users-role-filter');
-    if (usersRoleFilter) usersRoleFilter.addEventListener('change', () => loadUsers());
-    if (blogsSearch) blogsSearch.addEventListener('input', (e) => { clearTimeout(blogsTimer); blogsTimer = setTimeout(() => loadBlogs(), 350); });
+    if (usersRoleFilter) usersRoleFilter.addEventListener('change', () => loadUsers(1));
+    if (blogsSearch) blogsSearch.addEventListener('input', (_e) => { clearTimeout(blogsTimer); blogsTimer = setTimeout(() => loadBlogs(1), 350); });
     const blogsPublishedFilter = document.getElementById('blogs-published-filter');
-    if (blogsPublishedFilter) blogsPublishedFilter.addEventListener('change', () => loadBlogs());
+    if (blogsPublishedFilter) blogsPublishedFilter.addEventListener('change', () => loadBlogs(1));
 }
 
 async function handleLogout() {
@@ -232,7 +234,7 @@ function renderTopAuthors(authors) {
 }
 
 
-async function loadUsers() {
+async function loadUsers(page = 1) {
     const tbody = document.getElementById('users-table-body');
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="6" class="admin-loading-row">Loading...</td></tr>';
@@ -242,18 +244,23 @@ async function loadUsers() {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (role) params.set('role', role);
-    if (params.toString()) url += `?${params.toString()}`;
+    params.set('limit', '20');
+    params.set('skip', String((page - 1) * 20));
+    url += `?${params.toString()}`;
     try {
         const res = await fetch(url, { headers: { Authorization: `Bearer ${admin.token}` }, credentials: 'include' });
         if (!res.ok) throw new Error('Failed to load users');
-        const users = await res.json();
+        const payload = await res.json();
+        const users = payload.items || [];
+        const total = payload.total || 0;
+        usersPage.current = page;
+        usersPage.total = total;
+        updatePagination('users', page, total);
         if (!users || users.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="admin-empty">No users found.</td></tr>'; return; }
         const viewerIsOwner = admin.user && admin.user.is_owner;
         tbody.innerHTML = users.map(user => {
             const isOwner = user.is_owner;
             const isTargetAdmin = user.role === 'admin';
-            // Owner rows: completely locked
-            // Admin rows viewed by non-owner: also locked (only owner can manage admins)
             const locked = isOwner || (isTargetAdmin && !viewerIsOwner);
             return `
             <tr class="${isOwner ? 'admin-row-owner' : ''}">
@@ -302,7 +309,7 @@ function bindUserActions(users) {
             if (!confirmed) { e.target.value = user.role; return; }
             try {
                 const res = await fetch(`${API_URL}/admin/users/${userId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${admin.token}` }, credentials: 'include', body: JSON.stringify({ role: newRole }) });
-                if (res.ok) { notify({ type: 'success', title: 'Updated', text: 'Role updated', duration: 2000 }); loadUsers(); refreshBadgeCounts(); }
+                if (res.ok) { notify({ type: 'success', title: 'Updated', text: 'Role updated', duration: 2000 }); loadUsers(admin.currentView === 'users' ? usersPage.current : 1); refreshBadgeCounts(); }
                 else { const errData = await res.json(); notify({ type: 'error', title: 'Error', text: errData.detail || 'Failed to update role', duration: 3000 }); }
             } catch (err) { notify({ type: 'error', title: 'Error', text: 'Network error', duration: 3000 }); }
         });
@@ -318,7 +325,7 @@ function bindUserActions(users) {
             if (!confirmed) return;
             try {
                 const res = await fetch(`${API_URL}/admin/users/${userId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${admin.token}` }, credentials: 'include', body: JSON.stringify({ is_active: newActive }) });
-                if (res.ok) { notify({ type: 'success', title: 'Updated', text: 'Status updated', duration: 2000 }); loadUsers(); refreshBadgeCounts(); }
+                if (res.ok) { notify({ type: 'success', title: 'Updated', text: 'Status updated', duration: 2000 }); loadUsers(admin.currentView === 'users' ? usersPage.current : 1); refreshBadgeCounts(); }
                 else { notify({ type: 'error', title: 'Error', text: 'Failed to update status', duration: 3000 }); }
             } catch (err) { notify({ type: 'error', title: 'Error', text: 'Network error', duration: 3000 }); }
         });
@@ -333,7 +340,7 @@ function bindUserActions(users) {
             if (!confirmed) return;
             try {
                 const res = await fetch(`${API_URL}/admin/users/${userId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${admin.token}` }, credentials: 'include' });
-                if (res.ok || res.status === 204) { notify({ type: 'success', title: 'Deleted', text: 'User removed', duration: 2000 }); loadUsers(); refreshBadgeCounts(); }
+                if (res.ok || res.status === 204) { notify({ type: 'success', title: 'Deleted', text: 'User removed', duration: 2000 }); loadUsers(admin.currentView === 'users' ? usersPage.current : 1); refreshBadgeCounts(); }
                 else { const errData = await res.json(); notify({ type: 'error', title: 'Error', text: errData.detail || 'Failed to delete', duration: 3000 }); }
             } catch (err) { notify({ type: 'error', title: 'Error', text: 'Network error', duration: 3000 }); }
         });
@@ -341,7 +348,7 @@ function bindUserActions(users) {
 }
 
 
-async function loadBlogs() {
+async function loadBlogs(page = 1) {
     const tbody = document.getElementById('blogs-table-body');
     if (!tbody) return;
     tbody.innerHTML = '<tr><td colspan="7" class="admin-loading-row">Loading...</td></tr>';
@@ -351,11 +358,18 @@ async function loadBlogs() {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     if (published !== '') params.set('published', published);
-    if (params.toString()) url += `?${params.toString()}`;
+    params.set('limit', '20');
+    params.set('skip', String((page - 1) * 20));
+    url += `?${params.toString()}`;
     try {
         const res = await fetch(url, { headers: { Authorization: `Bearer ${admin.token}` }, credentials: 'include' });
         if (!res.ok) throw new Error('Failed to load blogs');
-        const blogs = await res.json();
+        const payload = await res.json();
+        const blogs = payload.items || [];
+        const total = payload.total || 0;
+        blogsPage.current = page;
+        blogsPage.total = total;
+        updatePagination('blogs', page, total);
         if (!blogs || blogs.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="admin-empty">No blogs found.</td></tr>'; return; }
         tbody.innerHTML = blogs.map(blog => `
             <tr>
@@ -383,7 +397,38 @@ async function loadBlogs() {
     }
 }
 
-function bindBlogActions(blogs) {
+function updatePagination(prefix, page, total) {
+    const prevBtn = document.getElementById(`${prefix}-prev`);
+    const nextBtn = document.getElementById(`${prefix}-next`);
+    const info = document.getElementById(`${prefix}-page-info`);
+    const pag = document.getElementById(`${prefix}-pagination`);
+    if (!prevBtn || !nextBtn || !info || !pag) return;
+
+    const totalPages = Math.ceil(total / 20) || 1;
+    if (totalPages <= 1) {
+        pag.style.display = 'none';
+        return;
+    }
+    pag.style.display = 'flex';
+    prevBtn.disabled = page <= 1;
+    nextBtn.disabled = page >= totalPages;
+    info.textContent = `Page ${page} / ${totalPages}`;
+
+    prevBtn.onclick = () => {
+        if (page > 1) {
+            if (prefix === 'users') loadUsers(page - 1);
+            else loadBlogs(page - 1);
+        }
+    };
+    nextBtn.onclick = () => {
+        if (page < totalPages) {
+            if (prefix === 'users') loadUsers(page + 1);
+            else loadBlogs(page + 1);
+        }
+    };
+}
+
+function bindBlogActions(_blogs) {
     const tbody = document.getElementById('blogs-table-body');
     if (!tbody) return;
     tbody.querySelectorAll('[data-action="toggle-publish"]').forEach(btn => {

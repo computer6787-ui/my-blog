@@ -48,6 +48,7 @@ export type WSEventType =
   | 'typing'
   | 'stop_typing'
   | 'read_receipt'
+  | 'pong'
   | 'error';
 
 export interface WSMessagePayload {
