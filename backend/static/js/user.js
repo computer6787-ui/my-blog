@@ -110,36 +110,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (clearProfileBtn) clearProfileBtn.classList.toggle("hidden", !hasEditorVisible || !profilePicInput.value.trim());
     }
 
-    function createWebPDataUrl(file, quality = 0.72, maxWidth = 1600, maxHeight = 1200) {
-        return new Promise((resolve, reject) => {
-            const url = URL.createObjectURL(file);
-            const image = new Image();
-            image.onload = () => {
-                try {
-                    const canvas = document.createElement("canvas");
-                    const ratio = Math.min(maxWidth / image.width, maxHeight / image.height, 1);
-                    const width = Math.max(1, Math.round(image.width * ratio));
-                    const height = Math.max(1, Math.round(image.height * ratio));
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext("2d");
-                    ctx.clearRect(0, 0, width, height);
-                    ctx.drawImage(image, 0, 0, width, height);
-                    resolve(canvas.toDataURL("image/webp", quality));
-                    URL.revokeObjectURL(url);
-                } catch (error) {
-                    URL.revokeObjectURL(url);
-                    reject(error);
-                }
-            };
-            image.onerror = () => {
-                URL.revokeObjectURL(url);
-                reject(new Error("Unable to read image."));
-            };
-            image.src = url;
-        });
-    }
-
     function openProfileCropEditor(source) {
         if (!profileEditorModal || !profileCropImg || !profileCropZoom || !profileCropX || !profileCropY || !profileZoomValue) return;
         pendingProfileImageSource = source || pendingProfileImageSource || profilePicInput.value.trim();
@@ -240,10 +210,25 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         try {
-            const webpDataUrl = await createWebPDataUrl(file, 0.72, 1600, 1200);
-            pendingProfileImageSource = webpDataUrl;
+            // Upload directly to Supabase Storage via our new endpoint
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await fetch(`${API_URL}/user/upload-avatar`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.detail || "Avatar upload failed");
+            }
+
+            const { url } = await response.json();
+            pendingProfileImageSource = url;
             if (profilePicInput) {
-                profilePicInput.value = webpDataUrl;
+                profilePicInput.value = url;
             }
             updateProfileUploadButtons();
             if (adjustProfileBtn) adjustProfileBtn.classList.remove("hidden");
@@ -251,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (profileDeviceImage) profileDeviceImage.value = "";
         } catch (error) {
             console.error(error);
-            await notify({ type: "error", title: "Image processing failed", text: "Could not read that image." });
+            await notify({ type: "error", title: "Avatar upload failed", text: error.message || "Could not upload that image." });
         }
     }
 

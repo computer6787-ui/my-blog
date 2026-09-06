@@ -236,7 +236,10 @@ async function openNotifications() {
 
     function init() {
         setupListeners();
-        refreshUnreadCount();
+        // Fetch the badge shortly after page load instead of in the startup burst,
+        // so this doesn't collide with /user/me and /blog/ right when the page
+        // loads while logged in (keeps the DB connection pool out of contention).
+        setTimeout(() => refreshUnreadCount(), 1500);
         startPolling();
     }
 

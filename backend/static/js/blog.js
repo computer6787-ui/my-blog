@@ -386,7 +386,7 @@ async function goToPage(page) {
     }
 }
 
-async function loadBlogs(search = "", page = 1, category = currentCategory) {
+async function loadBlogs(search = "", page = 1, category = currentCategory, isRetry = false) {
     if (isLoading) return;
     isLoading = true;
 
@@ -406,7 +406,9 @@ async function loadBlogs(search = "", page = 1, category = currentCategory) {
             category: category || ""
         });
 
-        const response = await fetch(`${API_URL}/blog?${query.toString()}`);
+        // Trailing slash on purpose — /blog/ matches the list route directly and
+        // avoids a 307 redirect round-trip on every page load.
+        const response = await fetch(`${API_URL}/blog/?${query.toString()}`);
 
         if (!response.ok) {
             throw new Error(`Server returned ${response.status}`);
@@ -468,6 +470,16 @@ async function loadBlogs(search = "", page = 1, category = currentCategory) {
         section.classList.remove("pagenav-fading");
         buildPaginationNavigation();
     } catch (error) {
+        if (!isRetry) {
+            // Transient server/DB failures (e.g. connection-pool timeouts) often
+            // clear on their own a second later — retry once before giving up so
+            // a refresh while logged in doesn't show a blank grid. A newer search/
+            // pagination request during the wait supersedes this retry.
+            console.warn("Blog load failed; retrying once:", error);
+            setTimeout(() => loadBlogs(search, page, category, true), 800);
+            return;
+        }
+
         removeSkeletonCards();
         section.classList.remove("pagenav-fading");
         console.error("Failed to load blogs:", error);

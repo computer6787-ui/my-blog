@@ -1,7 +1,7 @@
 import gzip
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI, Request
-from fastapi.responses import FileResponse, PlainTextResponse, HTMLResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import PlainTextResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
@@ -268,7 +268,9 @@ def init_db():
     except Exception as e:
         print("Database initialization notice:", e)
 
-init_db()
+# NOTE: init_db() runs inside lifespan (once per boot). Deliberately NOT run at
+# module import — importing backend.app.main no longer touches the production
+# database, and the migration/seed/prune sweep runs exactly once, not twice.
 
 app.include_router(blog.router)
 app.include_router(user.router)

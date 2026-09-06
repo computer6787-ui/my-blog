@@ -1,19 +1,83 @@
-from fastapi import FastAPI,Depends,status,Response,HTTPException,APIRouter
+from fastapi import FastAPI,Depends,status,Response,HTTPException,APIRouter, File, UploadFile
+from typing import cast
 
 from ..app import models
 from ..app.encryption import Encrypting
 from ..app import schemas
 from ..app.database import engine,SessionLocal,get_db
-from ..app.config import MAIN_ADMIN_EMAIL
+from ..app.config import MAIN_ADMIN_EMAIL, MAX_IMAGE_UPLOAD_BYTES
 from sqlalchemy.orm import Session
 from ..repository import user_repository
 from ..app import oath2
+from ..app import supabase_storage
 
 
 router=APIRouter(
     tags=["user"],
     prefix="/user"
 )
+
+ALLOWED_IMAGE_CONTENT_TYPES = {
+    "image/webp",
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+}
+
+
+@router.post("/upload-avatar", status_code=status.HTTP_201_CREATED)
+async def upload_avatar(
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(oath2.get_current_user),
+):
+    """
+    Accept a profile avatar image, validate size/type, stream it to Supabase Storage
+    using the server-side service_role key. Returns the public Storage URL to be
+    stored in users.profile_picture_url.
+
+    Auth: JWT required (same local JWT as the rest of the API).
+    """
+    if not supabase_storage.is_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Image storage is not configured on the server. Please contact the administrator.",
+        )
+
+    content_type = (file.content_type or "").split(";")[0].strip().lower()
+    if content_type not in ALLOWED_IMAGE_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Avatar must be WebP, JPEG, PNG, or GIF.",
+        )
+
+    data = await file.read()
+    file_size = len(data)
+    if file_size == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty.",
+        )
+    if file_size > MAX_IMAGE_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Image exceeds the {MAX_IMAGE_UPLOAD_BYTES // (1024 * 1024)} MB limit.",
+        )
+
+    try:
+        public_url = await supabase_storage.upload_blog_image(
+            user_id=cast(int, current_user.id),
+            file_bytes=data,
+            original_filename=file.filename or "avatar.webp",
+            content_type=content_type,
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Failed to upload avatar to storage. Please try again later.",
+        )
+
+    return {"url": public_url}
 
 
 @router.post("/")

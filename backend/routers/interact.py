@@ -317,10 +317,15 @@ def get_comments(
                     "created_at": mention.created_at
                 })
 
+        # user_id should always exist (FK NOT NULL), but guard against data
+        # anomalies where the user was deleted without cascade — use the FK
+        # value if present, else a sentinel so the response still renders.
+        safe_user_id = cast(int, comment.user_id) if comment.user_id is not None else 0
+
         return schemas.CommentResponse(
             id=cast(int, comment.id),
             blog_id=cast(int, comment.blog_id),
-            user_id=cast(int, comment.user_id),
+            user_id=safe_user_id,
             parent_id=cast(int, comment.parent_id) if comment.parent_id is not None else None,
             content=cast(str, comment.content),
             created_at=cast(datetime, comment.created_at),
