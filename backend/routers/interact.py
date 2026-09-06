@@ -3,7 +3,7 @@ from typing import Any, Optional, cast
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from backend.app import models, schemas
 from backend.app.database import get_db
 from backend.app.oath2 import get_current_user
@@ -123,51 +123,86 @@ def _notify_blog_author(db, blog_id: int, actor_id: int, actor_name: str, notif_
     _prune_notifications(db, cast(int, blog.user_id))
 
 
-def _resolve_mention_user(db: Session, raw_username: str) -> "models.User | None":
-    """Resolve a raw @mention string to a real User, or None.
+def _resolve_mention_users(db: Session, raw_usernames: list[str]) -> dict[str, "models.User"]:
+    """Batch-resolve @mention strings to Users with at most 2 queries.
 
-    Uses an exact name match first (covers single- and multi-word names like
-    "John Doe"). If that fails, walks backward through word prefixes so a
-    greedy extraction result such as "John Doe and" can still resolve to the
-    real user "John Doe".
+    Treats the raw string as untrusted data. Uses an exact name match first
+    (covers single- and multi-word names like "John Doe") for every mention
+    in one ``IN`` query. Unmatched mentions then walk backward through word
+    prefixes so a greedy extraction result such as "John Doe and" can still
+    resolve to the real user "John Doe" — all candidate prefixes fetched in a
+    single second query, so there is no per-mention round-trip.
     """
-    username = raw_username.strip()
-    if not username:
-        return None
-    user = db.query(models.User).filter(models.User.name == username).first()
-    if user:
-        return user
-    words = username.split(" ")
-    for i in range(len(words) - 1, 0, -1):
-        candidate = " ".join(words[:i]).strip()
-        if not candidate:
-            continue
-        user = db.query(models.User).filter(models.User.name == candidate).first()
-        if user:
-            return user
-    return None
+    unique = list(dict.fromkeys(name.strip() for name in raw_usernames))
+    unique = [name for name in unique if name]
+    if not unique:
+        return {}
+
+    users = db.query(models.User).filter(models.User.name.in_(unique)).all()
+    by_name = {cast(str, u.name): u for u in users}
+
+    unmatched = [name for name in unique if name not in by_name]
+    if not unmatched:
+        return by_name
+
+    # Collect every prefix candidate across all unmatched mentions, fetch once.
+    candidate_names = {
+        candidate
+        for name in unmatched
+        for i in range(len(name.split(" ")) - 1, 0, -1)
+        for candidate in [" ".join(name.split(" ")[:i])]
+    }
+    pending = [c for c in candidate_names if c and c not in by_name and c.strip()]
+    if pending:
+        extras = db.query(models.User).filter(models.User.name.in_(pending)).all()
+        for u in extras:
+            by_name.setdefault(cast(str, u.name), u)
+
+    # Walk each unmatched mention's own prefix sequence in its original order.
+    for name in unmatched:
+        words = name.split(" ")
+        for i in range(len(words) - 1, 0, -1):
+            candidate = " ".join(words[:i]).strip()
+            if not candidate:
+                continue
+            user = by_name.get(candidate)
+            if user is not None:
+                by_name[name] = user
+                break
+    return by_name
 
 
-def _notify_mentioned_users(db, mentioned_usernames: list[str], comment_id: int, actor_name: str):
+
+
+def _notify_mentioned_users(db, resolved_users: dict[str, "models.User"], comment_id: int, actor_name: str):
+    """Create Mention + Notification rows for already-resolved mentioned users.
+
+    ``resolved_users`` is the output of ``_resolve_mention_users`` keyed by
+    @mention string. Users are deduped by id so two spellings that resolve to
+    the same person ("John" and "John Doe") do not produce duplicate rows.
+    """
     affected_user_ids: list[int] = []
-    for raw_username in mentioned_usernames:
-        mentioned_user = _resolve_mention_user(db, raw_username)
-        if mentioned_user is not None and mentioned_user.id is not None:
-            mention = models.Mention(
-                comment_id=comment_id,
-                mentioned_user_id=mentioned_user.id,
-            )
-            db.add(mention)
-            notification = models.Notification(
-                user_id=mentioned_user.id,
-                type="mention",
-                reference_type="comment",
-                reference_id=comment_id,
-                actor_name=actor_name,
-                is_read=False,
-            )
-            db.add(notification)
-            affected_user_ids.append(cast(int, mentioned_user.id))
+    seen_ids: set[int] = set()
+    for mentioned_user in resolved_users.values():
+        uid = cast(int, mentioned_user.id) if mentioned_user.id is not None else None
+        if uid is None or uid in seen_ids:
+            continue
+        seen_ids.add(uid)
+        mention = models.Mention(
+            comment_id=comment_id,
+            mentioned_user_id=uid,
+        )
+        db.add(mention)
+        notification = models.Notification(
+            user_id=uid,
+            type="mention",
+            reference_type="comment",
+            reference_id=comment_id,
+            actor_name=actor_name,
+            is_read=False,
+        )
+        db.add(notification)
+        affected_user_ids.append(uid)
     db.commit()
     for user_id in affected_user_ids:
         _prune_notifications(db, user_id)
@@ -214,14 +249,22 @@ def create_comment(
     # multi-word names ("John Doe", "Ann Marie") by continuing through each
     # capitalized word, while stopping at punctuation, newlines, lowercase
     # prose words ("Ann Marie and Frank" -> "Ann Marie"), or the end.
-    mentioned_usernames = re.findall(
-        r'@([\w]+(?: [A-Z][\w]*)*)',
-        cast(str, new_comment.content),
-    )
+    mentioned_usernames = [
+        name
+        for name in re.findall(
+            r'@([\w]+(?: [A-Z][\w]*)*)',
+            cast(str, new_comment.content),
+        )
+        if name.strip()
+    ]
 
-    # Create mention records and notifications
+    # Create mention records and notifications. Resolve every mention in a
+    # single batched query and reuse the result for the response below —
+    # previously each mention triggered its own user lookup(s).
+    resolved_mentions: dict[str, "models.User"] = {}
     if mentioned_usernames:
-        _notify_mentioned_users(db, mentioned_usernames, cast(int, new_comment.id), cast(str, current_user.name))
+        resolved_mentions = _resolve_mention_users(db, mentioned_usernames)
+        _notify_mentioned_users(db, resolved_mentions, cast(int, new_comment.id), cast(str, current_user.name))
 
     # If replying, notify the parent comment author as well. A reply gets its own
     # distinct notification type ("reply") so the UI can word it as "replied to
@@ -258,21 +301,22 @@ def create_comment(
     user_initial = user_name.strip()[0].upper() if user_name.strip() else "A"
     user_profile_picture_url = _profile_picture_or_none(current_user.profile_picture_url)
 
-    # Build mentions list for response
+    # Build mentions list for response from already-resolved map
     mentions_response = []
     for raw_username in mentioned_usernames:
-        mentioned_user = _resolve_mention_user(db, raw_username)
+        mentioned_user = resolved_mentions.get(raw_username)
         if mentioned_user:
+            # Mention row was created by _notify_mentioned_users
             mention = db.query(models.Mention).filter(
                 models.Mention.comment_id == new_comment.id,
-                models.Mention.mentioned_user_id == mentioned_user.id
+                models.Mention.mentioned_user_id == cast(int, mentioned_user.id)
             ).first()
             if mention:
                 mentions_response.append({
                     "id": mention.id,
                     "comment_id": mention.comment_id,
                     "mentioned_user_id": mention.mentioned_user_id,
-                    "mentioned_user_name": mentioned_user.name,
+                    "mentioned_user_name": cast(str, mentioned_user.name),
                     "created_at": mention.created_at
                 })
 
@@ -295,9 +339,16 @@ def get_comments(
     blog_id: int,
     db: Session = Depends(get_db)
 ):
-    comments = db.query(models.Comment).filter(
-        models.Comment.blog_id == blog_id
-    ).order_by(models.Comment.created_at.asc()).all()
+    comments = (
+        db.query(models.Comment)
+        .options(
+            joinedload(models.Comment.user),
+            joinedload(models.Comment.mentions).joinedload(models.Mention.mentioned_user),
+        )
+        .filter(models.Comment.blog_id == blog_id)
+        .order_by(models.Comment.created_at.asc())
+        .all()
+    )
 
     def build_comment_response(comment: models.Comment) -> schemas.CommentResponse:
         user_name = comment.user.name if comment.user else "Anonymous"
@@ -378,33 +429,40 @@ def update_comment(
     db.refresh(comment)
 
     # Re-extract mentions from updated content (multi-word names supported)
-    mentioned_usernames = re.findall(
-        r'@([\w]+(?: [A-Z][\w]*)*)',
-        cast(str, comment.content),
-    )
+    mentioned_usernames = [
+        name
+        for name in re.findall(
+            r'@([\w]+(?: [A-Z][\w]*)*)',
+            cast(str, comment.content),
+        )
+        if name.strip()
+    ]
     # Clear old mentions
     db.query(models.Mention).filter(models.Mention.comment_id == comment_id).delete()
     db.commit()
+
+    resolved_mentions: dict[str, "models.User"] = {}
     if mentioned_usernames:
-        _notify_mentioned_users(db, mentioned_usernames, comment_id, cast(str, current_user.name))
+        resolved_mentions = _resolve_mention_users(db, mentioned_usernames)
+        _notify_mentioned_users(db, resolved_mentions, comment_id, cast(str, current_user.name))
 
     user_name = comment.user.name if comment.user else "Anonymous"
     user_initial = user_name.strip()[0].upper() if user_name.strip() else "A"
 
     mentions_response = []
     for raw_username in mentioned_usernames:
-        mentioned_user = _resolve_mention_user(db, raw_username)
+        mentioned_user = resolved_mentions.get(raw_username)
         if mentioned_user:
             mention = db.query(models.Mention).filter(
                 models.Mention.comment_id == comment_id,
-                models.Mention.mentioned_user_id == mentioned_user.id
+                models.Mention.mentioned_user_id == cast(int, mentioned_user.id)
             ).first()
             if mention:
                 mentions_response.append({
                     "id": mention.id,
                     "comment_id": mention.comment_id,
                     "mentioned_user_id": mention.mentioned_user_id,
-                    "mentioned_user_name": mentioned_user.name,
+                    "mentioned_user_name": cast(str, mentioned_user.name),
                     "created_at": mention.created_at
                 })
 
@@ -452,21 +510,50 @@ def get_notifications(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    notifications = db.query(models.Notification).filter(
-        models.Notification.user_id == current_user.id
-    ).order_by(models.Notification.created_at.desc()).all()
+    notifications = (
+        db.query(models.Notification)
+        .filter(models.Notification.user_id == current_user.id)
+        .order_by(models.Notification.created_at.desc())
+        .limit(100)
+        .all()
+    )
+
+    if not notifications:
+        return []
+
+    # Bulk-resolve actor profile pictures (one IN query instead of one per notification)
+    actor_names = list({
+        cast(str, n.actor_name)
+        for n in notifications
+        if n.actor_name is not None
+    })
+    actor_pic_map: dict[str, Optional[str]] = {}
+    if actor_names:
+        actor_users = db.query(models.User).filter(models.User.name.in_(actor_names)).all()
+        actor_pic_map = {
+            cast(str, u.name): _profile_picture_or_none(u.profile_picture_url)
+            for u in actor_users
+        }
+
+    # Bulk-resolve comment references (one IN query instead of one per notification)
+    comment_ids = [
+        cast(int, n.reference_id)
+        for n in notifications
+        if cast(str, n.reference_type) == "comment"
+    ]
+    comment_blog_map: dict[int, int] = {}
+    if comment_ids:
+        comment_rows = (
+            db.query(models.Comment.id, models.Comment.blog_id)
+            .filter(models.Comment.id.in_(comment_ids))
+            .all()
+        )
+        comment_blog_map = {cid: bid for cid, bid in comment_rows}
 
     result: list[schemas.NotificationResponse] = []
-    actor_pic_cache: dict[str, Optional[str]] = {}
     for notification in notifications:
-        # Resolve the actor's profile picture (cache by name to avoid repeated queries)
         actor_name = cast(Optional[str], notification.actor_name)
-        if actor_name and actor_name not in actor_pic_cache:
-            actor_user = db.query(models.User).filter(models.User.name == actor_name).first()
-            actor_pic_cache[actor_name] = _profile_picture_or_none(
-                actor_user.profile_picture_url if actor_user else None
-            )
-        actor_profile_picture_url = actor_pic_cache.get(actor_name) if actor_name else None
+        actor_profile_picture_url = actor_pic_map.get(actor_name) if actor_name else None
 
         # Resolve navigation targets
         blog_id = None
@@ -475,12 +562,8 @@ def get_notifications(
         if reference_type == "blog":
             blog_id = cast(int, notification.reference_id)
         elif reference_type == "comment":
-            target_comment = db.query(models.Comment).filter(
-                models.Comment.id == notification.reference_id
-            ).first()
-            if target_comment:
-                comment_id = cast(int, target_comment.id)
-                blog_id = cast(int, target_comment.blog_id)
+            comment_id = cast(int, notification.reference_id)
+            blog_id = comment_blog_map.get(comment_id)
 
         message = schemas.NotificationResponse.build_message(
             cast(str, notification.type), actor_name
