@@ -181,8 +181,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
     return (
       <p
-        className="m-0 block min-w-0 w-full max-w-full text-sm leading-relaxed"
         style={{
+          margin: 0,
+          padding: 0,
+          width: '100%',
+          minWidth: 0,
+          maxWidth: '100%',
+          fontSize: '14px',
+          lineHeight: '1.625',
           overflowWrap: 'anywhere',
           wordBreak: 'break-word',
           whiteSpace: 'pre-wrap',
@@ -317,11 +323,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             relative
             min-w-0
             max-w-full
-            px-5
-            py-3
             rounded-2xl
-            text-sm
-            leading-relaxed
             shadow-sm
             ${
               isSelf
@@ -330,8 +332,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             }
           `}
           style={{
+            padding: '12px 20px',
             overflowWrap: 'anywhere',
             wordBreak: 'break-word',
+            fontSize: '14px',
+            lineHeight: '1.625',
+            boxSizing: 'border-box',
           }}
         >
           {renderContent()}
