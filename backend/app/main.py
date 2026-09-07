@@ -321,8 +321,10 @@ Disallow: /verify
 Disallow: /resetPass
 Disallow: /Verify_user
 Disallow: /Update_pass
+Disallow: /admin
+Disallow: /chat
 
-Sitemap: https://lumora-2g3u.onrender.com/sitemap.xml
+Sitemap: https://lumorablogs.top/sitemap.xml
 """
     return PlainTextResponse(content, media_type="text/plain")
 
@@ -343,7 +345,7 @@ def sitemap_xml():
         # Homepage
         urls_xml += f"""
     <url>
-        <loc>https://lumora-2g3u.onrender.com/</loc>
+        <loc>https://lumorablogs.top/</loc>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>"""
@@ -352,7 +354,7 @@ def sitemap_xml():
         for path in ["/privacy-policy", "/terms-of-service"]:
             urls_xml += f"""
     <url>
-        <loc>https://lumora-2g3u.onrender.com{path}</loc>
+        <loc>https://lumorablogs.top{path}</loc>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>"""
@@ -362,7 +364,7 @@ def sitemap_xml():
             lastmod = blog_item.created_at.strftime("%Y-%m-%d") if blog_item.created_at is not None else datetime.now(timezone.utc).strftime("%Y-%m-%d")
             urls_xml += f"""
     <url>
-        <loc>https://lumora-2g3u.onrender.com/blogs/{blog_item.id}</loc>
+        <loc>https://lumorablogs.top/blogs/{blog_item.id}</loc>
         <lastmod>{lastmod}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -387,11 +389,50 @@ def Home_page(request: Request):
 
 @app.get("/blogs/{id}")
 def blog_page(request: Request, id: int):
+    """Serve the blog page.  Blog data is fetched client-side for the full
+    interactive experience, but we also do a lightweight server-side lookup so
+    the Jinja2 template can populate SEO <meta> tags that crawlers read
+    (title, description, OG, canonical, structured data).  If the lookup fails
+    the page still renders normally — the JS fetch is the source of truth for
+    the visible content."""
+    blog_seo = None
+    try:
+        db = SessionLocal()
+        try:
+            blog_row = (
+                db.query(models.Blog)
+                .filter(models.Blog.id == id, models.Blog.published == True)
+                .first()
+            )
+            if blog_row:
+                creator = None
+                if blog_row.user_id:
+                    creator = db.query(models.User).filter(
+                        models.User.id == blog_row.user_id
+                    ).first()
+                raw_body = (blog_row.body or "").strip()
+                blog_seo = {
+                    "title": (blog_row.title or "").strip(),
+                    "description": raw_body[:160].replace("\n", " ").strip(),
+                    "image_url": (blog_row.image_url or "").strip(),
+                    "created_at": (
+                        blog_row.created_at.isoformat() + "Z"
+                        if blog_row.created_at
+                        else ""
+                    ),
+                    "author_name": (creator.name if creator else None) or "Lumora Writer",
+                    "author_id": blog_row.user_id,
+                }
+        finally:
+            db.close()
+    except Exception:
+        pass  # graceful fallback — JS handles the page either way
+
     return templates.TemplateResponse(
-    request=request,
-    name="blog.html",
-    context={"id": id}
-)
+        request=request,
+        name="blog.html",
+        context={"id": id, "blog_seo": blog_seo},
+    )
 @app.get("/login")
 def login_page(request: Request):
     return templates.TemplateResponse(

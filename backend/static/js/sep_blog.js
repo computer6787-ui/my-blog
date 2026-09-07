@@ -262,6 +262,49 @@ async function loadBlog() {
 
         document.title = `${blog.title} - Lumora`;
         document.getElementById("title").textContent = blog.title;
+
+        // Update SEO meta tags for social sharing and crawlers
+        const seoDescription = (blog.body || "").replace(/\n/g, " ").trim().substring(0, 160);
+        const seoImage = (blog.image_url || "").trim() || `${window.location.origin}/static/images/favicon/apple-touch-icon.png`;
+        const seoUrl = `${window.location.origin}/blogs/${id}`;
+
+        function setMeta(name, content, attr = "name") {
+            let el = document.querySelector(`meta[${attr}="${name}"]`);
+            if (el) el.setAttribute("content", content);
+        }
+        setMeta("description", seoDescription);
+        setMeta("og:title", `${blog.title} - Lumora`, "property");
+        setMeta("og:description", seoDescription, "property");
+        setMeta("og:image", seoImage, "property");
+        setMeta("og:url", seoUrl, "property");
+        setMeta("og:type", "article", "property");
+        setMeta("twitter:title", `${blog.title} - Lumora`);
+        setMeta("twitter:description", seoDescription);
+        setMeta("twitter:image", seoImage);
+
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) canonicalLink.setAttribute("href", seoUrl);
+
+        // Inject BlogPosting structured data for crawlers
+        const existingLd = document.querySelector('script[type="application/ld+json"][data-blog-posting]');
+        if (!existingLd) {
+            const ldScript = document.createElement("script");
+            ldScript.type = "application/ld+json";
+            ldScript.setAttribute("data-blog-posting", "true");
+            ldScript.textContent = JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BlogPosting",
+                "headline": blog.title,
+                "description": seoDescription,
+                "url": seoUrl,
+                ...(seoImage !== `${window.location.origin}/static/images/favicon/apple-touch-icon.png` ? { "image": seoImage } : {}),
+                "datePublished": blog.created_at || undefined,
+                "author": { "@type": "Person", "name": blog.creator?.name || "Lumora Writer" },
+                "publisher": { "@type": "Organization", "name": "Lumora", "url": `${window.location.origin}` },
+                "mainEntityOfPage": { "@type": "WebPage", "@id": seoUrl }
+            });
+            document.head.appendChild(ldScript);
+        }
         const authorLink = document.getElementById("author");
         const authorAvatarLink = document.getElementById("author-avatar-link");
         const footerAvatarLink = document.getElementById("footer-author-avatar-link");

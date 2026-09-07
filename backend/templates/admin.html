@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Admin Panel - Lumora{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', path='css/admin.css') }}?v=20260913">

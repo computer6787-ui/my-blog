@@ -7,6 +7,9 @@ venv/
 .agents
 skills-lock.json
 
+# Node.js dependencies
+chat-frontend/node_modules/
+
 # Environment variables
 .env
 

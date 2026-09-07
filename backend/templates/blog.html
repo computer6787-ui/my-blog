@@ -1,9 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Story - Lumora{% endblock %}
-{% block meta_description %}Read this story on Lumora - a modern blog and thought space where ideas spark and stories unfold.{% endblock %}
-{% block og_title %}Story - Lumora{% endblock %}
-{% block og_description %}Read this story on Lumora - where ideas spark and stories unfold.{% endblock %}
+{% block title %}{% if blog_seo and blog_seo.title %}{{ blog_seo.title }} - Lumora{% else %}Story - Lumora{% endif %}{% endblock %}
+{% block meta_description %}{% if blog_seo and blog_seo.description %}{{ blog_seo.description }}{% else %}Read this story on Lumora — a modern blog and thought space where ideas spark and stories unfold.{% endif %}{% endblock %}
+{% block canonical %}{% if blog_seo %}https://lumorablogs.top/blogs/{{ id }}{% else %}https://lumorablogs.top/blogs/{{ id }}{% endif %}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_url %}https://lumorablogs.top/blogs/{{ id }}{% endblock %}
+{% block og_title %}{% if blog_seo and blog_seo.title %}{{ blog_seo.title }} - Lumora{% else %}Story - Lumora{% endif %}{% endblock %}
+{% block og_description %}{% if blog_seo and blog_seo.description %}{{ blog_seo.description }}{% else %}Read this story on Lumora — where ideas spark and stories unfold.{% endif %}{% endblock %}
+{% block og_image %}{% if blog_seo and blog_seo.image_url %}{{ blog_seo.image_url }}{% else %}https://lumorablogs.top/static/images/favicon/apple-touch-icon.png{% endif %}{% endblock %}
+{% block twitter_title %}{% if blog_seo and blog_seo.title %}{{ blog_seo.title }} - Lumora{% else %}Story - Lumora{% endif %}{% endblock %}
+{% block twitter_description %}{% if blog_seo and blog_seo.description %}{{ blog_seo.description }}{% else %}Read this story on Lumora — where ideas spark and stories unfold.{% endif %}{% endblock %}
+{% block twitter_image %}{% if blog_seo and blog_seo.image_url %}{{ blog_seo.image_url }}{% else %}https://lumorablogs.top/static/images/favicon/apple-touch-icon.png{% endif %}{% endblock %}
 
 {% block content %}
 <article class="single-story-article">
@@ -116,6 +123,33 @@
 <script type="module" src="{{ url_for('static', path='js/sep_blog.js') }}?v=20260909"></script>
 <script type="module" src="{{ url_for('static', path='js/config.js') }}?v=20260902"></script>
 <script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260902"></script>
+
+{% if blog_seo %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": {{ blog_seo.title | tojson }},
+    "description": {{ blog_seo.description | tojson }},
+    "url": "https://lumorablogs.top/blogs/{{ id }}",
+    {% if blog_seo.image_url %}"image": {{ blog_seo.image_url | tojson }},{% endif %}
+    {% if blog_seo.created_at %}"datePublished": {{ blog_seo.created_at | tojson }},{% endif %}
+    "author": {
+        "@type": "Person",
+        "name": {{ blog_seo.author_name | tojson }}
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "Lumora",
+        "url": "https://lumorablogs.top"
+    },
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://lumorablogs.top/blogs/{{ id }}"
+    }
+}
+</script>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
