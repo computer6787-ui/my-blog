@@ -40,18 +40,6 @@ export const ChatPage: React.FC = () => {
     refreshGlobalHistory,
   } = useWebSocket();
 
-  // Hide only <main> and <footer> so the header nav stays visible
-  useEffect(() => {
-    const main = document.querySelector('main');
-    const footer = document.querySelector('footer');
-    if (main) (main as HTMLElement).style.display = 'none';
-    if (footer) (footer as HTMLElement).style.display = 'none';
-    return () => {
-      if (main) (main as HTMLElement).style.display = '';
-      if (footer) (footer as HTMLElement).style.display = '';
-    };
-  }, []);
-
   // Sidebar state
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('conversations');
   const [searchQuery, setSearchQuery] = useState('');
@@ -184,11 +172,11 @@ export const ChatPage: React.FC = () => {
 
   // --- Render ---
   return (
-    <div className="h-screen pt-[68px] flex bg-[#0d0b0c] text-slate-100 overflow-hidden flex-col sm:flex-row">
+    <div className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-40 flex bg-[#0d0b0c] text-slate-100 overflow-hidden flex-col sm:flex-row">
       {/* ===== Sidebar (always visible on desktop) ===== */}
       <aside className={`${
         activeRecipient || showGlobalChat ? 'hidden md:flex' : 'flex'
-      } w-full md:w-80 lg:w-[340px] flex-shrink-0 flex flex-col border-r border-white/5 bg-[#161213]`}>
+      } w-full md:w-80 lg:w-[340px] flex-1 min-h-0 md:flex-none flex flex-col border-r border-white/5 bg-[#161213]`}>
         {/* Sidebar Header */}
         <div className="px-4 pt-5 pb-3">
           <div className="flex items-center justify-between mb-4">
@@ -367,12 +355,14 @@ export const ChatPage: React.FC = () => {
       </aside>
 
       {/* ===== Main Chat Area ===== */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#0d0b0c]">
+      <main className={`${
+        activeRecipient || showGlobalChat ? 'flex' : 'hidden md:flex'
+      } flex-1 min-h-0 flex-col min-w-0 bg-[#0d0b0c]`}>
         {showGlobalChat ? (
           /* ---- Global Chat View ---- */
           <>
             {/* Global Header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#161213]">
+            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#161213]">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => {
@@ -481,7 +471,7 @@ export const ChatPage: React.FC = () => {
           /* ---- Direct Chat View ---- */
           <>
             {/* Direct Chat Header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#161213]">
+            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#161213]">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setActiveRecipient(null)}

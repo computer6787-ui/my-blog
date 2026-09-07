@@ -41,6 +41,23 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Lumora",
+        "url": "https://lumora-2g3u.onrender.com/",
+        "description": "A modern blog and thought space where ideas spark and stories unfold.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://lumora-2g3u.onrender.com/explore?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
         "@type": "Blog",
         "name": "Lumora",
         "url": "https://lumora-2g3u.onrender.com",
@@ -68,7 +85,7 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/components.css') }}?v=20260902">
     <link rel="stylesheet" href="{{ url_for('static', path='css/footer.css') }}?v=20260902">
     <link rel="stylesheet" href="{{ url_for('static', path='css/responsive.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='chat/chat-bundle.css') }}?v=20260906">
+    <link rel="stylesheet" href="{{ url_for('static', path='chat/chat-bundle.css') }}?v=20260907b">
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -88,6 +105,26 @@
     </script>
 
     {% include "partials/navbar.html" %}
+
+    <script>
+        // Single source of truth for the navbar height. Measures the real header
+        // (handles the mobile 2-row wrap and any responsive height change) and
+        // exposes it as --navbar-height so content below never needs hardcoded
+        // pt/mt offsets.
+        (function () {
+            var root = document.documentElement;
+            var header = document.querySelector('.header');
+            if (!header) return;
+            function update() {
+                root.style.setProperty('--navbar-height', header.offsetHeight + 'px');
+            }
+            update();
+            if (window.ResizeObserver) {
+                new ResizeObserver(update).observe(header);
+            }
+            window.addEventListener('resize', update);
+        })();
+    </script>
 
     <main>
         {% block content %}
@@ -113,7 +150,7 @@
     {% endblock %}
 
     <script src="{{ url_for('static', path='js/notifications.js') }}?v=20260906"></script>
-    <script type="module" src="{{ url_for('static', path='chat/chat-bundle.js') }}"></script>
+    <script type="module" src="{{ url_for('static', path='chat/chat-bundle.js') }}?v=20260907b"></script>
 
 </body>
 

@@ -49,9 +49,3 @@
     }
 }
 
-/* Header wraps to 2 rows on small screens — extra top padding for fixed nav */
-@media (max-width: 600px) {
-    main {
-        padding-top: 7.5rem;
-    }
-}
