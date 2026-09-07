@@ -172,7 +172,10 @@ export const ChatPage: React.FC = () => {
 
   // --- Render ---
   return (
-    <div className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-40 flex bg-[#0d0b0c] text-slate-100 overflow-hidden flex-col sm:flex-row">
+    <div
+      className="fixed inset-x-0 bottom-0 z-40 flex bg-[#0d0b0c] text-slate-100 overflow-hidden flex-col sm:flex-row"
+      style={{ top: 'var(--navbar-height)' }}
+    >
       {/* ===== Sidebar (always visible on desktop) ===== */}
       <aside className={`${
         activeRecipient || showGlobalChat ? 'hidden md:flex' : 'flex'
