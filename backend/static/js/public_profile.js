@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const emailEl = document.getElementById("email");
     const bioEl = document.getElementById("bio");
     const avatarEl = document.getElementById("profile-avatar");
+    const onlineDot = document.getElementById("online-dot");
+    const onlineText = document.getElementById("online-text");
     const locationRow = document.getElementById("location-row");
     const hobbyRow = document.getElementById("hobby-row");
     const occupationRow = document.getElementById("occupation-row");
@@ -32,6 +34,14 @@ document.addEventListener("DOMContentLoaded", async function () {
             const user = await response.json();
             const blogs = Array.isArray(user.blogs) ? user.blogs : [];
 
+            // Update online indicator
+            if (onlineDot) {
+                onlineDot.style.background = user.is_online ? '#10b981' : '#9ca3af';
+            }
+            if (onlineText) {
+                onlineText.textContent = user.is_online ? 'Online' : 'Offline';
+            }
+
             if (nameEl) nameEl.textContent = user.name || "Author";
             if (emailEl) emailEl.textContent = user.email || "No email";
             if (bioEl) bioEl.textContent = user.bio || "No bio yet.";
@@ -47,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                                 email: user.email,
                                 role: user.role,
                                 profile_picture_url: user.profile_picture_url,
-                                is_online: false
+                                is_online: user.is_online || false
                             }
                         }
                     }));
@@ -66,6 +76,19 @@ document.addEventListener("DOMContentLoaded", async function () {
                     avatarEl.style.backgroundSize = "";
                     avatarEl.style.backgroundPosition = "";
                     avatarEl.textContent = (user.name || "A").charAt(0).toUpperCase();
+                }
+            }
+
+            // Update online indicator
+            if (onlineDot && onlineText) {
+                if (user.is_online) {
+                    onlineDot.style.background = "#22c55e";
+                    onlineText.textContent = "Online";
+                    onlineText.style.color = "#22c55e";
+                } else {
+                    onlineDot.style.background = "#9ca3af";
+                    onlineText.textContent = "Offline";
+                    onlineText.style.color = "#9ca3af";
                 }
             }
 

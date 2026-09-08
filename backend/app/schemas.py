@@ -68,6 +68,7 @@ class Show_user(BaseModel):
     facebook: Optional[str] = None
     instagram: Optional[str] = None
     blogs: list[BlogSummary] = []
+    is_online: bool = False
 
     class Config:
         from_attributes = True

@@ -28,6 +28,7 @@ export interface PrivateMessage {
   sender_avatar?: string | null;
   receiver_name?: string;
   receiver_avatar?: string | null;
+  _tempId?: number; // Temporary ID for optimistic message reconciliation
 }
 
 export interface Conversation {

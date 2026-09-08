@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from ..repository import user_repository
 from ..app import oath2
 from ..app import supabase_storage
+from ..routers.chat import manager
 
 
 router=APIRouter(
@@ -100,9 +101,14 @@ def search_users(q: str, db: Session = Depends(get_db), limit: int = 8):
     ).limit(min(limit, 20)).all()
     return users
 
-@router.get("/{id}",response_model=schemas.Show_user)
+@router.get("/{id}", response_model=schemas.Show_user)
 def show_user(id: int, db: Session = Depends(get_db)):
-    return user_repository.show_user(id,db) 
+    user = user_repository.show_user(id, db)
+    # Add is_online field from chat connection manager
+    if hasattr(user, '__dict__'):
+        # For SQLAlchemy models, add is_online dynamically
+        user.is_online = manager.is_online(id)
+    return user 
 
 @router.put("/edit_name",status_code=status.HTTP_202_ACCEPTED)
 def update(request:schemas.edit_user,db: Session = Depends(get_db),current_user:models.User=Depends(oath2.get_current_user)):

@@ -310,6 +310,11 @@ async def websocket_chat_endpoint(
                     if not recipient:
                         await websocket.send_json({"type": "error", "message": "Recipient not found."})
                         continue
+
+                    # Extract recipient data BEFORE committing/closing session
+                    recipient_name = recipient.name
+                    recipient_avatar = recipient.profile_picture_url
+
                     db_private = models.PrivateMessage(
                         sender_id=current_user.id,
                         receiver_id=recipient.id,
@@ -328,19 +333,19 @@ async def websocket_chat_endpoint(
                     "data": {
                         "id": db_private.id,
                         "sender_id": current_user.id,
-                        "receiver_id": recipient.id,
+                        "receiver_id": int(recipient_id),
                         "message_body": db_private.message_body,
                         "is_read": False,
                         "created_at": db_private.created_at.isoformat() if db_private.created_at is not None else datetime.now(timezone.utc).isoformat(),
                         "sender_name": current_user.name,
                         "sender_avatar": current_user.profile_picture_url,
                         "sender_role": current_user.role or "user",
-                        "receiver_name": recipient.name,
-                        "receiver_avatar": recipient.profile_picture_url,
+                        "receiver_name": recipient_name,
+                        "receiver_avatar": recipient_avatar,
                     },
                 }
 
-                await manager.send_to_user(cast(int, recipient.id), out_event)
+                await manager.send_to_user(cast(int, recipient_id), out_event)
                 await manager.send_to_user(cast(int, current_user.id), out_event)
                 continue
 

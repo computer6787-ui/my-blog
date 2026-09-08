@@ -36,6 +36,10 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
     sendPrivateMessage,
     sendTypingStatus,
     uploadFile,
+    // Pagination
+    hasMoreOlderMessages,
+    isLoadingOlderMessages,
+    loadOlderMessages,
   } = useWebSocket();
 
   const [inputVal, setInputVal] = useState('');
@@ -45,10 +49,28 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimerRef = useRef<any>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const scrollPositionRef = useRef<number>(0);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeChatHistory]);
+
+  // Handle scroll to top for pagination - load older messages
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const scrollThreshold = 50; // trigger slightly before actual top
+    if (target.scrollTop <= scrollThreshold && hasMoreOlderMessages && !isLoadingOlderMessages) {
+      // Save scroll height before loading to restore position
+      scrollPositionRef.current = target.scrollHeight;
+      loadOlderMessages(recipient.id).then(() => {
+        // Restore scroll position after new messages are prepended
+        if (target.scrollHeight > scrollPositionRef.current) {
+          target.scrollTop = target.scrollHeight - scrollPositionRef.current;
+        }
+      });
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -157,7 +179,19 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
       </div>
 
       {/* Direct Messages Stream */}
-      <div className="flex-1 overflow-y-auto p-4 scroller-thin bg-slate-50/40 dark:bg-slate-900/40 space-y-1 relative">
+      <div
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-4 scroller-thin bg-slate-50/40 dark:bg-slate-900/40 space-y-1 relative"
+      >
+        {isLoadingOlderMessages && (
+          <div className="flex justify-center py-3">
+            <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-pulse" />
+              Loading older messages...
+            </div>
+          </div>
+        )}
         {activeChatHistory.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 dark:text-slate-500">
             <UserAvatar

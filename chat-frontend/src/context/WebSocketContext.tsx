@@ -28,6 +28,11 @@ interface WebSocketContextType {
   refreshGlobalHistory: () => Promise<void>;
   fetchPrivateHistory: (partnerId: number) => Promise<void>;
   uploadFile: (file: File) => Promise<{ url: string; filename: string; is_image: boolean; size: number }>;
+  // Pagination
+  oldestLoadedMessageId: number | null;
+  hasMoreOlderMessages: boolean;
+  isLoadingOlderMessages: boolean;
+  loadOlderMessages: (partnerId: number) => Promise<void>;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
@@ -67,6 +72,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeRecipient, setActiveRecipientState] = useState<ChatUser | null>(null);
   const [activeChatHistory, setActiveChatHistory] = useState<PrivateMessage[]>([]);
+  // Pagination state for private messages
+  const [oldestLoadedMessageId, setOldestLoadedMessageId] = useState<number | null>(null);
+  const [hasMoreOlderMessages, setHasMoreOlderMessages] = useState(true);
+  const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
   const [typingUsers, setTypingUsers] = useState<{ [key: string]: string }>({});
   const [isSoundEnabled, setSoundEnabled] = useState(() => {
     return localStorage.getItem('lumora_chat_sound') !== 'false';
@@ -149,17 +158,63 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const fetchPrivateHistory = useCallback(async (partnerId: number) => {
     try {
-      const res = await fetch(`/chat/private/${partnerId}/history?limit=50`, {
+      const res = await fetch(`/chat/private/${partnerId}/history?limit=30`, {
         credentials: 'include',
         headers: getAuthHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
         setActiveChatHistory(data);
+        // Track the oldest message ID for pagination
+        if (data.length > 0) {
+          setOldestLoadedMessageId(data[0].id);
+          setHasMoreOlderMessages(data.length === 30);
+        } else {
+          setOldestLoadedMessageId(null);
+          setHasMoreOlderMessages(false);
+        }
       }
     } catch (err) {
       console.error('Error fetching private history:', err);
     }
+  }, []);
+
+  // Load older messages for pagination
+  const loadOlderMessages = useCallback(async (partnerId: number) => {
+    if (isLoadingOlderMessages || !hasMoreOlderMessages || oldestLoadedMessageId === null) return;
+
+    setIsLoadingOlderMessages(true);
+    try {
+      const res = await fetch(`/chat/private/${partnerId}/history?limit=30&before_id=${oldestLoadedMessageId}`, {
+        credentials: 'include',
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.length > 0) {
+          // Prepend older messages, deduplicating by ID
+          setActiveChatHistory((prev) => {
+            const filteredOlder = data.filter((m: PrivateMessage) => !prev.some((p) => p.id === m.id));
+            return [...filteredOlder, ...prev];
+          });
+          setOldestLoadedMessageId(data[0].id);
+          setHasMoreOlderMessages(data.length === 30);
+        } else {
+          setHasMoreOlderMessages(false);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading older messages:', err);
+    } finally {
+      setIsLoadingOlderMessages(false);
+    }
+  }, [isLoadingOlderMessages, hasMoreOlderMessages, oldestLoadedMessageId]);
+
+  // Reset pagination state when switching conversations
+  const resetPaginationState = useCallback(() => {
+    setOldestLoadedMessageId(null);
+    setHasMoreOlderMessages(true);
+    setIsLoadingOlderMessages(false);
   }, []);
 
   const markConversationAsRead = useCallback(async (partnerId: number) => {
@@ -187,13 +242,15 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const setActiveRecipient = useCallback((user: ChatUser | null) => {
     setActiveRecipientState(user);
+    // Reset pagination state when switching conversations
+    resetPaginationState();
     if (user) {
       fetchPrivateHistory(user.id);
       markConversationAsRead(user.id);
     } else {
       setActiveChatHistory([]);
     }
-  }, [fetchPrivateHistory, markConversationAsRead]);
+  }, [fetchPrivateHistory, markConversationAsRead, resetPaginationState]);
 
   const connectWebSocket = useCallback(() => {
     if (
@@ -333,7 +390,26 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               (activeUser.id === newMsg.sender_id || activeUser.id === newMsg.receiver_id)
             ) {
               setActiveChatHistory((prev) => {
+                // Deduplicate by real ID (incoming echo)
                 if (prev.some((m) => m.id === newMsg.id)) return prev;
+
+                // Reconcile: if sender, replace the temporary optimistic message
+                // (matched by sender_id + message_body + ~same timestamp)
+                const me = currentUserRef.current;
+                if (me && newMsg.sender_id === me.id) {
+                  const tempIdx = prev.findIndex((m) =>
+                    m.sender_id === me.id &&
+                    m.message_body === newMsg.message_body &&
+                    // match within 2 seconds to avoid false positives
+                    Math.abs(new Date(m.created_at).getTime() - new Date(newMsg.created_at).getTime()) < 2000
+                  );
+                  if (tempIdx >= 0) {
+                    const updated = [...prev];
+                    updated[tempIdx] = newMsg; // replace temp with real message
+                    return updated;
+                  }
+                }
+
                 return [...prev, newMsg];
               });
               if (currentUserRef.current && newMsg.sender_id === activeUser.id) {
@@ -369,8 +445,27 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 updated.splice(existingIdx, 1);
                 return [conv, ...updated];
               } else {
-                refreshConversations();
-                return prev;
+                // Build the conversation entry directly from the WS message
+                // so the inbox updates instantly without waiting for an async fetch.
+                const isPartnerSender = newMsg.sender_id === partnerId;
+                const partner: ChatUser = {
+                  id: partnerId,
+                  name: isPartnerSender ? (newMsg.sender_name || 'User') : (me?.name || 'You'),
+                  email: '',
+                  role: 'user',
+                  profile_picture_url: isPartnerSender
+                    ? newMsg.sender_avatar || null
+                    : me?.profile_picture_url || null,
+                  is_online: false,
+                };
+                const newConv: Conversation = {
+                  user: partner,
+                  last_message: newMsg.message_body,
+                  last_message_time: newMsg.created_at,
+                  unread_count: (!isLookingAtChat && me && newMsg.sender_id !== me.id) ? 1 : 0,
+                  last_sender_id: newMsg.sender_id,
+                };
+                return [newConv, ...prev];
               }
             });
             break;
@@ -478,8 +573,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // so they see it without waiting for the backend echo.
     const me = currentUserRef.current;
     if (me) {
+      const tempId = -Date.now(); // negative temp ID to avoid collision with real DB IDs
       const optimisticMsg: PrivateMessage = {
-        id: Date.now(), // temporary id, replaced when echo arrives
+        id: tempId,
         sender_id: me.id,
         receiver_id: recipientId,
         message_body: text,
@@ -494,7 +590,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (active && active.id === recipientId) {
         setActiveChatHistory((prev) => {
           // Avoid duplicate if echo arrives almost instantly
-          if (prev.some((m) => m.message_body === text && m.sender_id === me.id && Math.abs(Date.now() - new Date(m.created_at).getTime()) < 500)) return prev;
+          if (prev.some((m) => m.message_body === text && m.sender_id === me.id && Math.abs(new Date().getTime() - new Date(m.created_at).getTime()) < 500)) return prev;
           return [...prev, optimisticMsg];
         });
       }
@@ -576,6 +672,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         refreshGlobalHistory,
         fetchPrivateHistory,
         uploadFile,
+        // Pagination
+        oldestLoadedMessageId,
+        hasMoreOlderMessages,
+        isLoadingOlderMessages,
+        loadOlderMessages,
       }}
     >
       {children}
