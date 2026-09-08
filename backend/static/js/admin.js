@@ -207,7 +207,7 @@ function renderRecentBlogs(blogs) {
         <div class="admin-recent-item">
             <div class="admin-recent-item-icon">${(blog.title || '?')[0].toUpperCase()}</div>
             <div class="admin-recent-item-content">
-                <div class="admin-recent-item-title">${escapeHtml(blog.title || 'Untitled')}</div>
+                <div class="admin-recent-item-title"><a href="/blogs/${blog.id}" class="admin-view-link" title="View blog">${escapeHtml(blog.title || 'Untitled')}</a></div>
                 <div class="admin-recent-item-meta">
                     <span>by ${escapeHtml(blog.author || 'Unknown')}</span>
                     <span>${blog.category || 'General'}</span>
@@ -224,9 +224,9 @@ function renderTopAuthors(authors) {
     if (!authors || authors.length === 0) { container.innerHTML = '<p class="admin-empty">No authors yet.</p>'; return; }
     container.innerHTML = authors.map(author => `
         <div class="admin-author-item">
-            <div class="admin-author-avatar">${(author.name || '?')[0].toUpperCase()}</div>
+            <a href="/profile/${author.id}" class="admin-view-link" title="View public profile"><div class="admin-author-avatar">${(author.name || '?')[0].toUpperCase()}</div></a>
             <div class="admin-author-info">
-                <h4>${escapeHtml(author.name || 'Unknown')}</h4>
+                <h4><a href="/profile/${author.id}" class="admin-view-link" title="View public profile">${escapeHtml(author.name || 'Unknown')}</a></h4>
                 <p>${author.blog_count || 0} blog${(author.blog_count || 0) !== 1 ? 's' : ''} written</p>
             </div>
         </div>
@@ -266,8 +266,8 @@ async function loadUsers(page = 1) {
             <tr class="${isOwner ? 'admin-row-owner' : ''}">
                 <td>
                     <div style="display:flex; align-items:center; gap:0.6rem;">
-                        <div class="admin-author-avatar" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;">${(user.name || '?')[0].toUpperCase()}</div>
-                        <span>${escapeHtml(user.name)}${isOwner ? ' <span class="admin-owner-badge" title="Site Owner">👑 Owner</span>' : ''}</span>
+                        <a href="/profile/${user.id}" class="admin-view-link" title="View public profile"><div class="admin-author-avatar" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;">${(user.name || '?')[0].toUpperCase()}</div></a>
+                        <span><a href="/profile/${user.id}" class="admin-view-link" title="View public profile">${escapeHtml(user.name)}${isOwner ? ' <span class="admin-owner-badge" title="Site Owner">👑 Owner</span>' : ''}</a></span>
                     </div>
                 </td>
                 <td>${escapeHtml(user.email)}</td>
@@ -376,10 +376,10 @@ async function loadBlogs(page = 1) {
                 <td>
                     <div style="display:flex; align-items:center; gap:0.6rem;">
                         <div class="admin-recent-item-icon">${(blog.title || '?')[0].toUpperCase()}</div>
-                        <span style="font-weight:600;">${escapeHtml(blog.title || 'Untitled')}</span>
+                        <a href="/blogs/${blog.id}" class="admin-view-link" style="font-weight:600;" title="View blog">${escapeHtml(blog.title || 'Untitled')}</a>
                     </div>
                 </td>
-                <td>${escapeHtml(blog.author || 'Unknown')}</td>
+                <td>${blog.author_id ? `<a href="/profile/${blog.author_id}" class="admin-view-link" title="View author profile">${escapeHtml(blog.author || 'Unknown')}</a>` : escapeHtml(blog.author || 'Unknown')}</td>
                 <td><span class="admin-category-badge">${escapeHtml(blog.category || 'General')}</span></td>
                 <td>❤️ ${blog.likes_count || 0}</td>
                 <td>💬 ${blog.comments_count || 0}</td>
@@ -469,9 +469,9 @@ async function loadComments() {
         if (!comments || comments.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="admin-empty">No comments found.</td></tr>'; return; }
         tbody.innerHTML = comments.map(comment => `
             <tr>
-                <td><strong>${escapeHtml(comment.user_name || 'Unknown')}</strong></td>
+                <td>${comment.user_id ? `<a href="/profile/${comment.user_id}" class="admin-view-link" title="View user profile"><strong>${escapeHtml(comment.user_name || 'Unknown')}</strong></a>` : `<strong>${escapeHtml(comment.user_name || 'Unknown')}</strong>`}</td>
                 <td style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(comment.content)}">${escapeHtml(comment.content)}</td>
-                <td>${escapeHtml(comment.blog_title || 'Deleted blog')}</td>
+                <td>${comment.blog_id ? `<a href="/blogs/${comment.blog_id}" class="admin-view-link" title="View blog">${escapeHtml(comment.blog_title || 'Blog')}</a>` : escapeHtml(comment.blog_title || 'Deleted blog')}</td>
                 <td>${comment.created_at ? new Date(comment.created_at).toLocaleString() : '—'}</td>
                 <td class="admin-table-actions">
                     <button class="admin-btn-icon admin-btn-danger" data-id="${comment.id}" data-action="delete" aria-label="Delete comment">🗑️</button>

@@ -81,6 +81,59 @@ export const ChatPage: React.FC = () => {
     }
   }, [searchQuery, currentUser, sidebarTab]);
 
+  // Auto-open a direct conversation when arriving from a "Message" button on
+  // another page (e.g. the public profile's btn-dm-profile), which routes here
+  // as /chat?user=<id>. Resolves the recipient from an existing conversation,
+  // then falls back to the public profile endpoint.
+  const dmUserTarget = useRef<number | null>(null);
+  useEffect(() => {
+    if (!currentUser) return;
+    if (dmUserTarget.current == null) {
+      const raw = new URLSearchParams(window.location.search).get('user');
+      const id = raw ? Number(raw) : NaN;
+      dmUserTarget.current =
+        Number.isFinite(id) && id > 0 && id !== currentUser.id ? id : null;
+    }
+    const targetId = dmUserTarget.current;
+    if (targetId == null) return;
+
+    const select = (u: ChatUser) => {
+      dmUserTarget.current = null;
+      window.history.replaceState(window.history.state, '', '/chat');
+      setActiveRecipient(u);
+    };
+
+    const existing = conversations.find((c) => c.user.id === targetId);
+    if (existing) {
+      select(existing.user);
+      return;
+    }
+    if (activeRecipient?.id === targetId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/user/${targetId}`, { credentials: 'include' });
+        if (!res.ok || cancelled) return;
+        const u = await res.json();
+        if (cancelled || !u || !u.id) return;
+        select({
+          id: u.id,
+          name: u.name || 'User',
+          email: u.email || '',
+          role: u.role || 'user',
+          profile_picture_url: u.profile_picture_url || null,
+          is_online: false,
+        });
+      } catch {
+        dmUserTarget.current = null; // give up rather than re-try in a loop
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser, conversations, activeRecipient, setActiveRecipient]);
+
   // Auto-scroll global chat
   useEffect(() => {
     if (showGlobalChat) {
@@ -479,22 +532,28 @@ export const ChatPage: React.FC = () => {
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
-                <UserAvatar
-                  name={activeRecipient.name}
-                  avatarUrl={activeRecipient.profile_picture_url}
-                  size="sm"
-                  isOnline={activeRecipient.is_online}
-                  showStatus
-                />
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h2 className="text-sm font-bold text-white">{activeRecipient.name}</h2>
-                    <RoleBadge role={activeRecipient.role} size="sm" />
+                <a
+                  href={`/profile/${activeRecipient.id}`}
+                  className="flex items-center gap-3 group"
+                  title={`View ${activeRecipient.name}'s public profile`}
+                >
+                  <UserAvatar
+                    name={activeRecipient.name}
+                    avatarUrl={activeRecipient.profile_picture_url}
+                    size="sm"
+                    isOnline={activeRecipient.is_online}
+                    showStatus
+                  />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="text-sm font-bold text-white group-hover:text-blossom-400 transition-colors">{activeRecipient.name}</h2>
+                      <RoleBadge role={activeRecipient.role} size="sm" />
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      {activeRecipient.is_online ? 'Active now' : 'Offline'}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-slate-400">
-                    {activeRecipient.is_online ? 'Active now' : 'Offline'}
-                  </p>
-                </div>
+                </a>
               </div>
             </div>
 

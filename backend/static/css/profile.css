@@ -99,24 +99,26 @@
     color: #ffffff;
     box-shadow: 0 10px 24px rgba(194, 109, 132, 0.3);
 }
-
 .profile-name-row {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    min-width: 0;
-    justify-content: center;
     width: 100%;
+    min-width: 0;
+    height: 40px;
 }
 
 .profile-name {
-    font-size: clamp(1.4rem, 2.5vw, 1.8rem);
-    font-weight: 800;
-    color: var(--primary-deep);
-    letter-spacing: -0.03em;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
 }
 
+.btn-dm-profile {
+    position: absolute;
+    right: 0;
+}
 .profile-edit-name-btn {
     border: 1px solid var(--line);
     background: var(--surface-alt);

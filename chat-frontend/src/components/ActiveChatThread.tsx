@@ -110,24 +110,30 @@ export const ActiveChatThread: React.FC<ActiveChatThreadProps> = ({
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <UserAvatar
-            name={recipient.name}
-            avatarUrl={recipient.profile_picture_url}
-            size="sm"
-            isOnline={recipient.is_online}
-            showStatus={true}
-          />
-          <div>
-            <div className="flex items-center gap-1.5">
-              <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate max-w-[160px]">
-                {recipient.name}
-              </h4>
-              <RoleBadge role={recipient.role} size="sm" />
+          <a
+            href={`/profile/${recipient.id}`}
+            className="flex items-center gap-3 group"
+            title={`View ${recipient.name}'s public profile`}
+          >
+            <UserAvatar
+              name={recipient.name}
+              avatarUrl={recipient.profile_picture_url}
+              size="sm"
+              isOnline={recipient.is_online}
+              showStatus={true}
+            />
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate max-w-[160px] group-hover:text-blossom-600 dark:group-hover:text-blossom-400 transition-colors">
+                  {recipient.name}
+                </h4>
+                <RoleBadge role={recipient.role} size="sm" />
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-none">
+                {recipient.is_online ? 'Active now' : 'Offline'}
+              </p>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-none">
-              {recipient.is_online ? 'Active now' : 'Offline'}
-            </p>
-          </div>
+          </a>
         </div>
 
         <div className="flex items-center gap-1">

@@ -533,7 +533,7 @@ def resetPass_verEmail(request:Request):
 def chat_page(request: Request):
     return templates.TemplateResponse(
         request=request,
-        name="base.html",
+        name="chat.html",
         context={}
     )
 

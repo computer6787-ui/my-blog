@@ -27,8 +27,14 @@ export const ChatRoot: React.FC = () => {
     const handleToggleGlobal = () => {
       window.location.href = '/chat';
     };
-    const handleOpenDirect = () => {
-      window.location.href = '/chat';
+    const handleOpenDirect = (event: Event) => {
+      // Route to the actual DM thread by carrying the target user id in the
+      // query string; ChatPage auto-opens that conversation on arrival.
+      const detail = (event as CustomEvent).detail as
+        | { user?: { id?: number } }
+        | undefined;
+      const userId = detail?.user?.id;
+      window.location.href = userId ? `/chat?user=${userId}` : '/chat';
     };
     const handleToggleDirect = () => {
       window.location.href = '/chat';

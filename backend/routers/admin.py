@@ -394,6 +394,7 @@ def list_comments(
             "content": comment.content,
             "created_at": comment.created_at,
             "user_name": comment.user.name if comment.user else "Unknown",
+            "user_id": comment.user_id,
             "blog_id": comment.blog_id,
             "blog_title": comment.blog.title if comment.blog else "Deleted blog",
         })

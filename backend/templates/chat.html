@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Lumora{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<!-- The chat UI is rendered client-side by the chat bundle (ChatPage). -->
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260908"></script>
+{% endblock %}
