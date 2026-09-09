@@ -1,35 +1,147 @@
 {% extends "base.html" %}
 
-{% block title %}Write a Story - Lumora{% endblock %}
+{% block title %}Write — Lumora{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<main class="editor-main">
-    <div class="editor-container">
-        <header class="editor-header">
+<main class="editor-main" data-mode="create">
+    <!-- ===== Top bar: back + view mode + word count ===== -->
+    <div class="editor-topbar">
+        <div class="editor-topbar-left">
             <a href="/" class="back-link">← Back to Stories</a>
-            <h2>Create a New Story</h2>
-            <p class="editor-subtitle">Craft your narrative, share unique insights, and let your voice be heard.</p>
-        </header>
-
-        <form id="blog_form" class="story-editor-form" method="post">
-            <div class="form-group">
-                <label for="title" class="form-label">Story Title</label>
-                <input 
-                    type="text" 
-                    id="title" 
-                    name="title" 
-                    class="editor-title-input" 
-                    placeholder="Enter an inspiring title..." 
-                    maxlength="150" 
-                    required 
-                    autocomplete="off"
-                >
+            <span id="editor-topbar-status" class="editor-topbar-status">Write</span>
+        </div>
+        <div class="editor-topbar-actions">
+            <span id="editor-word-count" class="editor-stat">0 words · 1 min read</span>
+            <div class="editor-view-toggle">
+                <button type="button" id="view-write" class="is-active">Write</button>
+                <button type="button" id="view-preview">Preview</button>
             </div>
+            <button type="button" id="btn-save-draft" class="btn-editor">Save Draft</button>
+            <button type="button" id="btn-publish" class="btn-editor btn-editor-primary">Publish</button>
+        </div>
+    </div>
 
-            <div class="form-group">
-                <label for="category" class="form-label">Category <span class="optional-pill">Optional</span></label>
-                <select id="category" name="category" class="editor-category-select">
+    <!-- ===== Writing canvas ===== -->
+    <div class="editor-canvas">
+        <div class="editor-title-wrap">
+            <input
+                type="text"
+                id="title"
+                class="editor-title-input"
+                placeholder="Article title"
+                maxlength="150"
+                autocomplete="off"
+                required
+            >
+            <input
+                type="text"
+                id="subtitle"
+                class="editor-subtitle-input"
+                placeholder="Optional subtitle or excerpt"
+                maxlength="220"
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="editor-byline">
+            <div id="byline-avatar" class="editor-byline-avatar">L</div>
+            <span id="byline-name" class="editor-byline-name">Lumora Writer</span>
+            <span class="editor-byline-dot">·</span>
+            <time id="byline-date" class="editor-byline-date"></time>
+        </div>
+
+        <!-- ===== Formatting toolbar ===== -->
+        <div id="editor-toolbar" class="editor-toolbar" role="toolbar" aria-label="Formatting">
+            <div class="tt-group">
+                <button type="button" class="tt-btn" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="italic" title="Italic (Ctrl+I)" aria-label="Italic">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="underline" title="Underline (Ctrl+U)" aria-label="Underline">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v6a6 6 0 0 0 12 0V4"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="strike" title="Strikethrough" aria-label="Strikethrough">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="20" y2="12"/><path d="M6 4v6a6 6 0 0 0 12 0V4"/></svg>
+                </button>
+            </div>
+            <span class="tt-sep" aria-hidden="true"></span>
+
+            <div class="tt-group">
+                <select id="editor-format-select" class="editor-format-select" aria-label="Block type">
+                    <option value="p">Paragraph</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                </select>
+            </div>
+            <span class="tt-sep" aria-hidden="true"></span>
+
+            <div class="tt-group">
+                <button type="button" class="tt-btn" data-cmd="bulletList" title="Bullet list" aria-label="Bullet list">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><line x1="4" y1="6" x2="4.01" y2="6"/><line x1="4" y1="12" x2="4.01" y2="12"/><line x1="4" y1="18" x2="4.01" y2="18"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="orderedList" title="Ordered list" aria-label="Ordered list">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="blockquote" title="Quote" aria-label="Quote">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1H3v1"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2H16c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="hr" title="Divider" aria-label="Divider">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                </button>
+            </div>
+            <span class="tt-sep" aria-hidden="true"></span>
+
+            <div class="tt-group">
+                <button type="button" class="tt-btn" data-cmd="alignLeft" title="Align left" aria-label="Align left">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="alignCenter" title="Align center" aria-label="Align center">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="alignRight" title="Align right" aria-label="Align right">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+                </button>
+            </div>
+            <span class="tt-sep" aria-hidden="true"></span>
+
+            <div class="tt-group">
+                <button type="button" class="tt-btn" data-cmd="link" title="Link (Ctrl+K)" aria-label="Link">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="image" title="Insert image" aria-label="Insert image">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </button>
+            </div>
+            <span class="tt-sep" aria-hidden="true"></span>
+
+            <div class="tt-group">
+                <button type="button" class="tt-btn" data-cmd="undo" title="Undo (Ctrl+Z)" aria-label="Undo">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                </button>
+                <button type="button" class="tt-btn" data-cmd="redo" title="Redo (Ctrl+Y)" aria-label="Redo">
+                    <svg class="tt-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== Editor prose (contenteditable) ===== -->
+        <div id="editor-body" class="editor-prose" data-placeholder="Write your story..."></div>
+
+        <!-- ===== Preview pane (hidden by default) ===== -->
+        <div id="editor-preview" class="editor-preview hidden"></div>
+    </div>
+
+    <!-- ===== Settings strip (collapsible): category, cover, AI prompt ===== -->
+    <details class="editor-settings">
+        <summary>Settings · Category · Cover image · AI prompt</summary>
+        <div class="editor-settings-body">
+            <div class="editor-setting-row">
+                <label for="category" class="editor-setting-label">Category</label>
+                <select id="category" class="editor-select">
                     <option value="">Auto-detect from content</option>
                     <option value="Tech">🌊 Tech</option>
                     <option value="Life">🌿 Life</option>
@@ -42,142 +154,97 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <div class="label-with-actions">
-                    <label for="image_url" class="form-label">Cover Header Image <span class="optional-pill">Optional</span></label>
-                    <div class="image-action-buttons">
-                        <button type="button" id="btn-upload-img" class="btn-secondary-sm">📷 Upload Photo</button>
-                        <button type="button" id="btn-adjust-img" class="btn-secondary-sm hidden">✂️ Adjust Photo</button>
-                        <button type="button" id="btn-surprise-img" class="btn-secondary-sm">🎲 Surprise Image</button>
-                        <button type="button" id="btn-clear-img" class="btn-secondary-sm hidden">✕ Clear</button>
+            <div class="editor-setting-row">
+                <label class="editor-setting-label">Cover Image</label>
+                <div class="cover-strip">
+                    <input type="url" id="image_url" class="hidden" name="image_url" autocomplete="off">
+                    <div id="cover-preview" class="cover-preview hidden">
+                        <img id="cover-preview-img" class="cover-preview-img" src="" alt="Cover preview">
                     </div>
-                </div>
-
-                <input type="file" id="device_image" name="device_image" accept="image/*" class="hidden" />
-
-                <div class="image-input-wrap">
-                    <span class="input-prefix-icon">🖼️</span>
-                    <input 
-                        type="url" 
-                        id="image_url" 
-                        name="image_url" 
-                        class="editor-image-input" 
-                        placeholder="Paste image URL or choose a photo from your device"
-                        autocomplete="off"
-                    >
-                </div>
-
-                <div class="ai-cover-prompt-group">
-                    <label for="ai_cover_prompt" class="form-label">
-                        🎨 AI Cover Prompt <span class="optional-pill">Optional</span>
-                    </label>
-                    <textarea
-                        id="ai_cover_prompt"
-                        name="ai_cover_prompt"
-                        class="ai-cover-prompt-input"
-                        rows="2"
-                        maxlength="300"
-                        placeholder="Describe what you want the AI cover to show (e.g. 'a misty mountain at sunrise with a lone traveler'). Leave blank to auto-detect from your story."
-                    ></textarea>
-                    <span class="ai-cover-hint">If left blank, the AI reads your story title &amp; content to generate a matching cover.</span>
-                </div>
-
-
-                <div id="image_preview_box" class="image-preview-card">
-                    <div id="image_preview_placeholder" class="preview-placeholder">
-                        <span class="preview-icon">✨</span>
-                        <div class="preview-text">
-                            <strong>AI-Generated Cover</strong>
-                            <span>If no custom image is provided, the AI reads your story and generates a matching cover.</span>
-                        </div>
+                    <div id="cover-preview-placeholder" class="cover-preview-placeholder">
+                        <span>✨</span>
+                        <span>No cover image — one will be generated on publish</span>
                     </div>
-                    <div id="image_preview_img_wrap" class="preview-img-wrap hidden">
-                        <img id="preview_img" src="" alt="Cover preview" class="preview-img">
-                        <span class="preview-badge">Live Preview</span>
+                    <div class="cover-actions">
+                        <button type="button" id="btn-upload-img" class="btn-editor">📷 Upload</button>
+                        <button type="button" id="btn-adjust-img" class="btn-editor hidden">✂️ Adjust</button>
+                        <button type="button" id="btn-surprise-img" class="btn-editor">🎲 Surprise</button>
+                        <button type="button" id="btn-clear-img" class="btn-editor hidden">✕ Clear</button>
                     </div>
-                </div>
-
-                <div id="image_editor_modal" class="image-editor-modal hidden" aria-hidden="true">
-                    <div class="image-editor-panel">
-                        <div class="image-editor-header">
-                            <div>
-                                <h3>Adjust cover photo</h3>
-                                <p>Zoom in and crop the part you want people to see.</p>
-                            </div>
-                            <button type="button" id="close_crop_editor" class="btn-secondary-sm">Close</button>
-                        </div>
-
-                        <div class="crop-stage-wrap">
-                            <div id="crop_stage" class="crop-stage">
-                                <img id="crop_image" src="" alt="Crop preview" />
-                            </div>
-                        </div>
-
-                        <div class="crop-controls">
-                            <div class="crop-range-row">
-                                <label for="crop_zoom">Zoom</label>
-                                <span id="zoom_value">100%</span>
-                            </div>
-                            <input id="crop_zoom" name="crop_zoom" type="range" min="1" max="2.7" step="0.01" value="1" />
-
-                            <div class="crop-axis-row">
-                                <div>
-                                    <label for="crop_x">Horizontal</label>
-                                    <input id="crop_x" type="range" min="0" max="100" value="50" />
-                                </div>
-                                <div>
-                                    <label for="crop_y">Vertical</label>
-                                    <input id="crop_y" type="range" min="0" max="100" value="50" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="image-editor-actions">
-                            <button type="button" id="cancel_crop_editor" class="btn-cancel">Cancel</button>
-                            <button type="button" id="apply_crop_editor" class="publish-button">
-                                <span>Use This Crop</span>
-                                <span class="btn-arrow">✦</span>
-                            </button>
-                        </div>
-                    </div>
+                    <input type="file" id="device_image" name="device_image" accept="image/*" class="hidden" />
                 </div>
             </div>
 
-            <div class="form-group">
-                <div class="label-with-stats">
-                    <label for="body" class="form-label">Story Content</label>
-                    <div class="editor-stats">
-                        <span id="word-count">0 words</span>
-                        <span class="stat-divider">•</span>
-                        <span id="reading-time">~1 min read</span>
-                    </div>
-                </div>
-
-                <textarea 
-                    id="body" 
-                    name="body" 
-                    class="editor-body-textarea" 
-                    placeholder="Write your story, thoughts, and ideas here..." 
-                    rows="12" 
-                    required
+            <div class="editor-setting-row">
+                <label for="ai_cover_prompt" class="editor-setting-label">AI Cover Prompt <span style="font-weight:400;text-transform:none;">Optional</span></label>
+                <textarea
+                    id="ai_cover_prompt"
+                    class="ai-prompt-input"
+                    rows="2"
+                    maxlength="300"
+                    placeholder="Describe what you want the AI cover to show (e.g. 'a misty mountain at sunrise with a lone traveler'). Leave blank to auto-detect from your article."
                 ></textarea>
+                <span class="ai-hint">If left blank, the AI reads your article title & content to generate a matching cover.</span>
             </div>
+        </div>
+    </details>
 
-            <div class="editor-actions">
-                <a href="/" class="btn-cancel">Cancel</a>
-                <button type="submit" id="publish-button" class="publish-button">
-                    <span>Publish Story</span>
+    <!-- ===== Crop modal (reused from legacy flow) ===== -->
+    <div id="image_editor_modal" class="image-editor-modal hidden" aria-hidden="true">
+        <div class="image-editor-panel">
+            <div class="image-editor-header">
+                <div>
+                    <h3>Adjust cover photo</h3>
+                    <p>Zoom in and crop the part you want people to see.</p>
+                </div>
+                <button type="button" id="close_crop_editor" class="btn-secondary-sm">Close</button>
+            </div>
+            <div class="crop-stage-wrap">
+                <div id="crop_stage" class="crop-stage">
+                    <img id="crop_image" src="" alt="Crop preview" />
+                </div>
+            </div>
+            <div class="crop-controls">
+                <div class="crop-range-row">
+                    <label for="crop_zoom">Zoom</label>
+                    <span id="zoom_value">100%</span>
+                </div>
+                <input id="crop_zoom" name="crop_zoom" type="range" min="1" max="2.7" step="0.01" value="1" />
+
+                <div class="crop-axis-row">
+                    <div>
+                        <label for="crop_x">Horizontal</label>
+                        <input id="crop_x" type="range" min="0" max="100" value="50" />
+                    </div>
+                    <div>
+                        <label for="crop_y">Vertical</label>
+                        <input id="crop_y" type="range" min="0" max="100" value="50" />
+                    </div>
+                </div>
+            </div>
+            <div class="image-editor-actions">
+                <button type="button" id="cancel_crop_editor" class="btn-cancel">Cancel</button>
+                <button type="button" id="apply_crop_editor" class="publish-button">
+                    <span>Use This Crop</span>
                     <span class="btn-arrow">✦</span>
                 </button>
             </div>
-        </form>
+        </div>
+    </div>
+
+    <!-- ===== Slash command menu (popover) ===== -->
+    <div id="editor-command-menu" class="editor-command-menu hidden" role="menu" aria-label="Slash commands"></div>
+
+    <!-- ===== Global loader ===== -->
+    <div id="global-loader" class="global-loader hidden" aria-live="polite" aria-busy="true">
+        <div class="global-loader-spinner"></div>
+        <span id="global-loader-text">Loading...</span>
     </div>
 </main>
 
-<script type="module" src="{{ url_for('static', path='js/create-blog.js') }}?v=20260912"></script>
-<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260901"></script>
+<!-- Lumora editor (self-contained Tiptap module) -->
+<script type="module" src="{{ url_for('static', path='js/editor.js') }}?v=20260915b"></script>
 
 {% endblock %}
 
-{% block scripts %}
-{% endblock %}
+{% block scripts %}{% endblock %}

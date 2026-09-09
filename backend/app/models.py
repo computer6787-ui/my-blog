@@ -13,6 +13,7 @@ class Blog(base):
     id=Column(Integer, primary_key=True, index=True)
     title=Column(String)
     body=Column(String)
+    body_format=Column(String, nullable=True, default=None)  # None/"plain" = legacy text, "tiptap" = rich JSON
     image_url=Column(String, nullable=True)
     category=Column(String, nullable=True)
     published=Column(Boolean, default=True)

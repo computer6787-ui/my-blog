@@ -17,9 +17,12 @@
                         <span id="online-dot" class="online-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #9ca3af;"></span>
                         <span id="online-text">Offline</span>
                     </span>
-                    <button type="button" id="btn-dm-profile" class="btn-dm-author" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; cursor: pointer; transition: transform 0.15s, opacity 0.15s;">
-                        <span>💬</span> Message
+                    <button type="button" id="btn-dm-profile" class="btn-dm-author" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #F2F1ED; border: none; cursor: pointer; transition: transform 0.15s, opacity 0.15s;">
+                        <span class="css-icon css-icon-chat" style="background: #F2F1ED;"></span> Message
                     </button>
+                    <a href="/user" id="btn-edit-own-profile" class="btn-edit-own-profile" style="display: none; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; background: transparent; color: var(--text); border: 1px solid var(--card-border); cursor: pointer; text-decoration: none; transition: border-color 0.2s ease, color 0.2s ease;">
+                        ✎ Edit Profile
+                    </a>
                 </div>
                 <div class="profile-email-badge">
                     <span class="email-icon">✉</span>
@@ -72,5 +75,5 @@
     </section>
 </main>
 
-<script type="module" src="{{ url_for('static', path='js/public_profile.js') }}?v=20260901"></script>
+<script type="module" src="{{ url_for('static', path='js/public_profile.js') }}?v=20260913"></script>
 {% endblock %}

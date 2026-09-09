@@ -22,9 +22,12 @@
         <div id="published-blogs" class="user-stories-grid" aria-live="polite">
             <!-- User story cards loaded here -->
         </div>
+        <div id="load-more-wrap" class="load-more-wrap" style="display: none; text-align: center; margin-top: 1.5rem;">
+            <button type="button" id="btn-load-more" class="hero-btn hero-btn-primary" style="min-width: 180px;">Load More</button>
+        </div>
     </section>
 </main>
 
-<script type="module" src="{{ url_for('static', path='js/my_blogs.js') }}?v=20260912"></script>
-<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260912"></script>
+<script type="module" src="{{ url_for('static', path='js/my_blogs.js') }}?v=20260913"></script>
+<script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260913"></script>
 {% endblock %}

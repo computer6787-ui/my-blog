@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Optional
@@ -6,6 +7,7 @@ from typing import Optional
 class Blog(BaseModel):
     title: str
     body: str
+    body_format: Optional[str] = None
     image_url: Optional[str] = None
     category: Optional[str] = None
     published: Optional[bool] = True
@@ -19,6 +21,7 @@ class BlogSummary(BaseModel):
     id: int
     title: str
     body: str
+    body_format: Optional[str] = None
     image_url: Optional[str] = None
     category: Optional[str] = None
     published: bool
@@ -123,6 +126,7 @@ class ShowBlog(BaseModel):
     id: int
     title: str
     body: str
+    body_format: Optional[str] = None
     image_url: Optional[str] = None
     category: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -135,6 +139,34 @@ class ShowBlog(BaseModel):
         orm_mode = True
 
 
+def _tiptap_text(value):
+    """Recursively extract readable plain text from Tiptap JSON nodes."""
+    if isinstance(value, list):
+        return " ".join(_tiptap_text(item) for item in value)
+    if isinstance(value, dict):
+        if value.get("type") == "text":
+            return value.get("text") or ""
+        out = [_tiptap_text(child) for child in value.get("content") or []]
+        return " ".join(part for part in out if part)
+    return ""
+
+
+def tiptap_json_to_text(value: str) -> str:
+    """Convert a Tiptap JSON string to plain readable text. Returns None-ish
+    behavior by returning the original string if it isn't valid Tiptap JSON."""
+    if not isinstance(value, str):
+        return value or ""
+    stripped = value.strip()
+    if not (stripped.startswith("[") or stripped.startswith("{")):
+        return value
+    try:
+        data = json.loads(stripped)
+    except (ValueError, TypeError):
+        return value
+    text = _tiptap_text(data)
+    return " ".join(text.split()) if text else ""
+
+
 class BlogCardResponse(BaseModel):
     """Lightweight blog card used by the public listing endpoint.
     Uses CreatorInfo instead of the full Show_user so that nested creator
@@ -145,10 +177,13 @@ class BlogCardResponse(BaseModel):
 
     The full article body is NOT sent in listings — only a short preview. The
     front-end uses it purely for a snippet + read-time estimate, so a 400-char
-    head is sufficient and keeps each card's payload tiny."""
+    head is sufficient and keeps each card's payload tiny.
+    When the body is stored as Tiptap JSON, the raw markup is first flattened
+    to plain text so keyword search and card excerpts never leak JSON."""
     id: int
     title: str
     body: str
+    body_format: Optional[str] = None
     image_url: Optional[str] = None
     category: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -159,8 +194,11 @@ class BlogCardResponse(BaseModel):
     @field_validator("body", mode="before")
     @classmethod
     def truncate_body(cls, v):
-        if isinstance(v, str) and len(v) > 400:
-            return v[:400]
+        if isinstance(v, str):
+            if v.lstrip().startswith(("[", "{")):
+                v = tiptap_json_to_text(v)
+            if len(v) > 400:
+                return v[:400]
         return v
 
     class Config:
@@ -264,6 +302,7 @@ class BlogDetailResponse(BaseModel):
     id: int
     title: str
     body: str
+    body_format: Optional[str] = None
     image_url: Optional[str] = None
     category: Optional[str] = None
     created_at: Optional[datetime] = None

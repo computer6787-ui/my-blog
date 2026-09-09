@@ -67,7 +67,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
         />
       ) : (
         <div
-          className={`w-full h-full rounded-full bg-gradient-to-br ${gradient} text-white flex items-center justify-center shadow-inner select-none`}
+          className={`w-full h-full rounded-full bg-gradient-to-br ${gradient} text-[#F2F1ED] flex items-center justify-center shadow-inner select-none`}
         >
           {initial}
         </div>
@@ -75,7 +75,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 
       {showStatus && (
         <span
-          className={`absolute rounded-full ring-2 ring-white dark:ring-slate-900 ${dotSizeClasses} ${
+          className={`absolute rounded-full ring-2 ring-page dark:ring-slate-900 ${dotSizeClasses} ${
             isOnline ? 'bg-emerald-500 live-pulse-dot' : 'bg-slate-400 dark:bg-slate-600'
           }`}
           title={isOnline ? 'Online now' : 'Offline'}

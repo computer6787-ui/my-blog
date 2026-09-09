@@ -1,7 +1,7 @@
 <header class="header">
 
     <div class="logo">
-        <a href="/" ><img src="{{ url_for('static', path='images/logo_in.png') }}" alt="Logo"></a>
+        <a href="/" ><img src="{{ url_for('static', path='images/cherry_logo.png') }}" alt="Logo"></a>
         <section class="logo_text">
         <h1>Lumora</h1>
         <p>Where ideas come to light</p>
@@ -11,12 +11,10 @@
 
     <nav class="nav">
             <a class="nav_button" href="/">Home</a>
-            <button id="nav-chat-btn" class="notif-bell" type="button" aria-label="Direct Messages" onclick="window.dispatchEvent(new CustomEvent('lumora:toggle-direct-chat'))" title="Direct Messages">
-                <span class="bell-icon">💬</span>
-                <span id="nav-chat-badge" class="notif-badge lumora-chat-unread-badge hidden">0</span>
-            </button>
+            <a class="nav_button" href="/blog">Blog</a>
+            <a class="nav_button" href="/chat">Messaging</a>
             <button id="notif-bell" class="notif-bell" type="button" aria-label="Notifications">
-                <span class="bell-icon">🔔</span>
+                <span class="bell-icon css-icon css-icon-bell"></span>
                 <span id="notif-badge" class="notif-badge hidden">0</span>
             </button>
             <a id="nav-avatar" class="nav-avatar hidden" href="/user" aria-label="Profile">
@@ -51,13 +49,12 @@
 
     <a href="/user">Profile</a>
     <a href="/my-blogs">My Blogs</a>
-    <a href="#" onclick="window.dispatchEvent(new CustomEvent('lumora:toggle-direct-chat')); closeMenu(); return false;">Direct Messages <span class="lumora-chat-unread-badge hidden" style="background:#6366f1;color:white;padding:2px 7px;border-radius:9999px;font-size:11px;margin-left:6px;font-weight:bold;">0</span></a>
-    <a href="#" onclick="window.dispatchEvent(new CustomEvent('lumora:toggle-global-chat')); closeMenu(); return false;">Global Live Room</a>
-    <a href="/admin" id="admin-panel-link" class="hidden">🔧 Admin Panel</a>
+    <a href="/chat">Messaging</a>
+    <a href="/admin" id="admin-panel-link" class="hidden">Admin Panel</a>
     <a href="#" id="drawer-notif-link">Notifications</a>
 
     <button type="button" id="drawer-theme-toggle" class="drawer-theme-toggle" aria-label="Toggle dark mode">
-        <span class="drawer-theme-icon" id="drawer-theme-icon">🌙</span>
+        <span class="drawer-theme-icon" id="drawer-theme-icon"><span class="css-icon css-icon-moon"></span></span>
         <span class="drawer-theme-label" id="drawer-theme-label">Light mode</span>
         <span class="drawer-theme-switch" aria-hidden="true">
             <span class="drawer-theme-knob"></span>
@@ -102,7 +99,7 @@
                 const label = document.getElementById('drawer-theme-label');
                 const icon = document.getElementById('drawer-theme-icon');
                 if (label) label.textContent = isDark ? 'Dark mode' : 'Light mode';
-                if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+                if (icon) icon.innerHTML = isDark ? '<span class="css-icon css-icon-sun"></span>' : '<span class="css-icon css-icon-moon"></span>';
                 try { localStorage.setItem('lumora-theme', isDark ? 'dark' : 'light'); } catch (e) {}
             }
             const savedTheme = (() => { try { return localStorage.getItem('lumora-theme'); } catch (e) { return null; } })();

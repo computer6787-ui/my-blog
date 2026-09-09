@@ -1,162 +1,432 @@
-﻿/* ===== HERO SECTION ===== */
+/* ===== HOMEPAGE — SAKURA EDITORIAL ===== */
 
-.hero {
-    position: relative;
-    background: linear-gradient(135deg, rgba(240, 233, 255, 0.85) 0%, rgba(226, 232, 255, 0.75) 50%, rgba(245, 238, 255, 0.85) 100%);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-xl);
-    padding: clamp(2.2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3.5rem);
-    box-shadow: var(--shadow-soft);
+/* Poster: force full-width layout — overrides React/Tailwind re-renders */
+#sakura-poster-root {
+    display: block !important;
     overflow: hidden;
-    margin-bottom: 3.5rem;
+    max-width: 900px;
+    margin: 0 auto !important;
+    padding: 0 clamp(1rem, 3vw, 2.5rem);
 }
 
-body.dark-mode .hero {
-    background: linear-gradient(135deg, rgba(26, 32, 45, 0.85) 0%, rgba(20, 26, 38, 0.95) 50%, rgba(24, 30, 42, 0.85) 100%);
-    border-color: rgba(255, 255, 255, 0.08);
+.sakura-poster,
+.sakura-poster > div,
+.sakura-poster > div > article {
+    width: 100% !important;
+    max-width: none !important;
 }
 
-.hero::before {
-    content: "";
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(194, 109, 132, 0.22) 0%, transparent 70%);
-    filter: blur(25px);
-    pointer-events: none;
-}
-
-.hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 760px;
-}
-
-.hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    background: rgba(194, 109, 132, 0.12);
-    border: 1px solid rgba(194, 109, 132, 0.2);
-    color: var(--accent-strong);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-bottom: 1.2rem;
-}
-
-body.dark-mode .hero-badge {
-    background: rgba(232, 183, 195, 0.12);
-    border-color: rgba(232, 183, 195, 0.25);
-    color: #e8b7c3;
-}
-
-.hero-badge-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 10px #10b981;
-}
-
-.hero-title {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-size: clamp(2.3rem, 5vw, 3.8rem);
-    font-weight: 700;
-    line-height: 1.08;
-    color: var(--primary-deep);
-    letter-spacing: -0.02em;
-    margin-bottom: 1.2rem;
-}
-
-.hero-desc {
-    color: var(--muted);
-    font-size: clamp(1.02rem, 1.8vw, 1.2rem);
-    line-height: 1.75;
-    margin-bottom: 2rem;
-}
-
-.hero-nav {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2.2rem;
-}
+/* ---------- Shared button styles ---------- */
 
 .hero-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 0.85rem 1.6rem;
+    gap: 6px;
+    padding: 0.7rem 1.5rem;
     border-radius: 999px;
-    font-weight: 700;
-    font-size: 1rem;
-    min-height: 48px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    min-height: 42px;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    text-decoration: none;
 }
 
 .hero-btn-primary {
-    background: var(--accent-gradient);
-    color: #ffffff !important;
-    box-shadow: 0 10px 24px rgba(194, 109, 132, 0.28);
+    background: var(--accent);
+    color: #F2F1ED !important;
+    border: 1.5px solid var(--accent);
 }
 
 .hero-btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 30px rgba(194, 109, 132, 0.38);
-    filter: brightness(1.05);
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+    transform: translateY(-1px);
 }
 
 .hero-btn-secondary {
-    background: var(--surface);
-    color: var(--primary-deep) !important;
-    border: 1px solid var(--line);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    background: transparent;
+    color: var(--accent) !important;
+    border: none;
+    padding: 0.7rem 0.4rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
 .hero-btn-secondary:hover {
-    transform: translateY(-2px);
-    background: var(--surface-alt);
-    border-color: var(--card-border-hover);
+    color: var(--accent-strong) !important;
 }
 
 .btn-icon {
     display: inline-flex;
     align-items: center;
     font-size: 0.9em;
-    transition: transform 0.25s ease;
 }
 
-.hero-btn:hover .btn-icon {
-    transform: translateY(2px);
+/* ---------- Top Stories Fader (fade-in / fade-out) ---------- */
+
+.top-stories-section {
+    padding: clamp(2rem, 4vw, 3.5rem) clamp(1.2rem, 3vw, 2.5rem) clamp(2rem, 4vw, 3rem);
+    overflow: hidden;
 }
 
-.hero-btn-secondary:hover .btn-icon {
-    transform: translateX(2px);
+.top-stories-heading {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 400;
+    color: var(--primary-deep);
+    text-align: center;
+    margin-bottom: 0.3rem;
+}
+
+.top-stories-sub {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin-bottom: 2rem;
+}
+
+/* Container stacks every story in the same grid cell so the tallest one
+   sets the height and inactive cards gracefully fade out on top of it.
+   Matches the poster max-width for visual consistency. */
+.top-stories-fader {
+    display: grid;
+    max-width: min(100% - 2rem, 780px);
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Loading skeleton */
+.top-stories-skeleton {
+    grid-area: 1 / 1;
+    transition: opacity 0.3s ease;
+}
+
+.top-stories-skeleton .skeleton-card {
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.top-stories-skeleton .skeleton-media {
+    width: 100%;
+    height: clamp(200px, 30vw, 320px);
+    background: linear-gradient(90deg, var(--surface-alt) 25%, rgba(199, 123, 145, 0.06) 50%, var(--surface-alt) 75%);
+    background-size: 200% 100%;
+    animation: shimmerWave 1.5s infinite;
+}
+
+.top-stories-skeleton .skeleton-body {
+    padding: 1.2rem 1.4rem 1.4rem;
+}
+
+.top-stories-skeleton .skeleton-title {
+    width: 70%;
+    height: 20px;
+    border-radius: 6px;
+    margin-bottom: 0.7rem;
+    background: linear-gradient(90deg, var(--surface-alt) 25%, rgba(199, 123, 145, 0.06) 50%, var(--surface-alt) 75%);
+    background-size: 200% 100%;
+    animation: shimmerWave 1.5s infinite 0.1s;
+}
+
+.top-stories-skeleton .skeleton-text {
+    width: 45%;
+    height: 14px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--surface-alt) 25%, rgba(199, 123, 145, 0.06) 50%, var(--surface-alt) 75%);
+    background-size: 200% 100%;
+    animation: shimmerWave 1.5s infinite 0.2s;
+}
+
+@keyframes shimmerWave {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.top-stories-fader > .top-story-card {
+    grid-area: 1 / 1;
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.98);
+    transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out, visibility 0s linear 0.8s;
+    z-index: 1;
+}
+
+.top-stories-fader > .top-story-card.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.8s ease-in-out 0.15s, transform 0.8s ease-in-out 0.15s, visibility 0s;
+    z-index: 2;
+}
+
+.top-story-card {
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.top-story-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(109, 74, 78, 0.1);
+}
+
+/* ---- Fader navigation (prev / next + dots) ---- */
+
+.top-stories-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.1rem;
+    margin-top: 1.4rem;
+}
+
+.top-stories-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    background: var(--surface);
+    color: var(--accent);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.top-stories-arrow:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #F2F1ED;
+}
+
+.top-stories-dots {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.top-stories-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: var(--line);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.top-stories-dot.active {
+    background: var(--accent);
+    transform: scale(1.25);
+}
+
+.top-story-media {
+    width: 100%;
+    height: clamp(280px, 35vw, 400px);
+    overflow: hidden;
+    background: var(--surface-alt);
+}
+
+.top-story-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.top-story-card:hover .top-story-media img {
+    transform: scale(1.04);
+}
+
+.top-story-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--accent);
+    background: linear-gradient(135deg, var(--surface-alt) 0%, rgba(199, 123, 145, 0.08) 100%);
+}
+
+.top-story-body {
+    padding: 1.4rem 1.5rem 1.5rem;
+}
+
+.top-story-title {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    font-weight: 500;
+    color: var(--primary-deep);
+    line-height: 1.3;
+    margin-bottom: 0.8rem;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.top-story-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.top-story-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+}
+
+.top-story-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--lavender-soft);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+.top-story-likes {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ---------- Become an Author CTA ---------- */
+
+/* ---------- Become an Author CTA ---------- */
+
+.home-author-cta {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    height: clamp(280px, 35vw, 400px);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-author-cta img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.4) saturate(0.5);
+}
+
+.home-author-cta-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: #F2F1ED;
+    padding: 1.5rem;
+}
+
+.home-author-cta-content h2 {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 400;
+    margin-bottom: 1.2rem;
+    color: #F2F1ED;
+}
+
+.home-author-cta-content .hero-btn {
+    background: var(--accent);
+    color: #F2F1ED !important;
+    border: none;
+}
+
+.home-author-cta-content .hero-btn:hover {
+    background: var(--accent-strong);
+}
+
+/* ===== SHARED HERO COMPONENTS (for other pages) ===== */
+
+.hero {
+    position: relative;
+    background: var(--bg);
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.5rem, 4vw, 3rem);
+    text-align: center;
+}
+
+.hero-title {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.4rem, 5.5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--primary-deep);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+}
+
+.hero-desc {
+    color: var(--muted);
+    font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
 }
 
 .hero-highlights {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.2rem;
+    gap: 1rem;
+    justify-content: center;
     padding-top: 1.5rem;
-    border-top: 1px solid rgba(194, 109, 132, 0.12);
+    border-top: 1px solid var(--line);
+    margin-top: 2rem;
 }
 
 .highlight-item {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.88rem;
-    font-weight: 600;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
     color: var(--muted);
 }
 
@@ -164,37 +434,152 @@ body.dark-mode .hero-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: rgba(194, 109, 132, 0.12);
-    color: var(--accent);
-    font-size: 0.8rem;
+    background: var(--lavender-soft);
+    color: var(--lavender);
+    font-size: 0.7rem;
 }
 
-/* ===== CTA STRIP BELOW POSTER HERO ===== */
+/* ===== CTA STRIP ===== */
 
 .hero-cta-strip {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: clamp(0.6rem, 2vw, 1rem);
-    padding: clamp(1.2rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem);
+    padding: clamp(1rem, 2.5vw, 1.5rem) clamp(1rem, 3vw, 2rem);
     background: var(--bg);
-    /* Appear right as the LUMORA title starts expanding (title delays 0.2s).
-       Duration is !important so it stays smooth even under the global
-       prefers-reduced-motion override, matching the poster's entrance. */
-    animation: cta-slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
-    animation-duration: 0.8s !important;
 }
 
 @keyframes cta-slide-up {
-    from {
-        opacity: 0;
-        transform: translateY(14px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-cta-strip {
+    animation: cta-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+/* ===== PHOTO BREAK (shared) ===== */
+
+.photo-break {
+    width: 100%;
+    height: clamp(200px, 35vw, 380px);
+    overflow: hidden;
+    margin-bottom: 4rem;
+}
+
+.photo-break img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.7) brightness(1.02);
+}
+
+/* ===== CONNECT & CREATE ===== */
+
+.connect-section {
+    margin-bottom: 4rem;
+}
+
+.connect-section .section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.connect-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.connect-card {
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.connect-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-hover);
+}
+
+.connect-card-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--lavender);
+    margin-bottom: 0.6rem;
+}
+
+.connect-card h3 {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--primary-deep);
+    margin-bottom: 0.7rem;
+}
+
+.connect-card p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    max-width: 340px;
+    margin: 0 auto;
+}
+
+/* ===== PHOTO BACKDROP CTA ===== */
+
+.photo-cta {
+    position: relative;
+    width: 100%;
+    height: clamp(280px, 35vw, 400px);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4rem;
+}
+
+.photo-cta img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.45) saturate(0.5);
+}
+
+.photo-cta-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: #F2F1ED;
+    padding: 1.5rem;
+}
+
+.photo-cta-content h2 {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 400;
+    margin-bottom: 1.2rem;
+    color: #F2F1ED;
+}
+
+.photo-cta-content .hero-btn {
+    background: var(--accent);
+    color: #F2F1ED !important;
+    border: none;
+}
+
+.photo-cta-content .hero-btn:hover {
+    background: var(--accent-strong);
 }

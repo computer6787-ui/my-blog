@@ -34,6 +34,28 @@ document.addEventListener("DOMContentLoaded", async function () {
             const user = await response.json();
             const blogs = Array.isArray(user.blogs) ? user.blogs : [];
 
+            // Check if viewer is the profile owner
+            const token = localStorage.getItem("token");
+            if (token) {
+                try {
+                    const meRes = await fetch(`${API_URL}/user/me`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (meRes.ok) {
+                        const me = await meRes.json();
+                        // Use String() to avoid type mismatch (API may return string or number id)
+                        if (String(me.id) === String(user.id)) {
+                            const dmBtn = document.getElementById("btn-dm-profile");
+                            if (dmBtn) dmBtn.style.display = "none";
+                            const editBtn = document.getElementById("btn-edit-own-profile");
+                            if (editBtn) {
+                                editBtn.style.display = "inline-flex";
+                            }
+                        }
+                    }
+                } catch (_) { /* not logged in or token invalid — stay public */ }
+            }
+
             // Update online indicator
             if (onlineDot) {
                 onlineDot.style.background = user.is_online ? '#10b981' : '#9ca3af';

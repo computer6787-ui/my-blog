@@ -63,7 +63,7 @@ export const ConversationListView: React.FC<ConversationListViewProps> = ({
       <div className="px-4 pt-4 pb-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-slate-600 text-white shadow-sm">
+            <div className="p-1.5 rounded-lg bg-slate-600 text-[#F2F1ED] shadow-sm">
               <MessageSquare className="w-4 h-4" />
             </div>
             <div>
@@ -103,7 +103,7 @@ export const ConversationListView: React.FC<ConversationListViewProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={activeTab === 'conversations' ? 'Search chats...' : 'Find users...'}
-            className="w-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 px-3.5 py-2.5 rounded-lg text-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blossom-500/50 transition-shadow placeholder:text-slate-400"
+            className="w-full bg-[#F2F1ED] dark:bg-slate-800 text-slate-800 dark:text-slate-100 px-3.5 py-2.5 rounded-lg text-sm border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blossom-500/50 transition-shadow placeholder:text-slate-400"
           />
         </div>
 
@@ -113,7 +113,7 @@ export const ConversationListView: React.FC<ConversationListViewProps> = ({
             onClick={() => setActiveTab('conversations')}
             className={`flex-1 py-2.5 px-2 rounded-md text-xs font-semibold transition-all ${
               activeTab === 'conversations'
-                ? 'bg-white dark:bg-slate-700 text-blossom-600 dark:text-blossom-400 shadow-sm'
+                ? 'bg-[#F2F1ED] dark:bg-slate-700 text-blossom-600 dark:text-blossom-400 shadow-sm'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
@@ -123,7 +123,7 @@ export const ConversationListView: React.FC<ConversationListViewProps> = ({
             onClick={() => setActiveTab('directory')}
             className={`flex-1 py-2.5 px-2 rounded-md text-xs font-semibold transition-all ${
               activeTab === 'directory'
-                ? 'bg-white dark:bg-slate-700 text-blossom-600 dark:text-blossom-400 shadow-sm'
+                ? 'bg-[#F2F1ED] dark:bg-slate-700 text-blossom-600 dark:text-blossom-400 shadow-sm'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
@@ -188,7 +188,7 @@ export const ConversationListView: React.FC<ConversationListViewProps> = ({
                       {conv.last_message}
                     </p>
                     {conv.unread_count > 0 && (
-                      <span className="flex-shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blossom-600 text-white min-w-4 text-center">
+                      <span className="flex-shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blossom-600 text-[#F2F1ED] min-w-4 text-center">
                         {conv.unread_count}
                       </span>
                     )}
@@ -237,7 +237,7 @@ export const ConversationListView: React.FC<ConversationListViewProps> = ({
 
                 <button
                   type="button"
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-blossom-50 dark:bg-blossom-950/60 text-blossom-600 dark:text-blossom-300 group-hover:bg-blossom-600 group-hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-blossom-50 dark:bg-blossom-950/60 text-blossom-600 dark:text-blossom-300 group-hover:bg-blossom-600 group-hover:text-[#F2F1ED] transition-colors"
                 >
                   Chat
                 </button>

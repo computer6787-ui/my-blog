@@ -155,9 +155,9 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
       }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex items-center justify-between px-4 py-3 bg-[#F2F1ED] dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-blossom-600 text-white shadow-sm">
+          <div className="p-1.5 rounded-lg bg-blossom-600 text-[#F2F1ED] shadow-sm">
             <MessageSquare className="w-4 h-4" />
           </div>
           <div>
@@ -217,10 +217,10 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
               className="absolute inset-0 h-full"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-40 flex flex-col items-center justify-end p-6 text-center">
-              <p className="text-sm font-medium text-white drop-shadow-md">
+              <p className="text-sm font-medium text-[#F2F1ED] drop-shadow-md">
                 Welcome to the Global Live Stream!
               </p>
-              <p className="text-xs mt-1 max-w-xs text-white/80 drop-shadow-sm">
+              <p className="text-xs mt-1 max-w-xs text-[#F2F1ED]/80 drop-shadow-sm">
                 Say hello, share ideas, or join the conversation.
               </p>
             </div>
@@ -252,7 +252,7 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
         {hasScrolledUp && (
           <button
             onClick={() => scrollToBottom('smooth')}
-            className="sticky bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-blossom-600 text-white text-xs font-semibold shadow-lg hover:bg-blossom-700 transition-transform active:scale-95"
+            className="sticky bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-blossom-600 text-[#F2F1ED] text-xs font-semibold shadow-lg hover:bg-blossom-700 transition-transform active:scale-95"
           >
             <ChevronDown className="w-4 h-4" />
             New messages below
@@ -262,7 +262,7 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
 
       {/* Emoji Picker */}
       {showEmojiPicker && (
-        <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-850/95 flex items-center gap-1.5 overflow-x-auto scroller-thin">
+        <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-800 bg-[#F2F1ED]/95 dark:bg-slate-850/95 flex items-center gap-1.5 overflow-x-auto scroller-thin">
           {QUICK_EMOJIS.map((emoji) => (
             <button
               key={emoji}
@@ -277,7 +277,7 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
       )}
 
       {/* Input Box */}
-      <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
+      <div className="p-3 bg-[#F2F1ED] dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
         <div className="flex items-center gap-2 min-w-0">
           {currentUser && (
             <>
@@ -328,7 +328,7 @@ export const GlobalChatPanel: React.FC<GlobalChatPanelProps> = ({
             type="button"
             onClick={handleSend}
             disabled={!inputVal.trim()}
-            className={`btn-touch bg-blossom-600 text-white shadow hover:bg-blossom-700 disabled:opacity-40 disabled:cursor-not-allowed transition-transform ${
+            className={`btn-touch bg-blossom-600 text-[#F2F1ED] shadow hover:bg-blossom-700 disabled:opacity-40 disabled:cursor-not-allowed transition-transform ${
               isSending ? 'send-pulse' : ''
             }`}
             title="Send message"

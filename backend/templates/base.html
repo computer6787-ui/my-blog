@@ -14,8 +14,8 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" onload="this.rel='stylesheet'; this.onload=null;">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"></noscript>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap" onload="this.rel='stylesheet'; this.onload=null;">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Inter:wght@300;400;500;600;700&family=Pacifico&display=swap"></noscript>
 
     <title>{% block title %}Lumora{% endblock %}</title>
 
@@ -68,21 +68,68 @@
     }
     </script>
 
-    <link rel="stylesheet" href="{{ url_for('static', path='css/variables.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/nav.css') }}?v=20260912">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/hero.css') }}?v=20260905">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/explore.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/blog.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/single-blog.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/editor.css') }}?v=20260912">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/profile.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/auth.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/components.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/footer.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/responsive.css') }}?v=20260902">
-    <link rel="stylesheet" href="{{ url_for('static', path='chat/chat-bundle.css') }}?v=20260908">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/variables.css') }}?v=20260909d">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/nav.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/hero.css') }}?v=20260909d">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/explore.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/blog.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/single-blog.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/editor.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/editorial-content.css') }}?v=20260915a">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/profile.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/auth.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/components.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/footer.css') }}?v=20260909b">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/responsive.css') }}?v=20260909c">
+    <link rel="stylesheet" href="{{ url_for('static', path='chat/chat-bundle.css') }}?v=20260909b">
 
     {% block extra_head %}{% endblock %}
+
+    <!-- Import map: resolves bare specifiers in Tiptap ESM dist files so all
+         packages share the same @tiptap/pm instances (avoids duplicate plugin errors) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@tiptap/core": "https://esm.sh/@tiptap/core@2.14.0",
+            "@tiptap/pm/state": "https://esm.sh/@tiptap/pm@2.14.0/state",
+            "@tiptap/pm/view": "https://esm.sh/@tiptap/pm@2.14.0/view",
+            "@tiptap/pm/keymap": "https://esm.sh/@tiptap/pm@2.14.0/keymap",
+            "@tiptap/pm/model": "https://esm.sh/@tiptap/pm@2.14.0/model",
+            "@tiptap/pm/transform": "https://esm.sh/@tiptap/pm@2.14.0/transform",
+            "@tiptap/pm/commands": "https://esm.sh/@tiptap/pm@2.14.0/commands",
+            "@tiptap/pm/schema-list": "https://esm.sh/@tiptap/pm@2.14.0/schema-list",
+            "@tiptap/pm/gapcursor": "https://esm.sh/@tiptap/pm@2.14.0/gapcursor",
+            "@tiptap/pm/history": "https://esm.sh/@tiptap/pm@2.14.0/history",
+            "@tiptap/pm/dropcursor": "https://esm.sh/@tiptap/pm@2.14.0/dropcursor",
+            "@tiptap/pm/inputrules": "https://esm.sh/@tiptap/pm@2.14.0/inputrules",
+            "@tiptap/starter-kit": "https://esm.sh/@tiptap/starter-kit@2.14.0",
+            "@tiptap/extension-blockquote": "https://esm.sh/@tiptap/extension-blockquote@2.14.0",
+            "@tiptap/extension-bold": "https://esm.sh/@tiptap/extension-bold@2.14.0",
+            "@tiptap/extension-bullet-list": "https://esm.sh/@tiptap/extension-bullet-list@2.14.0",
+            "@tiptap/extension-code": "https://esm.sh/@tiptap/extension-code@2.14.0",
+            "@tiptap/extension-code-block": "https://esm.sh/@tiptap/extension-code-block@2.14.0",
+            "@tiptap/extension-document": "https://esm.sh/@tiptap/extension-document@2.14.0",
+            "@tiptap/extension-dropcursor": "https://esm.sh/@tiptap/extension-dropcursor@2.14.0",
+            "@tiptap/extension-gapcursor": "https://esm.sh/@tiptap/extension-gapcursor@2.14.0",
+            "@tiptap/extension-hard-break": "https://esm.sh/@tiptap/extension-hard-break@2.14.0",
+            "@tiptap/extension-heading": "https://esm.sh/@tiptap/extension-heading@2.14.0",
+            "@tiptap/extension-history": "https://esm.sh/@tiptap/extension-history@2.14.0",
+            "@tiptap/extension-horizontal-rule": "https://esm.sh/@tiptap/extension-horizontal-rule@2.14.0",
+            "@tiptap/extension-italic": "https://esm.sh/@tiptap/extension-italic@2.14.0",
+            "@tiptap/extension-list-item": "https://esm.sh/@tiptap/extension-list-item@2.14.0",
+            "@tiptap/extension-ordered-list": "https://esm.sh/@tiptap/extension-ordered-list@2.14.0",
+            "@tiptap/extension-paragraph": "https://esm.sh/@tiptap/extension-paragraph@2.14.0",
+            "@tiptap/extension-strike": "https://esm.sh/@tiptap/extension-strike@2.14.0",
+            "@tiptap/extension-text": "https://esm.sh/@tiptap/extension-text@2.14.0",
+            "@tiptap/extension-underline": "https://esm.sh/@tiptap/extension-underline@2.14.0",
+            "@tiptap/extension-link": "https://esm.sh/@tiptap/extension-link@2.14.0",
+            "@tiptap/extension-image": "https://esm.sh/@tiptap/extension-image@2.14.0",
+            "@tiptap/extension-text-align": "https://esm.sh/@tiptap/extension-text-align@2.14.0",
+            "@tiptap/extension-placeholder": "https://esm.sh/@tiptap/extension-placeholder@2.14.0",
+            "linkifyjs": "https://esm.sh/linkifyjs@4.2.0"
+        }
+    }
+    </script>
 </head>
 
 <body>
@@ -131,21 +178,68 @@
         <span id="global-loader-text">Loading...</span>
     </div>
 
-    {% if request and request.url.path == '/' %}
     <footer>
         {% include "partials/footer.html" %}
     </footer>
-    {% else %}
-    <footer class="page-footer">
-        <p>© 2026 Lumora. All rights reserved.</p>
-    </footer>
-    {% endif %}
 
     {% block scripts %}
     {% endblock %}
 
     <script src="{{ url_for('static', path='js/notifications.js') }}?v=20260906"></script>
     <script type="module" src="{{ url_for('static', path='chat/chat-bundle.js') }}?v=20260908"></script>
+
+    <script>
+    // Smooth lazy-section reveal + image lazy-load on every page
+    (function() {
+        function loadImg(img) {
+            if (!img.dataset.src) return;
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+        }
+
+        // Observe lazy sections: reveal + load any images inside
+        var sections = document.querySelectorAll('.lazy-section');
+        if (sections.length && 'IntersectionObserver' in window) {
+            var secObs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        var el = entry.target;
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                        el.querySelectorAll('img.lazy-bg[data-src]').forEach(loadImg);
+                        secObs.unobserve(el);
+                    }
+                });
+            }, { rootMargin: '200px' });
+            sections.forEach(function(s) { secObs.observe(s); });
+        } else {
+            sections.forEach(function(s) {
+                s.style.opacity = '1';
+                s.style.transform = 'translateY(0)';
+                s.querySelectorAll('img.lazy-bg[data-src]').forEach(loadImg);
+            });
+        }
+
+        // Also observe standalone lazy images (not inside a .lazy-section)
+        var standaloneImgs = [];
+        document.querySelectorAll('img.lazy-bg[data-src]').forEach(function(img) {
+            if (!img.closest('.lazy-section')) standaloneImgs.push(img);
+        });
+        if (standaloneImgs.length && 'IntersectionObserver' in window) {
+            var imgObs = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        loadImg(entry.target);
+                        imgObs.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '300px' });
+            standaloneImgs.forEach(function(img) { imgObs.observe(img); });
+        } else {
+            standaloneImgs.forEach(loadImg);
+        }
+    })();
+    </script>
 
 </body>
 

@@ -324,10 +324,10 @@ async function loadBlog() {
         attachBodyMentionClicks(bodyEl);
 
         const readTimeEl = document.getElementById("story-readtime");
-        if (readTimeEl) readTimeEl.textContent = `⏱ ${readTime}`;
+        if (readTimeEl) readTimeEl.textContent = `${readTime}`;
 
         const storyDateEl = document.getElementById("story-date");
-        if (storyDateEl) storyDateEl.textContent = `📅 ${formatBangladeshDate(blog.created_at)}`;
+        if (storyDateEl) storyDateEl.textContent = formatBangladeshDate(blog.created_at);
 
         const categoryEl = document.getElementById("story-category");
         if (categoryEl) categoryEl.textContent = `✦ ${theme.category}`;
@@ -423,7 +423,101 @@ async function loadBlog() {
     }
 }
 
-loadBlog();
+// ========================
+// Related Stories (hook before loadBlog so it runs after the main load)
+// ========================
+
+async function loadRelatedStories(currentBlog) {
+    try {
+        const response = await fetch(`${API_URL}/blog/?limit=30&skip=0`);
+        if (!response.ok) return;
+        const data = await response.json();
+        const blogs = (data.blogs || data || [])
+            .filter(b => b.published !== false && b.id !== currentBlog.id);
+
+        if (blogs.length === 0) return;
+
+        // Score relevance based on category match and content similarity
+        const currentCategory = (currentBlog.category || "").toLowerCase();
+        const currentWords = (currentBlog.title + " " + (currentBlog.body || "")).toLowerCase().split(/\s+/).filter(w => w.length > 3);
+
+        const scored = blogs.map(blog => {
+            let score = 0;
+            // Category match bonus
+            if ((blog.category || "").toLowerCase() === currentCategory) score += 10;
+            // Title word overlap
+            const blogWords = (blog.title || "").toLowerCase().split(/\s+/);
+            blogWords.forEach(w => {
+                if (w.length > 3 && currentWords.includes(w)) score += 2;
+            });
+            // Recency bonus (newer = higher)
+            const age = Date.now() - new Date(blog.created_at).getTime();
+            score += Math.max(0, 5 - Math.floor(age / (7 * 24 * 60 * 60 * 1000)));
+            // Like count bonus
+            score += Math.min(5, Math.floor((blog.likes_count || 0) / 5));
+
+            return { blog, score };
+        });
+
+        // Sort by relevance, take top 3
+        const related = scored.sort((a, b) => b.score - a.score).slice(0, 3);
+
+        if (related.length === 0) return;
+
+        const section = document.getElementById("related-stories-section");
+        const grid = document.getElementById("related-stories-grid");
+        if (!section || !grid) return;
+
+        related.forEach(({ blog }) => {
+            const card = document.createElement("a");
+            card.href = `/blogs/${blog.id}`;
+            card.className = "related-story-card";
+
+            const hasImage = blog.image_url && blog.image_url.trim().length > 5;
+            const authorName = blog.creator?.name || "Author";
+            const initial = authorName.charAt(0).toUpperCase();
+            const likes = blog.likes_count || 0;
+
+            card.innerHTML = `
+                <div class="related-story-media">
+                    ${hasImage
+                        ? `<img src="${blog.image_url.trim()}" alt="" loading="lazy">`
+                        : `<div class="related-story-placeholder">✦</div>`}
+                </div>
+                <div class="related-story-body">
+                    <h4 class="related-story-title">${escapeHtml(blog.title || "Untitled")}</h4>
+                    <div class="related-story-meta">
+                        <span class="related-story-author">
+                            <span class="related-story-avatar">${initial}</span>
+                            ${escapeHtml(authorName)}
+                        </span>
+                        <span class="related-story-likes">❤️ ${likes}</span>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        section.style.display = "block";
+    } catch (error) {
+        console.warn("Failed to load related stories", error);
+    }
+}
+
+// Load blog then related stories
+loadBlog().then(() => {
+    const titleEl = document.getElementById("title");
+    const categoryEl = document.getElementById("story-category");
+    const bodyEl = document.getElementById("body");
+    if (titleEl) {
+        loadRelatedStories({
+            id,
+            title: titleEl.textContent,
+            category: categoryEl?.textContent?.replace("✦ ", "") || "",
+            body: bodyEl?.textContent || ""
+        });
+    }
+});
 
 // ========================
 // Like and Comments System

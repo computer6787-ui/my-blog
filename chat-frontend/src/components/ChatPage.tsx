@@ -81,6 +81,16 @@ export const ChatPage: React.FC = () => {
     }
   }, [searchQuery, currentUser, sidebarTab]);
 
+  // Auto-open global chat when arriving with ?global=true
+  useEffect(() => {
+    if (!currentUser) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('global') === 'true') {
+      handleGoGlobal();
+      window.history.replaceState(window.history.state, '', '/chat');
+    }
+  }, [currentUser]);
+
   // Auto-open a direct conversation when arriving from a "Message" button on
   // another page (e.g. the public profile's btn-dm-profile), which routes here
   // as /chat?user=<id>. Resolves the recipient from an existing conversation,
@@ -225,28 +235,28 @@ export const ChatPage: React.FC = () => {
 
   // --- Render ---
   return (
-    <div className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-40 flex bg-[#0d0b0c] text-slate-100 overflow-hidden flex-col sm:flex-row">
+    <div className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-40 flex bg-page text-primary overflow-hidden flex-col sm:flex-row">
       {/* ===== Sidebar (always visible on desktop) ===== */}
       <aside className={`${
         activeRecipient || showGlobalChat ? 'hidden md:flex' : 'flex'
-      } w-full md:w-80 lg:w-[340px] flex-1 min-h-0 md:flex-none flex flex-col border-r border-white/5 bg-[#161213]`}>
+      } w-full md:w-80 lg:w-[340px] flex-1 min-h-0 md:flex-none flex flex-col border-r border-subtle bg-card`}>
         {/* Sidebar Header */}
         <div className="px-4 pt-5 pb-3">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-blossom-600 shadow-sm">
-                <MessageSquare className="w-4.5 h-4.5 text-white" />
+                <MessageSquare className="w-4.5 h-4.5 text-inverse" />
               </div>
               <div>
-                <h1 className="text-base font-bold text-white">Chats</h1>
-                <p className="text-[11px] text-slate-400">
+                <h1 className="text-base font-bold text-primary">Chats</h1>
+                <p className="text-[11px] text-muted">
                   {onlineCount} online
                 </p>
               </div>
             </div>
             <button
               onClick={() => setSoundEnabled(!isSoundEnabled)}
-              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              className="p-2 rounded-lg text-muted hover:text-primary hover:bg-elevated transition-colors"
               title={isSoundEnabled ? 'Mute sounds' : 'Unmute sounds'}
             >
               {isSoundEnabled ? <Volume2 className="w-4.5 h-4.5" /> : <VolumeX className="w-4.5 h-4.5" />}
@@ -255,24 +265,24 @@ export const ChatPage: React.FC = () => {
 
           {/* Search */}
           <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search conversations..."
-              className="w-full bg-white/5 text-white pl-9 pr-3 py-2.5 rounded-xl text-sm border border-white/5 focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-slate-500 transition-all"
+              className="w-full bg-elevated text-primary pl-9 pr-3 py-2.5 rounded-xl text-sm border border-subtle focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-muted transition-all"
             />
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 p-0.5 bg-white/5 rounded-xl">
+          <div className="flex gap-1 p-0.5 bg-elevated rounded-xl">
             <button
               onClick={() => setSidebarTab('conversations')}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
                 sidebarTab === 'conversations'
-                  ? 'bg-blossom-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-blossom-600 text-inverse shadow-sm'
+                  : 'text-muted hover:text-primary'
               }`}
             >
               Chats
@@ -281,8 +291,8 @@ export const ChatPage: React.FC = () => {
               onClick={() => setSidebarTab('directory')}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
                 sidebarTab === 'directory'
-                  ? 'bg-blossom-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-blossom-600 text-inverse shadow-sm'
+                  : 'text-muted hover:text-primary'
               }`}
             >
               Directory
@@ -296,7 +306,7 @@ export const ChatPage: React.FC = () => {
           className={`mx-3 mb-2 flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all ${
             showGlobalChat
               ? 'bg-blossom-600/20 border border-blossom-500/30 text-blossom-400'
-              : 'bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10'
+              : 'bg-elevated border border-subtle text-secondary hover:bg-hover'
           }`}
         >
           <div className="p-1.5 rounded-lg bg-green-500/20">
@@ -304,9 +314,9 @@ export const ChatPage: React.FC = () => {
           </div>
           <div className="text-left flex-1">
             <p className="text-xs font-semibold">Global Live Chat</p>
-            <p className="text-[10px] text-slate-500">{onlineCount} online</p>
+            <p className="text-[10px] text-muted">{onlineCount} online</p>
           </div>
-          <Hash className="w-3.5 h-3.5 text-slate-500" />
+          <Hash className="w-3.5 h-3.5 text-muted" />
         </button>
 
         {/* Conversation / Directory List */}
@@ -314,9 +324,9 @@ export const ChatPage: React.FC = () => {
           {sidebarTab === 'conversations' ? (
             filteredConversations.length === 0 ? (
               <div className="p-8 text-center">
-                <MessageSquare className="w-10 h-10 mx-auto mb-2 text-slate-600 opacity-40" />
-                <p className="text-sm font-medium text-slate-400">No conversations yet</p>
-                <p className="text-xs text-slate-500 mt-1">
+                <MessageSquare className="w-10 h-10 mx-auto mb-2 text-secondary opacity-40" />
+                <p className="text-sm font-medium text-muted">No conversations yet</p>
+                <p className="text-xs text-muted mt-1">
                   Start chatting from the Directory tab
                 </p>
               </div>
@@ -328,7 +338,7 @@ export const ChatPage: React.FC = () => {
                   className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left ${
                     activeRecipient?.id === conv.user.id && !showGlobalChat
                       ? 'bg-blossom-600/10 border-r-2 border-blossom-500'
-                      : 'hover:bg-white/5 border-r-2 border-transparent'
+                      : 'hover:bg-elevated border-r-2 border-transparent'
                   }`}
                 >
                   <UserAvatar
@@ -341,12 +351,12 @@ export const ChatPage: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="font-semibold text-sm text-white truncate">
+                        <span className="font-semibold text-sm text-primary truncate">
                           {conv.user.name}
                         </span>
                         <RoleBadge role={conv.user.role} size="sm" />
                       </div>
-                      <span className="text-[10px] text-slate-500 flex-shrink-0 ml-2">
+                      <span className="text-[10px] text-muted flex-shrink-0 ml-2">
                         {new Date(conv.last_message_time).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -354,12 +364,12 @@ export const ChatPage: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-0.5">
-                      <p className="text-xs text-slate-400 truncate">
+                      <p className="text-xs text-muted truncate">
                         {currentUser && conv.last_sender_id === currentUser.id ? 'You: ' : ''}
                         {conv.last_message}
                       </p>
                       {conv.unread_count > 0 && (
-                        <span className="flex-shrink-0 ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blossom-600 text-white min-w-[18px] text-center">
+                        <span className="flex-shrink-0 ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blossom-600 text-primary min-w-[18px] text-center">
                           {conv.unread_count}
                         </span>
                       )}
@@ -371,15 +381,15 @@ export const ChatPage: React.FC = () => {
           ) : (
             /* Directory Tab */
             isLoadingDirectory ? (
-              <div className="p-8 text-center text-xs text-slate-500">Loading users...</div>
+              <div className="p-8 text-center text-xs text-muted">Loading users...</div>
             ) : directoryUsers.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-500">No users found</div>
+              <div className="p-8 text-center text-xs text-muted">No users found</div>
             ) : (
               directoryUsers.map((user) => (
                 <button
                   key={user.id}
                   onClick={() => handleSelectConversation(user)}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-elevated transition-colors text-left"
                 >
                   <UserAvatar
                     name={user.name}
@@ -390,14 +400,14 @@ export const ChatPage: React.FC = () => {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-sm text-white truncate">{user.name}</span>
+                      <span className="font-semibold text-sm text-primary truncate">{user.name}</span>
                       <RoleBadge role={user.role} size="sm" />
                     </div>
-                    <p className="text-[11px] text-slate-500 truncate">
+                    <p className="text-[11px] text-muted truncate">
                       {user.is_online ? 'Active now' : 'Offline'}
                     </p>
                   </div>
-                  <span className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-white/5 text-blossom-400 hover:bg-blossom-600 hover:text-white transition-colors">
+                  <span className="px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-elevated text-blossom-400 hover:bg-blossom-600 hover:text-inverse transition-colors">
                     Chat
                   </span>
                 </button>
@@ -410,18 +420,18 @@ export const ChatPage: React.FC = () => {
       {/* ===== Main Chat Area ===== */}
       <main className={`${
         activeRecipient || showGlobalChat ? 'flex' : 'hidden md:flex'
-      } flex-1 min-h-0 flex-col min-w-0 bg-[#0d0b0c]`}>
+      } flex-1 min-h-0 flex-col min-w-0 bg-page`}>
         {showGlobalChat ? (
           /* ---- Global Chat View ---- */
           <>
             {/* Global Header */}
-            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#161213]">
+            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-subtle bg-card">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => {
                     setShowGlobalChat(false);
                   }}
-                  className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+                  className="p-2 rounded-lg text-muted hover:text-primary hover:bg-elevated transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -429,10 +439,10 @@ export const ChatPage: React.FC = () => {
                   <Globe className="w-4.5 h-4.5 text-green-400" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-white">Global Chat</h2>
+                  <h2 className="text-sm font-bold text-primary">Global Chat</h2>
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse-dot" />
-                    <span className="text-[11px] text-slate-400">{onlineCount} online</span>
+                    <span className="text-[11px] text-muted">{onlineCount} online</span>
                   </div>
                 </div>
               </div>
@@ -445,11 +455,11 @@ export const ChatPage: React.FC = () => {
             >
               {globalMessages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
-                  <div className="p-4 rounded-2xl bg-white/5 mb-4">
+                  <div className="p-4 rounded-2xl bg-elevated mb-4">
                     <Globe className="w-10 h-10 text-blossom-400 opacity-60" />
                   </div>
-                  <p className="text-sm font-medium text-slate-300">Welcome to Global Chat!</p>
-                  <p className="text-xs text-slate-500 mt-1 max-w-xs">
+                  <p className="text-sm font-medium text-secondary">Welcome to Global Chat!</p>
+                  <p className="text-xs text-muted mt-1 max-w-xs">
                     Start a conversation with the community. Messages are real-time.
                   </p>
                 </div>
@@ -474,7 +484,7 @@ export const ChatPage: React.FC = () => {
             </div>
 
             {/* Global Input */}
-            <div className="px-4 py-3 border-t border-white/5 bg-[#161213]">
+            <div className="px-4 py-3 border-t border-subtle bg-card">
               {showGlobalEmoji && (
                 <div className="mb-2 px-2 py-1.5 flex items-center gap-1 overflow-x-auto scroller-thin">
                   {QUICK_EMOJIS.map((emoji) => (
@@ -484,7 +494,7 @@ export const ChatPage: React.FC = () => {
                         setGlobalInputVal((p) => p + emoji);
                         setShowGlobalEmoji(false);
                       }}
-                      className="p-1.5 text-xl hover:bg-white/10 rounded-lg transition-colors"
+                      className="p-1.5 text-xl hover:bg-hover rounded-lg transition-colors"
                     >
                       {emoji}
                     </button>
@@ -494,7 +504,7 @@ export const ChatPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowGlobalEmoji(!showGlobalEmoji)}
-                  className="p-2.5 rounded-xl text-slate-400 hover:text-blossom-400 hover:bg-white/5 transition-colors"
+                  className="p-2.5 rounded-xl text-muted hover:text-blossom-400 hover:bg-elevated transition-colors"
                 >
                   <Smile className="w-5 h-5" />
                 </button>
@@ -508,12 +518,12 @@ export const ChatPage: React.FC = () => {
                       ? `Message as ${currentUser.name}...`
                       : 'Join the conversation...'
                   }
-                  className="flex-1 bg-white/5 text-white px-4 py-2.5 rounded-xl text-sm border border-white/5 focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-slate-500 transition-all"
+                  className="flex-1 bg-elevated text-primary px-4 py-2.5 rounded-xl text-sm border border-subtle focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-muted transition-all"
                 />
                 <button
                   onClick={handleGlobalSend}
                   disabled={!globalInputVal.trim()}
-                  className="p-2.5 rounded-xl bg-blossom-600 text-white hover:bg-blossom-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                  className="p-2.5 rounded-xl bg-blossom-600 text-inverse hover:bg-blossom-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -524,11 +534,11 @@ export const ChatPage: React.FC = () => {
           /* ---- Direct Chat View ---- */
           <>
             {/* Direct Chat Header */}
-            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#161213]">
+            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-subtle bg-card">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setActiveRecipient(null)}
-                  className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+                  className="p-2 rounded-lg text-muted hover:text-primary hover:bg-elevated transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -546,10 +556,10 @@ export const ChatPage: React.FC = () => {
                   />
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <h2 className="text-sm font-bold text-white group-hover:text-blossom-400 transition-colors">{activeRecipient.name}</h2>
+                      <h2 className="text-sm font-bold text-primary group-hover:text-blossom-400 transition-colors">{activeRecipient.name}</h2>
                       <RoleBadge role={activeRecipient.role} size="sm" />
                     </div>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-muted">
                       {activeRecipient.is_online ? 'Active now' : 'Offline'}
                     </p>
                   </div>
@@ -568,8 +578,8 @@ export const ChatPage: React.FC = () => {
                     isOnline={activeRecipient.is_online}
                     showStatus
                   />
-                  <h4 className="mt-3 font-semibold text-white text-sm">{activeRecipient.name}</h4>
-                  <p className="text-xs text-slate-500 mt-1 max-w-xs">
+                  <h4 className="mt-3 font-semibold text-primary text-sm">{activeRecipient.name}</h4>
+                  <p className="text-xs text-muted mt-1 max-w-xs">
                     Start your direct conversation. Messages are real-time and private.
                   </p>
                 </div>
@@ -595,11 +605,11 @@ export const ChatPage: React.FC = () => {
 
               {isPartnerTyping && (
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/5 flex items-center gap-1">
+                  <div className="px-3.5 py-2 rounded-xl bg-elevated border border-subtle flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-blossom-500 typing-dot-1" />
                     <span className="w-1.5 h-1.5 rounded-full bg-blossom-500 typing-dot-2" />
                     <span className="w-1.5 h-1.5 rounded-full bg-blossom-500 typing-dot-3" />
-                    <span className="ml-1 text-[11px] text-slate-500 font-medium">
+                    <span className="ml-1 text-[11px] text-muted font-medium">
                       {activeRecipient.name} is typing...
                     </span>
                   </div>
@@ -610,7 +620,7 @@ export const ChatPage: React.FC = () => {
             </div>
 
             {/* Direct Input */}
-            <div className="px-4 py-3 border-t border-white/5 bg-[#161213]">
+            <div className="px-4 py-3 border-t border-subtle bg-card">
               {showDirectEmoji && (
                 <div className="mb-2 px-2 py-1.5 flex items-center gap-1 overflow-x-auto scroller-thin">
                   {QUICK_EMOJIS.map((emoji) => (
@@ -620,7 +630,7 @@ export const ChatPage: React.FC = () => {
                         setDirectInputVal((p) => p + emoji);
                         setShowDirectEmoji(false);
                       }}
-                      className="p-1.5 text-xl hover:bg-white/10 rounded-lg transition-colors"
+                      className="p-1.5 text-xl hover:bg-hover rounded-lg transition-colors"
                     >
                       {emoji}
                     </button>
@@ -638,13 +648,13 @@ export const ChatPage: React.FC = () => {
                 <button
                   onClick={() => directFileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="p-2.5 rounded-xl text-slate-400 hover:text-blossom-400 hover:bg-white/5 disabled:opacity-30 transition-colors"
+                  className="p-2.5 rounded-xl text-muted hover:text-blossom-400 hover:bg-elevated disabled:opacity-30 transition-colors"
                 >
                   <Paperclip className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setShowDirectEmoji(!showDirectEmoji)}
-                  className="p-2.5 rounded-xl text-slate-400 hover:text-blossom-400 hover:bg-white/5 transition-colors"
+                  className="p-2.5 rounded-xl text-muted hover:text-blossom-400 hover:bg-elevated transition-colors"
                 >
                   <Smile className="w-5 h-5" />
                 </button>
@@ -654,12 +664,12 @@ export const ChatPage: React.FC = () => {
                   onChange={handleDirectInputChange}
                   onKeyDown={handleDirectKeyDown}
                   placeholder={`Message ${activeRecipient.name}...`}
-                  className="flex-1 bg-white/5 text-white px-4 py-2.5 rounded-xl text-sm border border-white/5 focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-slate-500 transition-all"
+                  className="flex-1 bg-elevated text-primary px-4 py-2.5 rounded-xl text-sm border border-subtle focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-muted transition-all"
                 />
                 <button
                   onClick={handleDirectSend}
                   disabled={!directInputVal.trim()}
-                  className="p-2.5 rounded-xl bg-blossom-600 text-white hover:bg-blossom-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                  className="p-2.5 rounded-xl bg-blossom-600 text-inverse hover:bg-blossom-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -669,16 +679,16 @@ export const ChatPage: React.FC = () => {
         ) : (
           /* ---- Empty State (No chat selected) ---- */
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-            <div className="p-5 rounded-2xl bg-white/5 mb-4">
+            <div className="p-5 rounded-2xl bg-elevated mb-4">
               <MessageSquare className="w-12 h-12 text-blossom-400 opacity-50" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">Welcome to Lumora Chat</h3>
-            <p className="text-sm text-slate-400 max-w-sm">
+            <h3 className="text-lg font-bold text-primary mb-1">Welcome to Lumora Chat</h3>
+            <p className="text-sm text-muted max-w-sm">
               Select a conversation from the sidebar or join the Global Live Chat to start messaging.
             </p>
             <button
               onClick={handleGoGlobal}
-              className="mt-6 px-6 py-2.5 rounded-xl bg-blossom-600 text-white text-sm font-semibold hover:bg-blossom-700 transition-colors shadow-sm"
+              className="mt-6 px-6 py-2.5 rounded-xl bg-blossom-600 text-primary text-sm font-semibold hover:bg-blossom-700 transition-colors shadow-sm"
             >
               <span className="flex items-center gap-2">
                 <Globe className="w-4 h-4" />

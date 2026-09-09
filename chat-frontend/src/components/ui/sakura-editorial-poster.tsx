@@ -34,7 +34,7 @@ export type SakuraEditorialPosterProps = {
 
 const FONT_LINK_ID = "sakura-editorial-poster-fonts";
 const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&family=Saira+Extra+Condensed:wght@700;800&display=swap";
+  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&family=Saira+Extra+Condensed:wght@700;800&family=Fredoka+One&display=swap";
 
 export const SAKURA_EDITORIAL_DEFAULT_KEYWORDS: SakuraEditorialKeyword[] = [
   { label: "Bloom" },
@@ -130,8 +130,8 @@ function SakuraFitTitle({ title }: { title: string }) {
   }, [title]);
 
   const titleStyle = {
-    fontFamily: '"Saira Extra Condensed", "Arial Narrow", sans-serif',
-    fontWeight: 800,
+    fontFamily: '"Fredoka One", "Arial Rounded", sans-serif',
+    fontWeight: 400,
     letterSpacing: "0.02em",
     WebkitFontSmoothing: "antialiased" as const,
     MozOsxFontSmoothing: "grayscale" as const,
@@ -394,8 +394,8 @@ export function SakuraEditorialPoster({
         className="box-border w-full h-full overflow-hidden"
         style={{ height: panelHeight }}
       >
-        <article className="@container relative flex h-full w-full min-h-0 flex-col overflow-hidden rounded-xl bg-[#f5f5f0] shadow-[0_24px_80px_rgba(80,50,50,0.12)]">
-          <div className="@container relative min-h-0 flex-1 overflow-hidden [container-type:size]">
+        <article className="relative flex h-full w-full min-h-0 flex-col overflow-hidden rounded-xl bg-[#f5f5f0] shadow-[0_24px_80px_rgba(80,50,50,0.12)]">
+          <div className="relative min-h-0 flex-1 overflow-hidden">
             <SakuraHeroVisual
               title={title}
               sceneSrc={sceneSrc}

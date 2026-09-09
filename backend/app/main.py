@@ -207,6 +207,10 @@ def init_db():
                 with engine.connect() as conn:
                     conn.execute(text("ALTER TABLE blogs ADD COLUMN category VARCHAR;"))
                     conn.commit()
+            if "body_format" not in cols:
+                with engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE blogs ADD COLUMN body_format VARCHAR;"))
+                    conn.commit()
             if "created_at" not in cols:
                 dialect = engine.dialect.name
                 if dialect.startswith("postgres"):
@@ -387,6 +391,14 @@ def Home_page(request: Request):
     context={}
     )
 
+@app.get("/blog")
+def blog_list_page(request: Request):
+    return templates.TemplateResponse(
+    request=request,
+    name="blog-list.html",
+    context={}
+    )
+
 @app.get("/blogs/{id}")
 def blog_page(request: Request, id: int):
     """Serve the blog page.  Blog data is fetched client-side for the full
@@ -543,6 +555,15 @@ def privacy_policy(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="privacy-policy.html",
+        context={}
+    )
+
+
+@app.get("/about")
+def about_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="about.html",
         context={}
     )
 

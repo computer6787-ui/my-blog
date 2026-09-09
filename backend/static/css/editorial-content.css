@@ -1,0 +1,346 @@
+/* ==========================================================================
+   EDITORIAL ARTICLE CONTENT — shared between Tiptap editor and public reader
+   ==========================================================================
+   One stylesheet renders Tiptap content identically in the writing canvas
+   (.editor-prose) and on the published page (.article-prose). Everything the
+   reader sees, the author sees — and vice versa.
+   -------------------------------------------------------------------------- */
+
+.article-prose,
+.editor-prose {
+    --ap-width: min(100%, 720px);
+    --ap-width-wide: min(100%, 940px);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: clamp(1.05rem, 1.4vw, 1.125rem);
+    line-height: 1.8;
+    color: var(--text);
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* -------- Headings -------- */
+.article-prose h1,
+.article-prose h2,
+.article-prose h3,
+.article-prose h4,
+.editor-prose h1,
+.editor-prose h2,
+.editor-prose h3,
+.editor-prose h4 {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, 'Times New Roman', serif;
+    color: var(--text-heading);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    margin: 2.4rem 0 1rem;
+}
+
+.article-prose h1 { font-size: 2.1rem; margin-top: 1.8rem; }
+.article-prose h2,
+.editor-prose h2 { font-size: 1.75rem; }
+.article-prose h3,
+.editor-prose h3 { font-size: 1.35rem; }
+.article-prose h4,
+.editor-prose h4 { font-size: 1.12rem; font-weight: 700; }
+.article-prose h5,
+.article-prose h6,
+.editor-prose h5,
+.editor-prose h6 { font-size: 1rem; font-weight: 700; }
+
+/* -------- Paragraphs -------- */
+.article-prose p,
+.editor-prose p {
+    margin: 0 0 1.4rem;
+}
+
+.article-prose > p:last-child,
+.editor-prose > p:last-child {
+    margin-bottom: 0;
+}
+
+/* Lead paragraph — slightly larger, quieter, sets the tone */
+.article-prose > p:first-child {
+    font-size: 1.2em;
+    color: var(--text);
+}
+
+/* -------- Drop cap (first paragraph) -------- */
+.article-prose.has-dropcap > p:first-child::first-letter {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: 3.4em;
+    line-height: 0.82;
+    float: left;
+    padding-right: 0.12em;
+    margin-top: 0.06em;
+    color: var(--accent-strong);
+    font-weight: 600;
+}
+
+/* -------- Blockquote -------- */
+.article-prose blockquote,
+.editor-prose blockquote {
+    margin: 2rem 0;
+    padding: 0.25rem 0 0.25rem 1.5rem;
+    border-left: 3px solid var(--accent);
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--primary-deep);
+}
+
+.article-prose blockquote p,
+.editor-prose blockquote p {
+    margin-bottom: 0.6rem;
+}
+.article-prose blockquote p:last-child,
+.editor-prose blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+.article-prose blockquote cite,
+.editor-prose blockquote cite {
+    display: block;
+    margin-top: 0.6rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+
+/* Pull quote — large centerpiece quote, no border decoration */
+.article-prose .pull-quote,
+.editor-prose .pull-quote,
+.article-prose blockquote.pull-quote,
+.editor-prose blockquote.pull-quote {
+    margin: 3rem auto;
+    max-width: 620px;
+    padding: 0.5rem 0;
+    border-left: none;
+    text-align: center;
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1.35;
+    color: var(--text-heading);
+}
+
+.article-prose .pull-quote p,
+.editor-prose .pull-quote p {
+    margin-bottom: 0;
+}
+
+/* Highlighted text */
+.article-prose mark,
+.editor-prose mark {
+    background: transparent;
+    color: var(--accent-strong);
+    font-weight: 500;
+    box-shadow: inset 0 -0.28em 0 0 var(--lavender-soft);
+}
+
+/* -------- Lists -------- */
+.article-prose ul,
+.article-prose ol,
+.editor-prose ul,
+.editor-prose ol {
+    margin: 0 0 1.4rem;
+    padding-left: 1.4rem;
+}
+
+.article-prose li,
+.editor-prose li {
+    margin-bottom: 0.4rem;
+    line-height: 1.7;
+}
+
+.article-prose li p,
+.editor-prose li p {
+    margin-bottom: 0.25rem;
+}
+
+.article-prose li > ul,
+.article-prose li > ol,
+.editor-prose li > ul,
+.editor-prose li > ol {
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.article-prose ul li::marker,
+.editor-prose ul li::marker {
+    color: var(--accent);
+}
+
+/* -------- Links -------- */
+.article-prose a,
+.editor-prose a {
+    color: var(--accent-strong);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: color 0.15s ease;
+}
+
+.article-prose a:hover,
+.editor-prose a:hover {
+    color: var(--accent);
+}
+
+/* -------- Horizontal rule / section divider -------- */
+.article-prose hr,
+.editor-prose hr {
+    border: none;
+    text-align: center;
+    margin: 3rem auto;
+    width: 100%;
+}
+
+.article-prose hr::before,
+.editor-prose hr::before {
+    content: "✦";
+    font-size: 0.9rem;
+    letter-spacing: 0.5em;
+    color: var(--accent);
+    opacity: 0.7;
+}
+
+/* -------- Images & captions -------- */
+.article-prose img,
+.editor-prose img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 2px;
+}
+
+/* Figure wrapping an inserted body image */
+.article-prose figure,
+.editor-prose figure {
+    margin: 2.4rem auto;
+    width: 100%;
+}
+
+/* Regular inline image in a paragraph */
+.article-prose img:not(figure img),
+.editor-prose img:not(figure img) {
+    margin: 2rem auto;
+    border-radius: 2px;
+}
+
+/* Wide/featured figure inside the article stretches the content column */
+.article-prose figure[data-width="wide"],
+.editor-prose figure[data-width="wide"] {
+    width: var(--ap-width-wide);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.article-prose figure figcaption,
+.editor-prose figure figcaption {
+    margin-top: 0.7rem;
+    font-size: 0.84rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.5;
+}
+
+.article-prose .image-caption,
+.editor-prose .image-caption {
+    display: block;
+    margin-top: 0.7rem;
+    font-size: 0.84rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* -------- Text alignment -------- */
+.article-prose .align-left,
+.editor-prose .align-left { text-align: left; }
+.article-prose .align-center,
+.editor-prose .align-center { text-align: center; }
+.article-prose .align-right,
+.editor-prose .align-right { text-align: right; }
+.article-prose .align-justify,
+.editor-prose .align-justify { text-align: justify; }
+
+/* Alignment helper wrapping any block (Tiptap sets the class on the node) */
+.article-prose p.align-center figure,
+.editor-prose p.align-center figure { margin-left: auto; margin-right: auto; }
+
+/* -------- Image + text side-by-side -------- */
+.article-prose .image-text,
+.editor-prose .image-text {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.8rem;
+    align-items: center;
+    margin: 2.4rem auto;
+}
+
+.article-prose .image-text img,
+.editor-prose .image-text img {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.article-prose .image-text .text-col p:last-child,
+.editor-prose .image-text .text-col p:last-child {
+    margin-bottom: 0;
+}
+
+/* -------- Multi-column editorial section -------- */
+.article-prose .columns-2,
+.editor-prose .columns-2,
+.article-prose .columns-3,
+.editor-prose .columns-3 {
+    display: grid;
+    gap: 2rem;
+    margin: 2.4rem 0;
+}
+
+.article-prose .columns-2 { grid-template-columns: 1fr 1fr; }
+.article-prose .columns-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.article-prose .columns-2 .column,
+.article-prose .columns-3 .column { min-width: 0; }
+
+/* -------- Small caps / misc editorial flourishes -------- */
+.article-prose .small-caps,
+.editor-prose .small-caps {
+    font-variant: small-caps;
+    letter-spacing: 0.03em;
+}
+
+/* Code blocks (from Tiptap codeBlock) */
+.article-prose pre,
+.editor-prose pre {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+    padding: 1.1rem 1.3rem;
+    overflow-x: auto;
+    font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin: 2rem 0;
+    color: var(--text);
+}
+
+.article-prose code:not(pre > code),
+.editor-prose code:not(pre > code) {
+    font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+    font-size: 0.86em;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.08em 0.35em;
+    color: var(--accent-strong);
+}

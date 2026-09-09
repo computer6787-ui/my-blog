@@ -1,225 +1,537 @@
-﻿/* ===== STORY EDITOR ===== */
+/* ==========================================================================
+   EDITORIAL WRITING CANVAS — Lumora create/edit blog
+   ==========================================================================
+   A flat, calm writing surface. No card-in-card, no dashboard sections.
+   The content is the focus; chrome is reduced to hairline rules.
+   -------------------------------------------------------------------------- */
 
 .editor-main {
-    width: min(100%, 780px);
-    margin: 0 auto 4rem;
-}
-
-.editor-container {
     width: 100%;
-}
-
-.editor-header {
-    margin-bottom: 2rem;
-}
-
-.editor-header h2 {
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    font-weight: 800;
-    color: var(--primary-deep);
-    letter-spacing: -0.04em;
-    margin-top: 0.8rem;
-    margin-bottom: 0.4rem;
-}
-
-.editor-subtitle {
-    color: var(--muted);
-    font-size: 1.05rem;
-}
-
-.story-editor-form {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    padding: clamp(1rem, 2.4vw, 2rem);
-    box-shadow: var(--shadow-card);
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 0 5rem;
     display: flex;
     flex-direction: column;
-    gap: 1.4rem;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-
-.form-label {
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: var(--primary-deep);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.optional-pill {
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--muted);
-    background: var(--surface-alt);
-    padding: 2px 8px;
-    border-radius: 999px;
-}
-
-.label-with-actions, .label-with-stats {
+/* -------- Top bar: back link + primary actions -------- */
+.editor-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 2rem;
 }
 
-.image-action-buttons {
+.editor-topbar-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 1.2rem;
+    min-width: 0;
 }
 
-.btn-secondary-sm {
-    border: 1px solid var(--line);
-    background: var(--surface-alt);
-    color: var(--text);
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.btn-secondary-sm:hover {
-    background: var(--primary-soft);
-    color: var(--accent-strong);
-    border-color: var(--card-border-hover);
-}
-
-.image-input-wrap {
-    display: flex;
+.editor-topbar .back-link {
+    display: inline-flex;
     align-items: center;
-    background: var(--surface-alt);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 0.75rem 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.image-input-wrap:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(194, 109, 132, 0.12);
-}
-
-.input-prefix-icon {
-    font-size: 1.1rem;
-    margin-right: 10px;
+    gap: 5px;
     color: var(--muted);
+    font-weight: 500;
+    font-size: 0.88rem;
+    transition: color 0.2s ease;
+    white-space: nowrap;
 }
 
-.editor-image-input {
-    flex: 1;
-    border: none;
+.editor-topbar .back-link:hover { color: var(--accent); }
+
+.editor-topbar-status {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: 1.05rem;
+    color: var(--text-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.editor-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+}
+
+.editor-topbar-actions .editor-stat {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-right: 0.5rem;
+    white-space: nowrap;
+}
+
+/* Compact editorial buttons — no giant pills */
+.btn-editor {
+    min-height: 36px;
+    padding: 0 1rem;
+    border: 1px solid var(--line);
     background: transparent;
     color: var(--text);
-    font-size: 0.95rem;
-    outline: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.image-preview-card {
+.btn-editor:hover {
+    border-color: var(--card-border-hover);
+    background: var(--primary-soft);
+}
+
+.btn-editor-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--bg);
+}
+
+body.dark-mode .btn-editor-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--bg);
+}
+
+.btn-editor-primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+}
+
+.btn-editor[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* -------- Writing canvas -------- */
+.editor-canvas {
+    width: min(100%, 740px);
+    margin: 0 auto;
+    padding-bottom: 3rem;
+}
+
+/* Title — large editorial heading, borderless */
+.editor-title-wrap { margin-bottom: 0.4rem; }
+
+.editor-title-input {
+    display: block;
     width: 100%;
-    min-height: 90px;
-    border-radius: 16px;
-    border: 1px dashed var(--line);
-    background: var(--surface-alt);
-    overflow: hidden;
+    border: none;
+    background: transparent;
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: clamp(2rem, 5.5vw, 2.9rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--text-heading);
+    padding: 0;
+    outline: none;
+    resize: none;
+}
+
+.editor-title-input::placeholder { color: var(--muted); opacity: 0.55; }
+
+.editor-subtitle-input {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--muted);
+    padding: 0.5rem 0 0;
+    outline: none;
+    resize: none;
+}
+
+.editor-subtitle-input::placeholder { color: var(--muted); opacity: 0.5; }
+
+.editor-byline {
     display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-bottom: 1.6rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+.editor-byline-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-top: 0.4rem;
+    background: var(--lavender-soft);
+    color: var(--accent-strong);
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
 }
 
-.preview-placeholder {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 1.2rem;
-    color: var(--muted);
-}
-
-.preview-icon {
-    font-size: 1.8rem;
-    color: var(--accent);
-}
-
-.preview-text strong {
-    display: block;
-    color: var(--primary-deep);
-    font-size: 0.92rem;
-    margin-bottom: 2px;
-}
-
-.preview-text span {
-    font-size: 0.82rem;
-    line-height: 1.4;
-}
-
-.preview-img-wrap {
-    width: 100%;
-    height: 150px;
-    position: relative;
-}
-
-.preview-img {
+.editor-byline-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.preview-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(15, 23, 42, 0.7);
+.editor-byline-name { font-weight: 600; color: var(--text); }
+.editor-byline-dot { opacity: 0.6; }
+
+/* ==========================================================================
+   FORMATTING TOOLBAR
+   ========================================================================== */
+
+.editor-toolbar {
+    position: sticky;
+    top: calc(var(--navbar-height) + 0.6rem);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 0.5rem 0.75rem;
+    margin: 1.4rem 0 2rem;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-    color: #ffffff;
-    font-size: 0.72rem;
-    font-weight: 800;
-    padding: 3px 8px;
-    border-radius: 999px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
 }
+
+.editor-toolbar .tt-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.editor-toolbar .tt-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--line);
+    margin: 0 0.45rem;
+    flex-shrink: 0;
+}
+
+.tt-btn {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 5px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.tt-btn:hover { background: var(--primary-soft); color: var(--text); }
+
+.tt-btn.is-active {
+    background: var(--primary);
+    color: var(--bg);
+}
+
+body.dark-mode .tt-btn.is-active {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.tt-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+.tt-icon-svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+/* Heading select */
+.editor-format-select {
+    height: 30px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 2px;
+    padding: 0 20px 0 6px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A6F75' stroke-width='1.5' stroke-linecap='round'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+}
+
+.editor-format-select:focus { outline: none; background-color: var(--primary-soft); }
+
+/* -------- Editor prose: the writing surface -------- */
+
+.editor-prose {
+    min-height: 340px;
+    outline: none;
+    margin-top: 1.5rem;
+}
+
+.editor-prose:focus,
+.editor-prose .ProseMirror:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Feedback cursor + hint while empty (place via .is-empty) */
+.editor-prose .is-empty::before {
+    content: attr(data-placeholder);
+    color: var(--muted);
+    opacity: 0.55;
+    float: left;
+    height: 0;
+    pointer-events: none;
+}
+
+/* Slight user-awareness: faint caret color affordance, nothing flashy */
+.editor-prose p { caret-color: var(--accent-strong); }
+.editor-prose * { caret-color: var(--accent-strong); }
+
+/* Editorial typography inside the edit canvas */
+.editor-prose h2 { font-size: 1.75rem; }
+.editor-prose h3 { font-size: 1.35rem; }
+.editor-prose h1 { font-size: 2.05rem; margin-top: 1.8rem; }
+
+/* Image node inside the editor — selected ring, subtle */
+.editor-prose .ProseMirror-selectednode {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+}
+
+.editor-prose img { border-radius: 2px; }
+
+/* Cap the in-editor figure width to the writing column */
+.editor-prose figure {
+    margin: 2.4rem auto;
+}
+
+/* ==========================================================================
+   SETTINGS STRIP — category, cover image, AI prompt (collapsible)
+   ========================================================================== */
+
+.editor-settings {
+    width: min(100%, 740px);
+    margin: 0 auto;
+    border-top: 1px solid var(--line);
+    padding-top: 1.2rem;
+}
+
+.editor-settings summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0.3rem 0.4rem;
+    border-radius: 2px;
+    user-select: none;
+}
+
+.editor-settings summary::-webkit-details-marker { display: none; }
+.editor-settings summary:hover { color: var(--text); }
+.editor-settings summary::after {
+    content: "▾";
+    font-size: 0.7rem;
+    opacity: 0.7;
+    transition: transform 0.15s ease;
+}
+.editor-settings[open] summary::after { transform: rotate(180deg); }
+
+.editor-settings-body {
+    margin-top: 1.2rem;
+    display: grid;
+    gap: 1.6rem;
+    padding-bottom: 1rem;
+}
+
+.editor-setting-row { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.editor-setting-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.editor-select {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: transparent;
+    border-radius: 2px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.88rem;
+    color: var(--text);
+    outline: none;
+}
+
+.editor-select:focus { border-color: var(--accent); }
+
+/* Cover image strip — compact, flat */
+.cover-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.cover-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 260px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cover-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cover-preview-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 0.84rem;
+    text-align: center;
+    padding: 1rem;
+}
+
+.cover-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Reuse btn-editor for cover strip actions */
+.cover-strip .btn-editor { min-height: 32px; font-size: 0.8rem; }
+
+.ai-prompt-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: transparent;
+    border-radius: 2px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--text);
+    resize: vertical;
+    font-family: inherit;
+    outline: none;
+}
+
+.ai-prompt-input:focus { border-color: var(--accent); }
+.ai-prompt-input::placeholder { color: var(--muted); }
+
+.ai-hint {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+/* ==========================================================================
+   FOOTER ACTIONS (legacy/e.g. bottom publish) — kept minimal
+   ========================================================================== */
+.editor-footer-actions {
+    width: min(100%, 740px);
+    margin: 2.5rem auto 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+}
+
+.btn-cancel {
+    padding: 0.5rem 0.9rem;
+    border-radius: 2px;
+    font-weight: 500;
+    font-size: 0.86rem;
+    color: var(--muted);
+    transition: color 0.2s ease;
+    border: 1px solid var(--line);
+    background: transparent;
+}
+
+.btn-cancel:hover { color: var(--text); border-color: var(--card-border-hover); }
+
+/* ==========================================================================
+   IMAGE CROP MODAL (preserved from legacy editor)
+   ========================================================================== */
 
 .image-editor-modal {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.35);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.25rem;
+    padding: 1rem;
     z-index: 100;
 }
 
 .image-editor-panel {
-    width: min(100%, 620px);
+    width: min(100%, 560px);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-soft);
-    padding: 1rem 1rem 1.2rem;
+    border-radius: 4px;
+    padding: 1.2rem 1.2rem 1.4rem;
 }
 
 .image-editor-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
 }
 
 .image-editor-header h3 {
-    font-size: 1.35rem;
-    font-weight: 800;
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 500;
     color: var(--primary-deep);
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.1rem;
 }
 
 .image-editor-header p {
@@ -227,58 +539,42 @@
     font-size: 0.8rem;
 }
 
+.btn-secondary-sm {
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    padding: 4px 12px;
+    border-radius: 2px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-secondary-sm:hover { background: var(--primary-soft); border-color: var(--card-border-hover); }
+
 .crop-stage-wrap {
     width: 100%;
     background: var(--surface-alt);
     border: 1px solid var(--line);
-    border-radius: 20px;
-    padding: 0.75rem;
-}
-
-.profile-image-panel .crop-stage-wrap {
-    border-radius: 50%;
-    background: transparent;
-    border: none;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.profile-image-panel .crop-stage {
-    width: min(100%, 340px);
-    height: min(100%, 340px);
-    min-width: 280px;
-    min-height: 280px;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 0 0 4px var(--surface), 0 0 0 6px var(--accent);
-    background: var(--surface-alt);
-    max-height: none;
-}
-
-.profile-image-panel .crop-stage img {
-    border-radius: 50%;
+    border-radius: 3px;
+    padding: 0.6rem;
 }
 
 .crop-stage {
     position: relative;
-    width: min(100%, 420px);
-    max-height: 56vh;
+    width: min(100%, 380px);
+    max-height: 50vh;
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    border-radius: 18px;
-    background: linear-gradient(135deg, rgba(123, 92, 242, 0.08), rgba(217, 143, 160, 0.12));
+    border-radius: 3px;
+    background: var(--surface-alt);
     margin: 0 auto;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
     cursor: grab;
     touch-action: none;
     user-select: none;
 }
 
-.crop-stage.is-dragging {
-    cursor: grabbing;
-}
+.crop-stage.is-dragging { cursor: grabbing; }
 
 .crop-stage img {
     position: absolute;
@@ -307,21 +603,10 @@
     gap: 0.8rem;
 }
 
-.crop-controls label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--primary-deep);
-}
+.crop-controls label { font-size: 0.8rem; font-weight: 700; color: var(--primary-deep); }
+.crop-controls input[type="range"] { width: 100%; accent-color: var(--accent); }
 
-.crop-controls input[type="range"] {
-    width: 100%;
-    accent-color: var(--accent);
-}
-
-.crop-axis-row {
-    align-items: flex-start;
-}
-
+.crop-axis-row { align-items: flex-start; }
 .crop-axis-row > div {
     flex: 1;
     display: flex;
@@ -337,161 +622,114 @@
     margin-top: 1.25rem;
 }
 
-.hidden {
-    display: none !important;
-}
+.hidden { display: none !important; }
 
-.editor-title-input {
-    width: 100%;
-    border: 1px solid var(--line);
-    background: var(--surface-alt);
-    border-radius: 14px;
-    padding: 0.9rem 1.2rem;
-    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-    font-weight: 800;
-    color: var(--primary-deep);
-    letter-spacing: -0.03em;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.editor-title-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(194, 109, 132, 0.12);
-}
-
-.editor-category-select {
-    width: 100%;
-    border: 1px solid var(--line);
-    background: var(--surface-alt);
-    border-radius: 14px;
-    padding: 0.9rem 1.2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--primary-deep);
-    letter-spacing: -0.02em;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    padding-right: 2.5rem;
-}
-
-.editor-category-select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(194, 109, 132, 0.12);
-}
-
-.editor-stats {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.editor-body-textarea {
-    width: 100%;
-    min-height: 220px;
-    border: 1px solid var(--line);
-    background: var(--surface-alt);
-    border-radius: 14px;
-    padding: 1rem 1.1rem;
-    font-size: 1.05rem;
-    line-height: 1.8;
-    color: var(--text);
-    outline: none;
-    resize: vertical;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.editor-body-textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(194, 109, 132, 0.12);
-}
-
-.editor-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--line);
-}
-
-.btn-cancel {
-    padding: 0.85rem 1.6rem;
-    border-radius: 999px;
-    font-weight: 700;
-    color: var(--muted);
-    transition: color 0.2s ease;
-    border: none;
-    background: transparent;
-}
-
-.btn-cancel:hover {
-    color: var(--text);
-}
-
+/* Publish/save buttons in the crop modal reuse .btn-editor-primary */
 .publish-button {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 0.85rem 1.8rem;
-    border-radius: 999px;
+    gap: 6px;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2px;
     border: none;
-    background: var(--accent-gradient);
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 1rem;
-    box-shadow: 0 8px 20px rgba(194, 109, 132, 0.3);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: var(--primary);
+    color: var(--bg);
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: background 0.2s ease;
 }
 
-.publish-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(194, 109, 132, 0.4);
-}
+.publish-button:hover { background: var(--accent); }
 
-/* AI Cover Prompt input (custom Pollination generation instructions) */
-.ai-cover-prompt-group {
-    margin-top: 0.9rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
+/* ==========================================================================
+   SLASH COMMAND MENU
+   ========================================================================== */
 
-.ai-cover-prompt-input {
-    width: 100%;
+.editor-command-menu {
+    position: fixed;
+    z-index: 120;
+    width: 260px;
+    background: var(--surface);
     border: 1px solid var(--line);
-    background: var(--surface-alt);
+    border-radius: 4px;
+    box-shadow: 0 10px 32px rgba(20, 12, 16, 0.14);
+    overflow: hidden;
+    padding: 0.3rem;
+}
+
+.editor-command-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: none;
+    background: transparent;
     color: var(--text);
-    border-radius: 12px;
-    padding: 0.7rem 0.9rem;
-    font-size: 0.92rem;
-    line-height: 1.4;
-    font-family: inherit;
-    resize: vertical;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-size: 0.86rem;
+    text-align: left;
+    border-radius: 2px;
+    cursor: pointer;
 }
 
-.ai-cover-prompt-input::placeholder {
+.editor-command-menu-item .cmd-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 2px;
+    background: var(--primary-soft);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--accent-strong);
+    flex-shrink: 0;
+}
+
+.editor-command-menu-item .cmd-label { font-weight: 600; }
+.editor-command-menu-item .cmd-shortcut {
+    margin-left: auto;
     color: var(--muted);
+    font-size: 0.72rem;
 }
 
-.ai-cover-prompt-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(194, 109, 132, 0.12);
+.editor-command-menu-item.is-selected,
+.editor-command-menu-item:hover {
+    background: var(--primary-soft);
 }
 
-.ai-cover-hint {
-    font-size: 0.78rem;
+/* ==========================================================================
+   EDITOR VIEW MODES (Write / Preview)
+   ========================================================================== */
+
+.editor-view-toggle {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.editor-view-toggle button {
+    padding: 0 0.75rem;
+    height: 32px;
+    border: none;
+    background: transparent;
     color: var(--muted);
-    line-height: 1.4;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
+.editor-view-toggle button.is-active { background: var(--primary); color: var(--bg); }
+body.dark-mode .editor-view-toggle button.is-active { background: var(--accent); color: var(--bg); }
+
+.editor-preview {
+    margin-top: 1.5rem;
+    animation: editorFadeIn 0.18s ease;
+    min-height: 340px;
+}
+
+@keyframes editorFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

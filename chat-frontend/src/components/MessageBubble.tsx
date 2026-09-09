@@ -58,7 +58,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   // ------------------------------------------------------------
 
   const renderAttachmentImage = (src: string, alt: string) => (
-    <div className="mt-1 max-w-xs overflow-hidden rounded-xl border border-black/10 shadow-sm dark:border-white/10">
+    <div className="mt-1 max-w-xs overflow-hidden rounded-xl border border-black/10 shadow-sm dark:border-[#F2F1ED]/10">
       <img
         src={src}
         alt={alt}
@@ -79,7 +79,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       />
 
       <div
-        className="hidden items-center gap-2.5 bg-black/5 px-4 py-3 text-xs text-slate-500 dark:bg-white/5 dark:text-slate-400"
+        className="hidden items-center gap-2.5 bg-black/5 px-4 py-3 text-xs text-slate-500 dark:bg-[#F2F1ED]/5 dark:text-slate-400"
         aria-hidden="true"
       >
         <ImageOff className="h-4 w-4 flex-shrink-0" />
@@ -156,7 +156,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           href={trimmed}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex min-w-0 max-w-full items-center gap-2.5 rounded-xl bg-black/5 p-2 text-xs font-medium transition-colors hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15"
+          className="flex min-w-0 max-w-full items-center gap-2.5 rounded-xl bg-black/5 p-2 text-xs font-medium transition-colors hover:bg-black/10 dark:bg-[#F2F1ED]/10 dark:hover:bg-[#F2F1ED]/15"
         >
           <FileText className="h-4 w-4 flex-shrink-0 text-blossom-500" />
 
@@ -295,7 +295,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 truncate
                 text-xs
                 font-semibold
-                text-slate-700
+                text-secondary
                 dark:text-slate-300
                 ${
                   onAuthorClick
@@ -327,8 +327,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
             shadow-sm
             ${
               isSelf
-                ? 'bg-blossom-600 text-white rounded-br-md'
-                : 'bg-white text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 rounded-bl-md'
+                ? 'bg-blossom-600 text-inverse rounded-br-md'
+                : 'bg-card text-primary border border-subtle dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 rounded-bl-md'
             }
           `}
           style={{
@@ -358,8 +358,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               text-[10px]
               ${
                 isSelf
-                  ? 'text-white/75'
-                  : 'text-slate-400 dark:text-slate-500'
+                  ? 'text-[#F2F1ED]/75 dark:text-[#F2F1ED]/75'
+                  : 'text-muted dark:text-slate-500'
               }
             `}
           >
@@ -371,9 +371,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 className="flex-shrink-0"
               >
                 {isRead ? (
-                  <CheckCheck className="h-3.5 w-3.5 text-white/90" />
+                  <CheckCheck className="h-3.5 w-3.5 text-[#F2F1ED]/90" />
                 ) : (
-                  <Check className="h-3.5 w-3.5 text-white/70" />
+                  <Check className="h-3.5 w-3.5 text-[#F2F1ED]/70" />
                 )}
               </span>
             )}

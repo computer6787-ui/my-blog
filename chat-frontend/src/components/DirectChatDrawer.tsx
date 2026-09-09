@@ -25,7 +25,7 @@ export const DirectChatDrawer: React.FC<DirectChatDrawerProps> = ({ isOpen, onCl
 
       {/* Drawer Panel */}
       <aside
-        className="relative w-full max-w-md h-full lumora-glass-surface bg-white/95 dark:bg-slate-900/95 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col z-10 transition-transform duration-300 transform translate-x-0"
+        className="relative w-full max-w-md h-full lumora-glass-surface bg-[#F2F1ED]/95 dark:bg-slate-900/95 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col z-10 transition-transform duration-300 transform translate-x-0"
         aria-label="Direct Messages Drawer"
       >
         {!currentUser ? (
@@ -51,7 +51,7 @@ export const DirectChatDrawer: React.FC<DirectChatDrawerProps> = ({ isOpen, onCl
             <div className="mt-6 flex flex-col gap-2.5 w-full max-w-xs">
               <a
                 href="/login"
-                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blossom-600 text-white font-semibold text-sm shadow hover:bg-blossom-700 transition-colors"
+                className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blossom-600 text-[#F2F1ED] font-semibold text-sm shadow hover:bg-blossom-700 transition-colors"
               >
                 <LogIn className="w-4 h-4" />
                 Sign In to Message

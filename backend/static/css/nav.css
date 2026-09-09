@@ -1,4 +1,4 @@
-﻿/* ===== HEADER & NAVIGATION ===== */
+/* ===== HEADER & NAVIGATION — SAKURA EDITORIAL ===== */
 
 .header {
     position: sticky;
@@ -9,134 +9,148 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.5rem;
     width: 100%;
-    padding: 0.9rem clamp(1.2rem, 4vw, 3rem);
-    background: rgba(255, 255, 255, 0.88);
+    padding: 0 clamp(1.2rem, 4vw, 3rem);
+    height: var(--navbar-height);
+    background: rgba(242, 241, 237, 0.95);
     border-bottom: 1px solid var(--line);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 body.dark-mode .header {
-    background: rgba(23, 16, 19, 0.88);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    background: rgba(23, 16, 19, 0.92);
+    border-bottom-color: rgba(242, 241, 237, 0.06);
 }
+
+/* ---------- Logo ---------- */
 
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 0.1rem;
+    text-decoration: none;
+    flex-shrink: 0;
 }
 
 .logo img {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
     object-fit: cover;
-    box-shadow: 0 6px 14px rgba(194, 109, 132, 0.2);
 }
 
 .logo_text h1 {
     margin: 0;
-    color: var(--primary-deep);
-    font-size: 1.5rem;
-    font-weight: 800;
+    color: var(--accent-strong);
+    font-family: 'Pacifico', cursive;
+    font-size: 1.45rem;
+    font-weight: 400;
     line-height: 1.1;
-    letter-spacing: -0.04em;
+    letter-spacing: 0.01em;
 }
 
 .logo_text p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    display: none;
 }
+
+/* ---------- Nav links ---------- */
 
 .nav {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.2rem;
 }
 
 .nav_button, .nav_link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.6rem 1.2rem;
+    padding: 0.5rem 0.9rem;
     border-radius: 999px;
-    background: var(--accent-gradient);
-    color: #ffffff !important;
-    font-weight: 700;
-    font-size: 0.9rem;
-    box-shadow: 0 6px 16px rgba(194, 109, 132, 0.22);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    background: transparent;
+    color: var(--muted) !important;
+    font-weight: 500;
+    font-size: 0.88rem;
     border: none;
+    transition: color 0.2s ease, background 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
 .nav_button:hover, .nav_link:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 22px rgba(194, 109, 132, 0.32);
-    filter: brightness(1.05);
+    color: var(--text) !important;
+    background: var(--primary-soft);
 }
 
-/* The mobile-only "Home" link lives inside the logo row; hidden on desktop,
-   shown only within the mobile media query below. */
+.nav_button.is-active {
+    color: var(--accent) !important;
+    font-weight: 600;
+}
+
+/* Rose pill CTA button */
+.nav_button.nav-cta {
+    background: transparent;
+    color: var(--accent) !important;
+    border: 1.5px solid var(--accent);
+    font-weight: 600;
+    padding: 0.45rem 1.1rem;
+    margin-left: 0.3rem;
+}
+
+.nav_button.nav-cta:hover {
+    background: var(--accent);
+    color: #F2F1ED !important;
+}
+
+/* ---------- Utility icons ---------- */
+
 .mobile-home {
     display: none;
 }
 
-#dark-mode-toggle {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
+#dark-mode-toggle,
+.menu-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
     border-radius: 50%;
     border: 1px solid var(--line);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface-alt);
+    background: transparent;
     color: var(--text);
-    font-size: 1.05rem;
-    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    font-size: 1rem;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-#dark-mode-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+#dark-mode-toggle:hover,
+.menu-btn:hover {
+    background: var(--primary-soft);
+    border-color: var(--card-border-hover);
 }
 
 .menu-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: var(--surface-alt);
-    display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
     gap: 4px;
     padding: 0;
-    transition: transform 0.2s ease;
 }
 
 .menu-btn span {
     display: block;
-    width: 18px;
-    height: 2px;
+    width: 16px;
+    height: 1.5px;
     background: var(--text);
     border-radius: 2px;
     transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
 .menu-btn.open span:nth-child(1) {
-    transform: translateY(6px) rotate(45deg);
+    transform: translateY(5.5px) rotate(45deg);
 }
 
 .menu-btn.open span:nth-child(2) {
@@ -144,14 +158,16 @@ body.dark-mode .header {
 }
 
 .menu-btn.open span:nth-child(3) {
-    transform: translateY(-6px) rotate(-45deg);
+    transform: translateY(-5.5px) rotate(-45deg);
 }
+
+/* ---------- Overlay & Drawer ---------- */
 
 .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(10, 14, 24, 0.45);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(2px);
     z-index: 90;
     opacity: 0;
     pointer-events: none;
@@ -166,18 +182,18 @@ body.dark-mode .header {
 .drawer {
     position: fixed;
     top: 0;
-    right: -320px;
-    width: min(82vw, 300px);
+    right: -300px;
+    width: min(82vw, 280px);
     height: 100vh;
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1.2rem;
     background: var(--surface);
     border-left: 1px solid var(--line);
-    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.15);
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.08);
     transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 100;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.4rem;
 }
 
 .drawer.open {
@@ -185,8 +201,9 @@ body.dark-mode .header {
 }
 
 .drawer h2 {
-    font-size: 1.4rem;
-    font-weight: 800;
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
     color: var(--primary-deep);
     margin-bottom: 0.5rem;
 }
@@ -199,60 +216,55 @@ body.dark-mode .header {
 
 .drawer a {
     display: block;
-    padding: 0.85rem 1.1rem;
-    border-radius: 12px;
-    background: var(--surface-alt);
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius-md);
+    background: transparent;
     color: var(--text);
-    font-weight: 600;
-    transition: background 0.2s ease, transform 0.2s ease;
+    font-weight: 500;
+    font-size: 0.92rem;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
 .drawer a:hover {
     background: var(--primary-soft);
-    color: var(--accent-strong);
-    transform: translateX(3px);
+    color: var(--accent);
 }
 
 body.dark-mode .drawer a:hover {
-    background: var(--primary-soft);
-    color: #ffffff;
+    color: var(--accent-strong);
 }
 
-/* Login / Sign Out link pinned to the very bottom of the drawer.
-   margin-top: auto pushes it below the theme toggle and all menu items. */
 .drawer #auth-link {
     margin-top: auto;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
 }
 
+/* ---------- Drawer theme toggle ---------- */
 
-/* Dark mode toggle inside the drawer (slide switch) */
 .drawer-theme-toggle {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     width: 100%;
-    padding: 0.85rem 1.1rem;
+    padding: 0.7rem 0.9rem;
     border: none;
-    border-radius: 12px;
-    background: var(--surface-alt);
+    border-radius: var(--radius-md);
+    background: transparent;
     color: var(--text);
     font-family: inherit;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.92rem;
+    font-weight: 500;
     cursor: pointer;
     text-align: left;
-    transition: background 0.2s ease, transform 0.2s ease;
-    overflow: hidden;
+    transition: background 0.2s ease;
 }
 
 .drawer-theme-toggle:hover {
     background: var(--primary-soft);
-    transform: translateX(3px);
 }
 
 .drawer-theme-icon {
-    font-size: 1.1rem;
+    font-size: 1rem;
     flex-shrink: 0;
 }
 
@@ -261,16 +273,17 @@ body.dark-mode .drawer a:hover {
     min-width: 0;
     white-space: nowrap;
     overflow: hidden;
+    display: inline-block;
 }
 
 .drawer-theme-switch {
     position: relative;
-    width: 46px;
-    height: 24px;
+    width: 40px;
+    height: 22px;
     flex-shrink: 0;
     border-radius: 999px;
-    background: rgba(194, 109, 132, 0.18);
-    border: 1px solid rgba(194, 109, 132, 0.35);
+    background: var(--line);
+    border: 1px solid var(--card-border);
     transition: background 0.25s ease;
 }
 
@@ -278,37 +291,378 @@ body.dark-mode .drawer a:hover {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+    background: #F2F1ED;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.dark-mode .drawer-theme-switch {
-    background: var(--primary);
-    border-color: var(--primary);
+    background: var(--accent);
+    border-color: var(--accent);
 }
 
 body.dark-mode .drawer-theme-knob {
-    transform: translateX(22px);
+    transform: translateX(18px);
 }
 
-/* Slide animation on the label text when the theme changes */
-.drawer-theme-label {
+/* ---------- Notification Bell & Badge ---------- */
+
+.notif-bell {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.notif-bell:hover {
+    background: var(--primary-soft);
+    border-color: var(--card-border-hover);
+}
+
+.notif-bell .bell-icon {
     display: inline-block;
-    animation: theme-label-slide-in 0.25s ease;
 }
 
-@keyframes theme-label-slide-in {
-    from {
-        opacity: 0;
-        transform: translateX(-8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.notif-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #F2F1ED;
+    font-size: 0.62rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.notif-badge.hidden {
+    display: none;
+}
+
+.notif-bell.has-unread {
+    border-color: var(--accent);
+    background: rgba(199, 123, 145, 0.06);
+}
+
+/* ---------- Navbar Profile Avatar ---------- */
+
+.nav-avatar {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    background: linear-gradient(135deg, #EFE9F8, #e8d5dc);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-decoration: none;
+    transition: border-color 0.2s ease;
+}
+
+.nav-avatar:hover {
+    border-color: var(--accent);
+}
+
+.nav-avatar .nav-avatar-initial {
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+}
+
+.nav-avatar .nav-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ---------- Notification Drawer ---------- */
+
+.notif-drawer {
+    position: fixed;
+    top: 0;
+    right: -380px;
+    width: min(92vw, 360px);
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--line);
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.08);
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 110;
+    display: flex;
+    flex-direction: column;
+}
+
+.notif-drawer.open {
+    right: 0;
+}
+
+.notif-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.2rem 0.5rem;
+}
+
+.notif-drawer-header h2 {
+    font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--primary-deep);
+    margin: 0;
+}
+
+.notif-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.notif-close:hover {
+    background: var(--primary-soft);
+    color: var(--text);
+}
+
+.notif-drawer hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 0 0 0.4rem;
+}
+
+.notif-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.4rem 0.6rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.notif-item {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.notif-item:hover {
+    background: var(--primary-soft);
+}
+
+.notif-item.unread {
+    background: rgba(199, 123, 145, 0.05);
+    border-color: rgba(199, 123, 145, 0.12);
+}
+
+.notif-item.unread:hover {
+    background: rgba(199, 123, 145, 0.1);
+}
+
+.notif-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #EFE9F8, #e8d5dc);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    overflow: hidden;
+}
+
+.notif-icon.notif-avatar {
+    background: transparent;
+}
+
+.notif-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+
+.notif-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.notif-message {
+    font-size: 0.84rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.notif-time {
+    font-size: 0.72rem;
+    color: var(--muted);
+}
+
+.notif-dot {
+    width: 7px;
+    height: 7px;
+    min-width: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 5px;
+}
+
+.notif-empty {
+    padding: 2.5rem 1.2rem;
+    text-align: center;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.notif-empty-icon {
+    font-size: 2rem;
+    opacity: 0.6;
+}
+
+.notif-empty p {
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+}
+
+.notif-empty small {
+    font-size: 0.78rem;
+}
+
+.notif-login-link {
+    margin-top: 0.5rem;
+    padding: 0.55rem 1.4rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #F2F1ED !important;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.notif-login-link:hover {
+    background: var(--accent-strong);
+}
+
+body.dark-mode .notif-item.unread {
+    background: rgba(217, 160, 176, 0.1);
+    border-color: rgba(217, 160, 176, 0.2);
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 600px) {
+    .header {
+        padding: 0 0.75rem;
+        gap: 0.4rem;
+        height: 56px;
+    }
+
+    .logo {
+        gap: 0.4rem;
+    }
+
+    .logo img {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+    }
+
+    .logo_text h1 {
+        font-size: 1.1rem;
+    }
+
+    .mobile-home {
+        display: inline-flex !important;
+        margin-left: auto;
+        padding: 0.3rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--muted) !important;
+        border: 1px solid var(--line);
+    }
+
+    .nav {
+        gap: 0.3rem;
+    }
+
+    .nav .nav_button {
+        display: none;
+    }
+
+    .notif-bell {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        font-size: 0.9rem;
+    }
+
+    .nav-avatar {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+    }
+
+    .menu-btn {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+    }
+
+    .notif-drawer {
+        width: 94vw;
+        right: -96vw;
+    }
+}

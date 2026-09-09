@@ -22,9 +22,12 @@ function mountChatApp() {
 function mountSakuraPoster() {
   const posterRoot = document.getElementById('sakura-poster-root');
   if (posterRoot) {
+    // Force full-width block layout before React mounts into it
+    posterRoot.style.cssText = 'width:100%;display:block;overflow:hidden;';
     createRoot(posterRoot).render(
       <SakuraEditorialPoster
-        className="w-full"
+        className="w-full block"
+        height="clamp(240px, 30vw, 400px)"
         interactiveReveal
         sceneSrc="/static/images/sakura/hero-scene-bg.webp"
         foregroundSrc="/static/images/sakura/hero-branch.webp"

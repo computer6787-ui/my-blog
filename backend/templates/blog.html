@@ -15,11 +15,10 @@
 {% block content %}
 <article class="single-story-article">
     <div class="story-nav-bar">
-        <a href="/" class="back-link">← Back to Stories</a>
+        <a href="/blog" class="back-link">← Back to Stories</a>
     </div>
 
     <div id="story-cover-container" class="story-cover-container">
-        <!-- Image or dynamic placeholder banner loaded here -->
         <div id="story-cover-placeholder" class="story-cover-placeholder">
             <span class="placeholder-icon" id="cover-icon">✦</span>
             <span class="placeholder-category" id="cover-category">Story</span>
@@ -49,14 +48,14 @@
             <div class="story-share-actions">
                 <span id="story-date" class="story-date-pill" aria-label="Story date">—</span>
                 <button type="button" id="btn-copy-link" class="btn-share" aria-label="Copy story link">
-                    <span>🔗 Share Story</span>
+                    <span>Share Story</span>
                 </button>
             </div>
         </div>
     </header>
 
     <div class="single-story-body-wrap">
-        <div id="body" class="single-story-content"></div>
+        <div id="body" class="single-story-content article-prose"></div>
     </div>
 
     <footer class="single-story-footer">
@@ -68,7 +67,7 @@
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                     <h4 id="footer-author-name">Lumora Author</h4>
                     <button type="button" id="btn-dm-story-author" class="btn-share" style="padding: 4px 12px; font-size: 12px; border-radius: 10px; cursor: pointer;">
-                        <span>💬 Message Author</span>
+                        <span><span class="css-icon css-icon-chat"></span> Message Author</span>
                     </button>
                 </div>
                 <p id="footer-author-bio">Sharing ideas and stories that inspire and connect us all on Lumora.</p>
@@ -83,7 +82,7 @@
                 <span class="interaction-label">Like</span>
             </button>
             <button type="button" id="btn-comments-toggle" class="btn-interaction btn-comments">
-                <span class="interaction-icon">💬</span>
+                <span class="interaction-icon css-icon css-icon-chat"></span>
                 <span class="interaction-count" id="comments-count">0</span>
                 <span class="interaction-label">Comments</span>
             </button>
@@ -92,14 +91,14 @@
         <!-- Comments Section -->
         <div id="comments-section" class="comments-section hidden">
             <h3 class="comments-header">Comments</h3>
-            
+
             <form id="comment-form" class="comment-form">
                 <div class="comment-input-wrap">
                     <label for="comment-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;">Write a comment</label>
-                    <textarea 
-                        id="comment-input" 
+                    <textarea
+                        id="comment-input"
                         name="comment-input"
-                        class="comment-input" 
+                        class="comment-input"
                         placeholder="Share your thoughts... use @ to mention someone"
                         rows="3"
                     ></textarea>
@@ -115,14 +114,23 @@
         </div>
 
         <div class="story-footer-nav">
-            <a href="/" class="hero-btn hero-btn-primary">Explore More Stories →</a>
+            <a href="/blog" class="hero-btn hero-btn-primary">Explore More Stories →</a>
+        </div>
+
+        <!-- Related Stories Section -->
+        <div id="related-stories-section" class="related-stories-section" style="display: none;">
+            <h3 class="related-stories-title">More Stories You May Like</h3>
+            <div id="related-stories-grid" class="related-stories-grid">
+                <!-- Related blog cards loaded here -->
+            </div>
         </div>
     </footer>
 </article>
 
-<script type="module" src="{{ url_for('static', path='js/sep_blog.js') }}?v=20260909"></script>
+<script type="module" src="{{ url_for('static', path='js/sep_blog.js') }}?v=20260915"></script>
 <script type="module" src="{{ url_for('static', path='js/config.js') }}?v=20260902"></script>
 <script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260902"></script>
+<script type="module" src="{{ url_for('static', path='js/reader.js') }}?v=20260915"></script>
 
 {% if blog_seo %}
 <script type="application/ld+json">

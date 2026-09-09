@@ -1,56 +1,416 @@
-﻿/* ===== RESPONSIVE ===== */
+/* ===== RESPONSIVE — Editorial Reader & Editor ===== */
+
+/* ---- Global responsive base ---- */
+@media (max-width: 1024px) {
+    .blog-grid, #blog_section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Wider article container on tablets */
+    .single-story-article {
+        max-width: 720px;
+    }
+
+    /* Editor canvas stays compact */
+    .editor-canvas {
+        max-width: 680px;
+    }
+}
 
 @media (max-width: 768px) {
     .blog-grid, #blog_section {
         grid-template-columns: 1fr;
-        gap: 1.4rem;
+        gap: 1.2rem;
     }
 
-    .hero {
-        padding: 2rem 1.2rem;
-        margin-bottom: 2.5rem;
+    .hero-content {
+        padding: clamp(2rem, 5vw, 3.5rem) clamp(1rem, 3vw, 1.5rem);
     }
 
     .hero-cta-strip {
         flex-direction: column;
-        gap: 0.6rem;
-        padding: 1rem 1rem;
+        gap: 0.5rem;
+        padding: 0.8rem 1rem;
     }
 
     .hero-btn {
         width: 100%;
         justify-content: center;
-        padding: 0.9rem 1.4rem;
+        padding: 0.7rem 1.2rem;
     }
 
     .section-header {
         flex-direction: column;
         align-items: stretch;
-        gap: 1rem;
+        gap: 0.8rem;
     }
 
     .search-wrap {
         max-width: 100%;
     }
 
-    .user-profile-card {
+    .connect-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .photo-cta,
+    .home-author-cta {
+        border-radius: 0;
+        margin-left: calc(-1 * clamp(1.2rem, 3vw, 2.5rem));
+        margin-right: calc(-1 * clamp(1.2rem, 3vw, 2.5rem));
+        width: calc(100% + 2 * clamp(1.2rem, 3vw, 2.5rem));
+    }
+
+    /* Single blog reader */
+    .single-story-article {
+        max-width: 100%;
+        padding: 0 0.8rem;
+    }
+
+    .story-cover-container {
+        max-width: 100%;
+        height: clamp(180px, 28vw, 280px);
+        margin-bottom: 1.8rem;
+    }
+
+    .single-story-title {
+        font-size: clamp(1.7rem, 5vw, 2.2rem);
+    }
+
+    .single-story-author-bar {
         flex-direction: column;
-        align-items: stretch;
+        align-items: flex-start;
+        gap: 0.6rem;
     }
 
-    .profile-card-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .story-author-card {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .single-story-body-wrap {
-        padding: 1.5rem 1.2rem;
+    .footer-author-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
     }
 
-    /* Chat mobile: message input bar should sit directly below navbar */
+    /* User story card */
+    .user-story-card {
+        grid-template-columns: 1fr;
+    }
+
+    .top-stories-fader {
+        max-width: min(100% - 0.8rem, 780px);
+    }
+
+    .top-story-media {
+        height: clamp(200px, 50vw, 300px);
+    }
+
+    .top-story-body {
+        padding: 1rem 1.1rem 1.1rem;
+    }
+
+    .top-story-title {
+        font-size: 1.1rem;
+    }
+
+    /* Chat mobile */
     div[class*="fixed inset-x-0 bottom-0 top-"] {
         top: var(--navbar-height) !important;
     }
+
+    /* --- Editor responsive --- */
+    .editor-canvas {
+        max-width: 100%;
+    }
+
+    .editor-topbar {
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .editor-topbar-left {
+        flex: 1 1 auto;
+    }
+
+    .editor-topbar-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .editor-title-input {
+        font-size: clamp(1.6rem, 5vw, 2.2rem);
+    }
+
+    .editor-toolbar {
+        top: calc(var(--navbar-height) + 0.4rem);
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding: 0.4rem 0.6rem;
+        gap: 1px;
+    }
+
+    .tt-group {
+        flex-shrink: 0;
+    }
+
+    .tt-sep {
+        margin: 0 0.25rem;
+    }
+
+    .editor-prose {
+        font-size: clamp(1rem, 1.2vw, 1.08rem);
+    }
+
+    /* Two/three column layouts collapse */
+    .article-prose .columns-2,
+    .editor-prose .columns-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .article-prose .columns-3,
+    .editor-prose .columns-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .article-prose .image-text,
+    .editor-prose .image-text {
+        grid-template-columns: 1fr;
+    }
+
+    /* Wide figures collapse */
+    .article-prose figure[data-width="wide"],
+    .editor-prose figure[data-width="wide"] {
+        width: 100%;
+    }
+
+    .cover-preview {
+        max-height: 180px;
+    }
+
+    .related-stories-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .related-story-media {
+        height: 100px;
+    }
+
+    .related-story-body {
+        padding: 0.5rem 0.6rem 0.6rem;
+    }
+
+    .related-story-title {
+        font-size: 0.78rem;
+    }
+
+    .related-story-meta {
+        font-size: 0.65rem;
+    }
 }
 
+@media (max-width: 480px) {
+    main {
+        padding: 1rem 0.75rem;
+    }
+
+    .single-story-title {
+        font-size: 1.6rem;
+    }
+
+    .user-profile-card {
+        border-radius: 10px;
+    }
+
+    .profile-avatar-row {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-card-actions {
+        justify-content: center;
+    }
+
+    /* Connect & Create mobile */
+    .connect-create-section {
+        padding: 2rem 0.75rem;
+    }
+
+    .connect-create-heading {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .connect-create-cards {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+
+    .connect-create-card {
+        padding: 1.2rem 0.8rem;
+    }
+
+    .connect-create-label {
+        font-size: 0.6rem;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.4rem;
+    }
+
+    .connect-create-title {
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .connect-create-desc {
+        font-size: 0.72rem;
+        line-height: 1.4;
+    }
+
+    /* Related Stories mobile */
+    .related-stories-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.4rem;
+    }
+
+    .related-story-media {
+        height: 80px;
+    }
+
+    .related-story-body {
+        padding: 0.4rem 0.5rem 0.5rem;
+    }
+
+    .related-story-title {
+        font-size: 0.72rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .related-story-meta {
+        font-size: 0.6rem;
+    }
+
+    /* Editor mobile */
+    .editor-main {
+        padding-bottom: 3rem;
+    }
+
+    .editor-topbar-actions {
+        gap: 0.3rem;
+    }
+
+    .editor-stat {
+        display: none;
+    }
+
+    .editor-view-toggle button {
+        padding: 0 0.5rem;
+        font-size: 0.78rem;
+    }
+
+    .btn-editor {
+        min-height: 32px;
+        padding: 0 0.7rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-editor-primary {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+    }
+
+    .editor-title-input {
+        font-size: clamp(1.4rem, 5vw, 1.8rem);
+    }
+
+    .editor-subtitle-input {
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+    }
+
+    .tt-btn {
+        min-width: 26px;
+        height: 28px;
+        padding: 0 3px;
+    }
+
+    .tt-icon-svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    .editor-format-select {
+        font-size: 0.78rem;
+        padding-right: 18px;
+        background-size: 10px;
+    }
+
+    .cover-preview {
+        max-height: 140px;
+    }
+
+    /* Editor settings strip mobile */
+    .editor-settings {
+        margin-top: 1.2rem;
+    }
+
+    .editor-settings summary {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .editor-settings-body {
+        padding: 0.8rem;
+        gap: 1rem;
+    }
+
+    .editor-setting-row {
+        gap: 0.6rem;
+    }
+
+    .editor-setting-label {
+        font-size: 0.8rem;
+    }
+
+    .editor-select,
+    .ai-prompt-input {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.6rem;
+    }
+
+    .ai-hint {
+        font-size: 0.7rem;
+    }
+
+    .cover-actions {
+        gap: 0.4rem;
+    }
+
+    .btn-editor {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    /* Editor byline mobile */
+    .editor-byline {
+        gap: 0.4rem;
+        font-size: 0.85rem;
+    }
+
+    .editor-byline-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+    }
+
+    .story-interaction-bar {
+        flex-wrap: wrap;
+    }
+
+    .comment-reply {
+        margin-left: 1rem;
+    }
+}

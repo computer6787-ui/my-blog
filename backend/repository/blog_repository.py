@@ -19,8 +19,21 @@ CATEGORY_KEYWORDS = {
 }
 
 
+def _readable_body(body: str | None) -> str:
+    """Return readable plain text for a blog body, flattening Tiptap JSON if needed."""
+    value = body or ""
+    stripped = str(value).strip()
+    if stripped.startswith("[") or stripped.startswith("{"):
+        try:
+            from backend.app.schemas import tiptap_json_to_text
+            return tiptap_json_to_text(str(value)) or ""
+        except Exception:
+            return str(value)
+    return str(value)
+
+
 def infer_category(title: str | None, body: str | None) -> str | None:
-    text = f"{title or ''} {body or ''}".lower()
+    text = f"{title or ''} {_readable_body(body)}".lower()
     best_category = None
     best_score = 0
 
@@ -44,6 +57,7 @@ def create_blog(request, db, current_user):
     new_blog = models.Blog(
         title=request.title,
         body=request.body,
+        body_format=getattr(request, "body_format", None) or None,
         image_url=getattr(request, "image_url", None),
         category=normalize_blog_category(request),
         user_id=current_user.id,
@@ -63,7 +77,7 @@ def matches_category(blog, category):
     if saved_category and saved_category.lower() == normalized_category.lower():
         return True
 
-    text = f"{blog.title or ''} {blog.body or ''}".lower()
+    text = f"{blog.title or ''} {_readable_body(blog.body)}".lower()
     keywords = CATEGORY_KEYWORDS.get(normalized_category, [])
     return any(keyword in text for keyword in keywords)
 
@@ -224,6 +238,11 @@ def update(id: int, request, db, current_user):
 
     if not update_data.get("category") or not str(update_data.get("category")).strip():
         update_data["category"] = infer_category(update_data.get("title"), update_data.get("body"))
+
+    # Never silently clear a stored body_format when a client omits it — only
+    # update when an explicit non-empty value was sent.
+    if not update_data.get("body_format"):
+        update_data.pop("body_format", None)
 
     db.query(models.Blog).filter(models.Blog.id == id).update(
         update_data, synchronize_session=False

@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}About Lumora — Where Ideas Come to Light{% endblock %}
+{% block meta_description %}Lumora is a modern blog and thought space where ideas spark and stories unfold. Learn about our mission, our story, and how to get in touch.{% endblock %}
+{% block og_title %}About Lumora — Where Ideas Come to Light{% endblock %}
+{% block og_description %}A modern blog and thought space where ideas spark and stories unfold.{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/about.css') }}?v=20260913b">
+{% endblock %}
+
+{% block content %}
+<main class="about-page">
+
+    <!-- ═══════════════════════════════════════════════════════
+         MASTHEAD
+         ═══════════════════════════════════════════════════════ -->
+    <header class="about-masthead">
+        <div class="masthead-rule reveal-masthead"></div>
+        <div class="masthead-dateline reveal-masthead" style="transition-delay:0.1s">
+            <span>Est. 2026</span>
+            <span class="masthead-sep">✦</span>
+            <span>Dhaka, Bangladesh</span>
+            <span class="masthead-sep">✦</span>
+            <span>Vol. I</span>
+        </div>
+        <h1 class="masthead-title reveal-masthead" style="transition-delay:0.2s">LUMORA</h1>
+        <p class="masthead-subtitle reveal-masthead" style="transition-delay:0.35s">Where Ideas Come to Light</p>
+        <div class="masthead-rule reveal-masthead" style="transition-delay:0.45s"></div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════
+         HERO IMAGE — Full-width editorial photo
+         ═══════════════════════════════════════════════════════ -->
+    <section class="about-hero">
+        <img
+            src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=1200&q=80"
+            alt="Writer at desk with notebook and coffee"
+            class="about-hero-img reveal-hero"
+            loading="eager"
+        >
+        <div class="about-hero-caption reveal d1">
+            <em>"A room of one's own, a page of one's own."</em>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LEAD — The Story (newspaper column style)
+         ═══════════════════════════════════════════════════════ -->
+    <section class="about-lead">
+        <div class="about-columns">
+            <div class="about-lead-text reveal">
+                <p class="about-dropcap">
+                    Lumora was born from a simple belief: that everyone has a story worth telling, and every story deserves a beautiful home. In a world of algorithms and noise, we built a quiet corner of the internet where words still matter — where a well-crafted sentence can stop a scroll, and an honest thought can spark a movement.
+                </p>
+                <p>
+                    We are not a social media platform. We are not a content farm. Lumora is a thought space — a place for writers, thinkers, dreamers, and makers to share their work with the world on their own terms. No clickbait. No engagement traps. Just good writing, beautifully presented.
+                </p>
+            </div>
+            <div class="about-aside reveal d2">
+                <div class="about-pullquote">
+                    <span class="pullquote-mark">"</span>
+                    <p>In a world of algorithms and noise, we built a quiet corner of the internet where words still matter.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         MISSION — Three-column editorial grid
+         ═══════════════════════════════════════════════════════ -->
+    <section class="about-mission">
+        <div class="section-divider reveal-divider">
+            <span class="divider-label">Our Mission</span>
+        </div>
+
+        <div class="mission-grid">
+            <div class="mission-card reveal d1">
+                <div class="mission-icon">✍️</div>
+                <h3>Write Freely</h3>
+                <p>Every voice matters. Lumora gives you the tools to craft, refine, and publish your stories without gatekeepers or paywalls. Your words, your way.</p>
+            </div>
+            <div class="mission-card reveal d2">
+                <div class="mission-icon">💡</div>
+                <h3>Think Deeply</h3>
+                <p>We celebrate long-form thinking over hot takes. Our reading experience is designed to let ideas breathe — no distractions, no doomscrolling, just depth.</p>
+            </div>
+            <div class="mission-card reveal d3">
+                <div class="mission-icon">🤝</div>
+                <h3>Connect Genuinely</h3>
+                <p>Real conversations happen here. Chat with authors, discuss ideas, and build meaningful connections with people who care about the same things you do.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         FEATURE IMAGE — Books / Library
+         ═══════════════════════════════════════════════════════ -->
+    <section class="about-feature">
+        <div class="about-feature-grid">
+            <div class="about-feature-img-wrap reveal-slide-left">
+                <img
+                    src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&q=80"
+                    alt="Library shelves filled with books"
+                    class="about-feature-img"
+                    loading="lazy"
+                >
+            </div>
+            <div class="about-feature-text reveal-slide-right">
+                <div class="section-divider section-divider--left reveal-divider">
+                    <span class="divider-label">The Story</span>
+                </div>
+                <h2>Built by Writers,<br>for Writers</h2>
+                <p>
+                    Lumora started as a weekend project between friends who were frustrated with the state of online publishing. We wanted a platform that felt like a literary magazine — curated, elegant, and focused on substance over spectacle.
+                </p>
+                <p>
+                    Today, Lumora is home to hundreds of authors sharing stories on everything from technology and culture to personal essays and poetry. Every story is handcrafted, every profile is personal, and every interaction is human.
+                </p>
+                <p>
+                    We're still a small team, and we like it that way. Every feature we build is something we'd want to use ourselves. Every design choice is made with care. We're not trying to be everything to everyone — we're trying to be the best home for thoughtful writing on the internet.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VALUES — Editorial boxes
+         ═══════════════════════════════════════════════════════ -->
+    <section class="about-values">
+        <div class="section-divider reveal-divider">
+            <span class="divider-label">What We Stand For</span>
+        </div>
+
+        <div class="values-grid">
+            <div class="value-box reveal d1">
+                <span class="value-number">01</span>
+                <h4>Quality Over Quantity</h4>
+                <p>We'd rather publish one beautiful story than a hundred forgettable ones. Our editorial standards are high because your time is valuable.</p>
+            </div>
+            <div class="value-box reveal d2">
+                <span class="value-number">02</span>
+                <h4>Privacy First</h4>
+                <p>We don't sell your data. We don't track you across the web. Your reading habits and personal information stay yours.</p>
+            </div>
+            <div class="value-box reveal d3">
+                <span class="value-number">03</span>
+                <h4>Open Community</h4>
+                <p>Lumora is for everyone. We welcome writers of all backgrounds, experience levels, and perspectives. The only requirement is sincerity.</p>
+            </div>
+            <div class="value-box reveal d4">
+                <span class="value-number">04</span>
+                <h4>Beautiful by Default</h4>
+                <p>Every story on Lumora looks stunning. No templates to configure, no themes to install. Just write, and we'll make it shine.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         FEATURE IMAGE — Writing / Creativity
+         ═══════════════════════════════════════════════════════ -->
+    <section class="about-feature about-feature--reverse">
+        <div class="about-feature-grid about-feature-grid--reverse">
+            <div class="about-feature-text reveal-slide-left">
+                <div class="section-divider section-divider--left reveal-divider">
+                    <span class="divider-label">Looking Ahead</span>
+                </div>
+                <h2>The Road<br>Ahead</h2>
+                <p>
+                    We're just getting started. In the coming months, we're building richer author tools, collaborative editing, series and collections, and a discovery engine that surfaces stories based on what you actually enjoy reading — not what keeps you clicking.
+                </p>
+                <p>
+                    Our vision is a platform where the best writing on the internet finds its readers, and where every author feels proud to call Lumora home.
+                </p>
+            </div>
+            <div class="about-feature-img-wrap reveal-slide-right">
+                <img
+                    src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80"
+                    alt="Laptop on wooden desk with coffee and notepad"
+                    class="about-feature-img"
+                    loading="lazy"
+                >
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STATS — Numbers that matter
+         ═══════════════════════════════════════════════════════ -->
+    <section class="about-stats">
+        <div class="stats-grid">
+            <div class="stat-item reveal-pop d1">
+                <span class="stat-number">100+</span>
+                <span class="stat-label">Stories Published</span>
+            </div>
+            <div class="stat-item reveal-pop d2">
+                <span class="stat-number">50+</span>
+                <span class="stat-label">Active Authors</span>
+            </div>
+            <div class="stat-item reveal-pop d3">
+                <span class="stat-number">1000+</span>
+                <span class="stat-label">Community Members</span>
+            </div>
+            <div class="stat-item reveal-pop d4">
+                <span class="stat-number">∞</span>
+                <span class="stat-label">Ideas to Share</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         CONTACT — Newspaper classified ad style
+         ═══════════════════════════════════════════════════════ -->
+    <section class="about-contact">
+        <div class="section-divider reveal-divider">
+            <span class="divider-label">Get In Touch</span>
+        </div>
+
+        <div class="contact-grid">
+            <div class="contact-card reveal d1">
+                <div class="contact-icon">✉️</div>
+                <h4>Email Us</h4>
+                <a href="mailto:farabi01618@gmail.com" class="contact-link">farabi01618@gmail.com</a>
+                <p class="contact-note">For general inquiries, partnerships, or just to say hello.</p>
+            </div>
+            <div class="contact-card reveal d2">
+                <div class="contact-icon">🐦</div>
+                <h4>Follow Us</h4>
+                <div class="contact-social">
+                    <a href="#" class="contact-social-link" target="_blank" rel="noreferrer">Twitter / X</a>
+                    <a href="#" class="contact-social-link" target="_blank" rel="noreferrer">Instagram</a>
+                    <a href="#" class="contact-social-link" target="_blank" rel="noreferrer">Facebook</a>
+                </div>
+                <p class="contact-note">Stay updated with our latest stories and announcements.</p>
+            </div>
+            <div class="contact-card reveal d3">
+                <div class="contact-icon">💬</div>
+                <h4>Join the Community</h4>
+                <a href="/chat" class="contact-link">Lumora Chat</a>
+                <p class="contact-note">Jump into real-time conversations with authors and readers.</p>
+            </div>
+        </div>
+
+        <div class="contact-cta reveal">
+            <p>Have a story to tell? <a href="/register">Join Lumora today</a> and start writing.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         FOOTER NOTE — Newspaper colophon style
+         ═══════════════════════════════════════════════════════ -->
+    <footer class="about-colophon">
+        <div class="colophon-rule reveal-divider"></div>
+        <p class="colophon-text reveal">
+            Lumora is published from Dhaka, Bangladesh. All stories are the original work of their respective authors.
+            <br>
+            <span class="colophon-emoji">🌸</span> Made with care for the written word.
+        </p>
+        <div class="colophon-rule reveal-divider"></div>
+    </footer>
+
+</main>
+
+<script>
+(function () {
+    // Skip if user prefers reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var selectors = [
+        '.reveal',
+        '.reveal-hero',
+        '.reveal-slide-left',
+        '.reveal-slide-right',
+        '.reveal-pop',
+        '.reveal-divider',
+        '.reveal-masthead'
+    ].join(',');
+
+    var elements = document.querySelectorAll(selectors);
+    if (!elements.length) return;
+
+    if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            rootMargin: '0px 0px -60px 0px',
+            threshold: 0.15
+        });
+
+        elements.forEach(function (el) { observer.observe(el); });
+    } else {
+        // Fallback: show everything immediately
+        elements.forEach(function (el) { el.classList.add('visible'); });
+    }
+})();
+</script>
+
+{% endblock %}
