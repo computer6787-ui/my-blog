@@ -232,6 +232,9 @@
         </div>
     </div>
 
+    <!-- ===== Hidden file input for inline images (toolbar / slash menu) ===== -->
+    <input type="file" id="inline_image_input" accept="image/*" class="hidden" />
+
     <!-- ===== Slash command menu (popover) ===== -->
     <div id="editor-command-menu" class="editor-command-menu hidden" role="menu" aria-label="Slash commands"></div>
 
@@ -243,7 +246,7 @@
 </main>
 
 <!-- Lumora editor (self-contained Tiptap module) -->
-<script type="module" src="{{ url_for('static', path='js/editor.js') }}?v=20260915b"></script>
+<script type="module" src="{{ url_for('static', path='js/editor.js') }}?v=20260915g"></script>
 
 {% endblock %}
 

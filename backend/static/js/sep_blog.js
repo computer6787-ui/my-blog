@@ -1,5 +1,6 @@
 import { API_URL, ROUTES, showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260902";
 import { setupMentionAutocomplete } from "./mention-autocomplete.js?v=20260909";
+import { renderTiptapJSON } from "./reader.js?v=20260916a";
 
 const id = window.location.pathname.split("/").pop();
 
@@ -209,6 +210,25 @@ function formatBody(text = "") {
 }
 
 
+// Extract plain readable text from Tiptap JSON so word count / read time isn't
+// skewed by JSON syntax (keys, quotes, braces). Falls back to stripping tags.
+function tiptapBodyToText(jsonString) {
+    try {
+        const json = typeof jsonString === "string" ? JSON.parse(jsonString) : jsonString;
+        const parts = [];
+        const walk = (node) => {
+            if (!node) return;
+            if (node.type === "text") parts.push(node.text || " ");
+            else if (node.type === "hardBreak") parts.push(" ");
+            else if (node.content && Array.isArray(node.content)) node.content.forEach(walk);
+        };
+        walk(json);
+        return parts.join(" ").replace(/\s+/g, " ").trim();
+    } catch {
+        return String(jsonString || "").replace(/<[^>]*>/g, " ");
+    }
+}
+
 async function loadBlog() {
     const token = localStorage.getItem("token");
     showLoading("Loading story...");
@@ -243,7 +263,10 @@ async function loadBlog() {
         const authorProfilePicture = blog.creator?.profile_picture_url || "";
         const savedAuthorBio = (blog.creator?.bio || "").trim();
         const authorBio = savedAuthorBio || "Sharing ideas and stories that inspire and connect us all on Lumora.";
-        const readTime = calculateReadTime(blog.body);
+        const fmt = (blog.body_format || "").toLowerCase();
+        const bodyText = (blog.body || "").trim();
+        const isTiptap = fmt === "tiptap" || bodyText.startsWith("{") || bodyText.startsWith("[");
+        const readTime = calculateReadTime(isTiptap ? tiptapBodyToText(blog.body) : blog.body);
         const authorProfileTarget = (() => {
             const authorId = blog.creator?.id;
             if (!authorId) return "/";
@@ -262,6 +285,21 @@ async function loadBlog() {
 
         document.title = `${blog.title} - Lumora`;
         document.getElementById("title").textContent = blog.title;
+
+        // Subtitle (optional — create a subtitle element if missing)
+        let subtitleEl = document.getElementById("subtitle");
+        if (!subtitleEl && blog.subtitle) {
+            subtitleEl = document.createElement("p");
+            subtitleEl.id = "subtitle";
+            subtitleEl.className = "single-story-subtitle";
+            document.getElementById("title").after(subtitleEl);
+        }
+        if (subtitleEl && blog.subtitle) {
+            subtitleEl.textContent = blog.subtitle;
+            subtitleEl.classList.remove("hidden");
+        } else if (subtitleEl) {
+            subtitleEl.classList.add("hidden");
+        }
 
         // Update SEO meta tags for social sharing and crawlers
         const seoDescription = (blog.body || "").replace(/\n/g, " ").trim().substring(0, 160);
@@ -320,7 +358,12 @@ async function loadBlog() {
             footerAuthorBioEl.textContent = authorBio;
         }
         const bodyEl = document.getElementById("body");
-        bodyEl.innerHTML = formatBody(blog.body);
+        if (isTiptap) {
+            // Rich text → render Tiptap JSON to semantic HTML (figures, captions, etc.)
+            bodyEl.innerHTML = renderTiptapJSON(blog.body, { dropcap: true });
+        } else {
+            bodyEl.innerHTML = formatBody(blog.body);
+        }
         attachBodyMentionClicks(bodyEl);
 
         const readTimeEl = document.getElementById("story-readtime");

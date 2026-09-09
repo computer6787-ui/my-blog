@@ -12,6 +12,7 @@ class Blog(base):
     __tablename__="blogs"
     id=Column(Integer, primary_key=True, index=True)
     title=Column(String)
+    subtitle=Column(String, nullable=True)
     body=Column(String)
     body_format=Column(String, nullable=True, default=None)  # None/"plain" = legacy text, "tiptap" = rich JSON
     image_url=Column(String, nullable=True)

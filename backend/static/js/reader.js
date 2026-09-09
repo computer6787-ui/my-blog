@@ -324,3 +324,7 @@ document.addEventListener("DOMContentLoaded", function() {
 // Expose for external use
 window.renderTiptapJSON = renderTiptapJSON;
 window.renderArticle = renderArticle;
+
+// Named export so sep_blog.js can render Tiptap bodies at load time (the
+// DOMContentLoaded heuristic alone can't catch JSON wrapped as HTML).
+export { renderTiptapJSON, renderArticle };

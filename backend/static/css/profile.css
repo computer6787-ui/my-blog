@@ -106,9 +106,6 @@
 }
 
 .profile-edit-name-btn {
-    position: absolute;
-    top: 12px;
-    right: clamp(1.2rem, 3vw, 2rem);
     border: 1px solid var(--card-border);
     background: transparent;
     color: var(--text);
@@ -117,6 +114,7 @@
     font-size: 0.78rem;
     font-weight: 500;
     transition: border-color 0.2s ease;
+    cursor: pointer;
 }
 
 .profile-edit-name-btn:hover {

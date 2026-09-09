@@ -9,6 +9,7 @@
 
 {% block extra_head %}
 <link rel="preload" as="image" href="/static/images/sakura/hero-scene-bg.webp" fetchpriority="high">
+<link rel="stylesheet" href="{{ url_for('static', path='css/home.css') }}?v=20260909e">
 {% endblock %}
 
 {% block content %}
@@ -18,11 +19,11 @@
 <div id="sakura-poster-root"></div>
 
 <!-- ===== TOP STORIES CAROUSEL ===== -->
-<section class="top-stories-section lazy-section" style="opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease;">
-    <h2 class="top-stories-heading">Top Stories</h2>
-    <p class="top-stories-sub">The most loved stories from our community.</p>
+<section class="top-stories-section">
+    <h2 class="top-stories-heading reveal d1">Top Stories</h2>
+    <p class="top-stories-sub reveal d2">The most loved stories from our community.</p>
 
-    <div class="top-stories-fader" id="top-stories-fader">
+    <div class="top-stories-fader reveal d3" id="top-stories-fader">
         <!-- Loading skeleton -->
         <div class="top-stories-skeleton" id="top-stories-skeleton">
             <div class="skeleton-card">
@@ -37,15 +38,15 @@
 </section>
 
 <!-- ===== CONNECT & CREATE ===== -->
-<section class="connect-create-section lazy-section" style="opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s;">
-    <h2 class="connect-create-heading">Connect & Create</h2>
+<section class="connect-create-section">
+    <h2 class="connect-create-heading reveal">Connect & Create</h2>
     <div class="connect-create-cards">
-        <a href="/chat" class="connect-create-card">
+        <a href="/chat" class="connect-create-card reveal d1">
             <span class="connect-create-label">DIRECT MESSAGING</span>
             <h3 class="connect-create-title">Private Conversations</h3>
             <p class="connect-create-desc">Connect with fellow authors and readers in private, secure chat rooms designed for calm and thoughtful dialogue.</p>
         </a>
-        <a href="/chat?global=true" class="connect-create-card">
+        <a href="/chat?global=true" class="connect-create-card reveal d2">
             <span class="connect-create-label">GLOBAL ROOMS</span>
             <h3 class="connect-create-title">Shared Spaces</h3>
             <p class="connect-create-desc">Join vibrant global rooms where stories are shared and inspired by a diverse community of writers and readers.</p>
@@ -54,7 +55,7 @@
 </section>
 
 <!-- ===== BECOME AN AUTHOR CTA ===== -->
-<div class="home-author-cta lazy-section" style="opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;">
+<div class="home-author-cta reveal-pop">
     <img data-src="/static/images/become_an_author_bg.png" alt="" loading="lazy" class="lazy-bg">
     <div class="home-author-cta-content">
         <h2>Become an Author</h2>
@@ -188,12 +189,6 @@
 
             cards[0].classList.add('active');
             restart();
-
-            // Smooth reveal after content is ready
-            requestAnimationFrame(function() {
-                section.style.opacity = '1';
-                section.style.transform = 'translateY(0)';
-            });
         } catch (e) {
             console.warn('Top stories failed to load', e);
         }
@@ -212,6 +207,41 @@
         observer.observe(section);
     } else {
         loadStories();
+    }
+})();
+</script>
+
+<!-- ===== Scroll-reveal observer (matches About page) ===== -->
+<script>
+(function () {
+    // Skip if user prefers reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var selectors = [
+        '.reveal',
+        '.reveal-pop'
+    ].join(',');
+
+    var elements = document.querySelectorAll(selectors);
+    if (!elements.length) return;
+
+    if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            rootMargin: '0px 0px -60px 0px',
+            threshold: 0.15
+        });
+
+        elements.forEach(function (el) { observer.observe(el); });
+    } else {
+        // Fallback: show everything immediately
+        elements.forEach(function (el) { el.classList.add('visible'); });
     }
 })();
 </script>

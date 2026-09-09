@@ -12,11 +12,14 @@
      - Save draft & Publish (POST/PUT to /blog)
    -------------------------------------------------------------------------- */
 
+// Capture native Image constructor BEFORE Tiptap import shadows it
+const NativeImage = window.Image;
+
 import { Editor, Node } from "https://cdn.jsdelivr.net/npm/@tiptap/core@2.14.0/dist/index.js";
 import StarterKit from "https://cdn.jsdelivr.net/npm/@tiptap/starter-kit@2.14.0/dist/index.js";
 import Underline from "https://cdn.jsdelivr.net/npm/@tiptap/extension-underline@2.14.0/dist/index.js";
 import Link from "https://cdn.jsdelivr.net/npm/@tiptap/extension-link@2.14.0/dist/index.js";
-import Image from "https://cdn.jsdelivr.net/npm/@tiptap/extension-image@2.14.0/dist/index.js";
+import TiptapImage from "https://cdn.jsdelivr.net/npm/@tiptap/extension-image@2.14.0/dist/index.js";
 import TextAlign from "https://cdn.jsdelivr.net/npm/@tiptap/extension-text-align@2.14.0/dist/index.js";
 import Placeholder from "https://cdn.jsdelivr.net/npm/@tiptap/extension-placeholder@2.14.0/dist/index.js";
 import { showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260902";
@@ -51,6 +54,34 @@ const FigureCaption = Node.create({
     defining: true,
     parseHTML() { return [{ tag: "figcaption" }]; },
     renderHTML() { return ["figcaption", 0]; },
+    // Enter inside a caption should NOT try to exit the code-like node into a
+    // dead boundary after the <figure>. Instead, insert a fresh paragraph right
+    // after the figure and drop the cursor into it so writing can continue.
+    addKeyboardShortcuts() {
+        return {
+            Enter: () => {
+                const { state } = this.editor;
+                const { $from } = state.selection;
+                if (!this.editor.isActive("figcaption")) return false;
+
+                // Walk up to the enclosing <figure>
+                let captionDepth = $from.depth;
+                while (captionDepth > 0 && $from.node(captionDepth).type.name !== "figcaption") {
+                    captionDepth -= 1;
+                }
+                if (captionDepth === 0) return false;
+
+                const figureDepth = captionDepth - 1;
+                const figureStart = $from.before(figureDepth);
+                const figureNode = state.doc.nodeAt(figureStart);
+                if (!figureNode || figureNode.type.name !== "figure") return false;
+
+                const figureEnd = figureStart + figureNode.nodeSize;
+                this.editor.chain().focus().insertContentAt(figureEnd, { type: "paragraph" }).run();
+                return true; // consume the keystroke so the default Enter handler never runs
+            },
+        };
+    },
 });
 
 const FigureImage = Node.create({
@@ -195,7 +226,7 @@ function uploadImageToStorage(dataUrl) {
 function createWebPDataUrl(file, quality = 0.72, maxWidth = 1600, maxHeight = 1200) {
     return new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
-        const image = new Image();
+        const image = new NativeImage();
         image.onload = () => {
             try {
                 const canvas = document.createElement("canvas");
@@ -261,6 +292,7 @@ const el = {
     viewWrite: $("view-write"),
     viewPreview: $("view-preview"),
     cmdMenu: $("editor-command-menu"),
+    inlineImageInput: $("inline_image_input"),
 };
 
 /* ==========================================================================
@@ -277,7 +309,9 @@ function makeEditor() {
             }),
             Underline,
             Link,
-            Image,
+            TiptapImage,
+            Figure,
+            FigureCaption,
             TextAlign.configure({ types: ["heading", "paragraph"] }),
             Placeholder.configure({
                 placeholder: "Write your story...",
@@ -382,11 +416,15 @@ function promptForLink() {
 
 /* Inline images from the toolbar: upload then insert a figure w/ caption */
 function pickAndInsertImage() {
-    if (!el.deviceImage) return;
-    el.deviceImage.value = "";
-    el.deviceImage.click();
-    el.deviceImage.onchange = async () => {
-        const file = el.deviceImage.files && el.deviceImage.files[0];
+    if (!el.inlineImageInput) return;
+    el.inlineImageInput.value = "";
+    el.inlineImageInput.click();
+}
+
+// Set up the inline image input handler (separate from the cover image input)
+if (el.inlineImageInput) {
+    el.inlineImageInput.addEventListener("change", async () => {
+        const file = el.inlineImageInput.files && el.inlineImageInput.files[0];
         if (!file) return;
         if (!file.type.startsWith("image/")) {
             notify({ type: "warning", title: "Invalid file", text: "Please choose an image file." });
@@ -412,7 +450,7 @@ function pickAndInsertImage() {
             console.error(error);
             notify({ type: "error", title: "Image Error", text: "This image could not be processed. Please try another one." });
         }
-    };
+    });
 }
 
 /* ==========================================================================
@@ -722,10 +760,11 @@ async function ensureCoverUploaded() {
 
 function getPayload(published) {
     const title = (el.title && el.title.value.trim()) || "";
+    const subtitle = (el.subtitle && el.subtitle.value.trim()) || null;
     const body = editor ? JSON.stringify(editor.getJSON()) : "";
     const image_url = el.imageUrl ? (el.imageUrl.value || "").trim() || null : null;
     const category = el.category ? (el.category.value || "").trim() || null : null;
-    return { title, body, body_format: "tiptap", image_url, category, published };
+    return { title, subtitle, body, body_format: "tiptap", image_url, category, published };
 }
 
 async function submitArticle(published) {
@@ -757,6 +796,7 @@ async function submitArticle(published) {
 
         const payload = {
             title,
+            subtitle: (el.subtitle && el.subtitle.value.trim()) || null,
             body: editor ? JSON.stringify(editor.getJSON()) : "",
             body_format: "tiptap",
             image_url,
@@ -764,8 +804,9 @@ async function submitArticle(published) {
             published,
         };
 
-        const response = await fetch(`${API_URL}/blog/${MODE === "edit" ? BLOG_ID + "" : ""}`, {
-            method: MODE === "edit" ? "PUT" : "POST",
+        const isEdit = MODE === "edit";
+        const response = await fetch(`${API_URL}/blog/${isEdit ? BLOG_ID + "" : ""}`, {
+            method: isEdit ? "PUT" : "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify(payload),
         });
@@ -773,7 +814,12 @@ async function submitArticle(published) {
 
         if (response.ok) {
             await notify({ type: "success", title: published ? "Published!" : "Draft saved", text: published ? "Your article is now live." : "Your draft has been saved." });
-            window.location.href = MODE === "edit" ? "/user" : "/user";
+            // Edit → go to the published blog page; new publish → go to public blog listing
+            if (published) {
+                window.location.href = isEdit ? `/blogs/${BLOG_ID}` : "/blog";
+            } else {
+                window.location.href = "/user";
+            }
             return true;
         }
         if (response.status === 401) {
@@ -953,7 +999,7 @@ async function loadExisting() {
         }
         const blog = await res.json();
         if (el.title) el.title.value = blog.title || "";
-        if (el.subtitle) el.subtitle.value = ""; // subtitle reserved for future use
+        if (el.subtitle) el.subtitle.value = blog.subtitle || "";
         if (el.category) el.category.value = blog.category || "";
         if (el.bylineName) el.bylineName.textContent = blog.creator?.name || "Lumora Writer";
         if (el.bylineDate) {

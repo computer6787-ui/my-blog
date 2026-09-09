@@ -6,6 +6,7 @@ from typing import Optional
 
 class Blog(BaseModel):
     title: str
+    subtitle: Optional[str] = None
     body: str
     body_format: Optional[str] = None
     image_url: Optional[str] = None
@@ -20,6 +21,7 @@ class Blog(BaseModel):
 class BlogSummary(BaseModel):
     id: int
     title: str
+    subtitle: Optional[str] = None
     body: str
     body_format: Optional[str] = None
     image_url: Optional[str] = None
@@ -28,6 +30,16 @@ class BlogSummary(BaseModel):
     created_at: Optional[datetime] = None
     likes_count: int = 0
     comments_count: int = 0
+
+    @field_validator("body", mode="before")
+    @classmethod
+    def truncate_body(cls, v):
+        if isinstance(v, str):
+            if v.lstrip().startswith(("[", "{")):
+                v = tiptap_json_to_text(v)
+            if len(v) > 400:
+                return v[:400]
+        return v
 
     class Config:
         from_attributes = True
@@ -125,6 +137,7 @@ class BlogCreator(BaseModel):
 class ShowBlog(BaseModel):
     id: int
     title: str
+    subtitle: Optional[str] = None
     body: str
     body_format: Optional[str] = None
     image_url: Optional[str] = None
@@ -182,6 +195,7 @@ class BlogCardResponse(BaseModel):
     to plain text so keyword search and card excerpts never leak JSON."""
     id: int
     title: str
+    subtitle: Optional[str] = None
     body: str
     body_format: Optional[str] = None
     image_url: Optional[str] = None
@@ -301,6 +315,7 @@ class CommentResponse(BaseModel):
 class BlogDetailResponse(BaseModel):
     id: int
     title: str
+    subtitle: Optional[str] = None
     body: str
     body_format: Optional[str] = None
     image_url: Optional[str] = None
