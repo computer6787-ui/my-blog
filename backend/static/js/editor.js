@@ -399,19 +399,74 @@ function runCmd(btn) {
     }
 }
 
+/* --- Link dialog (themed replacement for window.prompt) --- */
+let linkDialogEl = null, linkApplyBtn, linkCancelBtn;
+
+function buildLinkDialog() {
+    linkDialogEl = document.createElement("div");
+    linkDialogEl.className = "link-dialog-overlay hidden";
+    linkDialogEl.innerHTML = `
+      <div class="link-dialog-panel">
+        <h3>Insert link</h3>
+        <input type="url" class="link-dialog-input" placeholder="https://example.com" autocomplete="off" />
+        <div class="link-dialog-actions">
+          <button type="button" class="btn-link-remove hidden" data-action="remove">Remove link</button>
+          <button type="button" class="btn-cancel" data-action="cancel">Cancel</button>
+          <button type="button" class="publish-button" data-action="apply">Apply</button>
+        </div>
+      </div>`;
+    document.body.appendChild(linkDialogEl);
+    linkApplyBtn  = linkDialogEl.querySelector('[data-action="apply"]');
+    linkCancelBtn = linkDialogEl.querySelector('[data-action="cancel"]');
+}
+
 function promptForLink() {
     if (!editor) return;
     const previous = editor.getAttributes("link");
     const href = previous.href || "";
-    const url = window.prompt("Paste a link URL:", href);
-    if (url === null) return;
-    if (url === "") {
-        editor.chain().focus().extendMarkRange("link").unsetLink().run();
-        return;
+    const isEdit = !!href;
+
+    if (!linkDialogEl) buildLinkDialog();
+
+    const input     = linkDialogEl.querySelector(".link-dialog-input");
+    const removeBtn = linkDialogEl.querySelector(".btn-link-remove");
+    const title     = linkDialogEl.querySelector("h3");
+
+    title.textContent = isEdit ? "Edit link" : "Insert link";
+    input.value = href;
+    removeBtn.classList.toggle("hidden", !isEdit);
+    linkDialogEl.classList.remove("hidden");
+    setTimeout(() => { input.focus(); input.select(); }, 50);
+
+    /* ---- wiring (rebuilt each open to avoid stale closures) ---- */
+    function close()  { linkDialogEl.classList.add("hidden"); teardown(); }
+    function teardown() {
+        input.removeEventListener("keydown", onKey);
+        linkApplyBtn.removeEventListener("click", apply);
+        linkCancelBtn.removeEventListener("click", cancel);
+        removeBtn.removeEventListener("click", remove);
+        linkDialogEl.removeEventListener("click", onOverlay);
     }
-    let clean = (url || "").trim();
-    if (clean && !/^https?:\/\//i.test(clean) && !/^mailto:/i.test(clean)) clean = `https://${clean}`;
-    editor.chain().focus().extendMarkRange("link").setLink({ href: clean, target: "_blank", rel: "noopener" }).run();
+    function onKey(e)  { if (e.key === "Enter") { e.preventDefault(); apply(); } if (e.key === "Escape") cancel(); }
+    function onOverlay(e) { if (e.target === linkDialogEl) cancel(); }
+
+    function apply() {
+        const raw = input.value.trim();
+        close();
+        if (raw === "") { editor.chain().focus().extendMarkRange("link").unsetLink().run(); return; }
+        let clean = raw;
+        if (!/^https?:\/\//i.test(clean) && !/^mailto:/i.test(clean)) clean = `https://${clean}`;
+        editor.chain().focus().extendMarkRange("link").setLink({ href: clean, target: "_blank", rel: "noopener" }).run();
+    }
+
+    function remove() { close(); editor.chain().focus().extendMarkRange("link").unsetLink().run(); }
+    function cancel() { close(); }
+
+    input.addEventListener("keydown", onKey);
+    linkApplyBtn.addEventListener("click", apply);
+    linkCancelBtn.addEventListener("click", cancel);
+    removeBtn.addEventListener("click", remove);
+    linkDialogEl.addEventListener("click", onOverlay);
 }
 
 /* Inline images from the toolbar: upload then insert a figure w/ caption */

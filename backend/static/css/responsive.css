@@ -414,3 +414,126 @@
         margin-left: 1rem;
     }
 }
+
+/* ==========================================================================
+   EDITOR — MOBILE REFINEMENTS
+   Appended last so these phone rules win the cascade for small screens
+   without altering anything above 600px. Every rule lives inside a mobile
+   media query: the desktop editor (≥601px) is pixel-for-pixel untouched.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+    /* -------- Top bar: clean two-row layout, actions never wrap -------- */
+    .editor-topbar {
+        padding: 0.75rem 0 0.55rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .editor-topbar-left {
+        width: 100%;
+    }
+
+    .editor-topbar-actions {
+        width: 100%;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 0.4rem;
+    }
+
+    /* View toggle stays left; Save / Publish group right. Gap left by
+       margin-right:auto absorbs slack instead of wrapping a button out of
+       the row on narrow screens (esp. edit mode's longer "Save Changes"). */
+    .editor-topbar-actions .editor-view-toggle {
+        margin-right: auto;
+        flex-shrink: 0;                /* hold natural width so "Preview" never clips */
+    }
+
+    .editor-topbar-actions .editor-view-toggle button {
+        min-height: 40px;
+        padding: 0 0.55rem;
+        font-size: 0.76rem;
+        white-space: nowrap;
+    }
+
+    .editor-topbar-actions .btn-editor {
+        flex: 0 1 auto;                 /* allow shrink on narrow screens so the row
+                                           never overflows the viewport */
+        min-height: 40px;
+        min-width: 0;
+        padding: 0 0.6rem;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .editor-topbar-actions .btn-editor-primary { padding: 0 0.7rem; }
+
+    /* -------- Toolbar: compact, primary controls first, internal scroll -------- */
+    .editor-toolbar {
+        margin: 1rem 0 1.4rem;
+        overscroll-behavior-x: contain;     /* swiping the toolbar must not drag the page */
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;              /* invisible scrollbar, flat editorial look */
+    }
+
+    .editor-toolbar::-webkit-scrollbar {
+        display: none;
+        height: 0;
+    }
+
+    /* Secondary alignment group (and its divider) moves to the END of the
+       scroll row so the essentials stay visible first: Bold/Italic/Underline
+       → block type → lists/quote → link/image → undo/redo → align. */
+    .editor-toolbar > :nth-child(7) { order: 10; }  /* align-left/center/right */
+    .editor-toolbar > :nth-child(8) { order: 11; }  /* separator after align */
+
+    /* Slightly larger touch targets than the 26px cutdown, still a single
+       compact row — no growth in toolbar height. */
+    .editor-toolbar .tt-btn {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 4px;
+    }
+
+    /* -------- Writing canvas: content stays the hero, tighten gaps -------- */
+    .editor-main,
+    .editor-canvas {
+        min-width: 0;                       /* break the flex min-content chain so the
+                                               toolbar's overflow-x:auto can take over and
+                                               the page never scrolls horizontally */
+    }
+
+    .editor-main {
+        overflow-x: clip;                   /* belt-and-suspenders: never a page-level
+                                               horizontal scroll, without breaking the
+                                               toolbar's position:sticky (unlike hidden) */
+        padding-bottom: 2.5rem;             /* less dead space above the footer */
+    }
+
+    .editor-canvas { padding-bottom: 1.25rem; }
+
+    .editor-byline {
+        margin-top: 0.8rem;
+        padding-bottom: 1.1rem;
+    }
+
+    .editor-prose {
+        margin-top: 1rem;
+        min-height: 300px;
+    }
+
+    .editor-preview {
+        margin-top: 1rem;
+        min-height: 300px;
+    }
+
+    /* Link dialog — tighter on phones */
+    .link-dialog-panel { padding: 1rem; }
+    .link-dialog-actions { gap: 0.4rem; }
+    .link-dialog-actions .publish-button { flex: 1; justify-content: center; min-height: 40px; }
+    .link-dialog-actions .btn-cancel { min-height: 40px; }
+    .btn-link-remove { min-height: 40px; }
+}

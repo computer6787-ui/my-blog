@@ -71,12 +71,15 @@
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    background: transparent;
+    width: auto !important;
+    padding: 3px !important;
+    border-radius: 0 !important;
+    background: transparent !important;
     border: none;
-    color: var(--muted);
+    color: var(--primary-deep) !important;
     font-size: 1rem;
+    margin-top: 0 !important;
     cursor: pointer;
-    padding: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -92,17 +95,6 @@
 
 .password-container input[type="text"] + .password-toggle .eye-open { display: none; }
 .password-container input[type="text"] + .password-toggle .eye-closed { display: block; }
-
-.input-group.password-container {
-    position: relative;
-}
-
-.input-group.password-container > .password-toggle {
-    position: absolute;
-    right: 10px;
-    top: calc(100% - 10px);
-    transform: translateY(-50%);
-}
 
 .auth-links {
     display: flex;

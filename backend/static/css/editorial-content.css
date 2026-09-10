@@ -149,6 +149,12 @@
 .editor-prose ol {
     margin: 0 0 1.4rem;
     padding-left: 1.4rem;
+    list-style-type: disc;
+}
+
+.article-prose ol,
+.editor-prose ol {
+    list-style-type: decimal;
 }
 
 .article-prose li,
@@ -193,6 +199,7 @@
 /* -------- Horizontal rule / section divider -------- */
 .article-prose hr,
 .editor-prose hr {
+    display: block;
     border: none;
     text-align: center;
     margin: 3rem auto;
