@@ -9,7 +9,7 @@
 
 {% block extra_head %}
 <link rel="preload" as="image" href="/static/images/sakura/hero-scene-bg.webp" fetchpriority="high">
-<link rel="stylesheet" href="{{ url_for('static', path='css/home.css') }}?v=20260909e">
+<link rel="stylesheet" href="{{ url_for('static', path='css/home.css') }}?v=20260910c">
 {% endblock %}
 
 {% block content %}
@@ -55,11 +55,29 @@
 </section>
 
 <!-- ===== BECOME AN AUTHOR CTA ===== -->
-<div class="home-author-cta reveal-pop">
+<div class="home-cta-banner reveal-pop">
     <img data-src="/static/images/become_an_author_bg.png" alt="" loading="lazy" class="lazy-bg">
-    <div class="home-author-cta-content">
+    <div class="home-cta-banner-content">
         <h2>Become an Author</h2>
         <a href="/create-blog" class="hero-btn hero-btn-primary">Start Your Story</a>
+    </div>
+</div>
+
+<!-- ===== OR divider between CTAs ===== -->
+<div class="home-cta-separator reveal">
+    <svg class="home-cta-ring" viewBox="0 0 260 190" aria-hidden="true" focusable="false">
+        <path d="M 233 96 C 233 135, 196 165, 132 165 C 64 165, 27 134, 28 94 C 29 53, 69 24, 131 25 C 193 26, 232 55, 232 96 C 232 105, 228 111, 223 114"
+              fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>OR</span>
+</div>
+
+<!-- ===== EXPLORE STORIES CTA ===== -->
+<div class="home-cta-banner reveal-rise">
+    <img data-src="/static/images/explore_stories_bg.webp" alt="" loading="lazy" class="lazy-bg">
+    <div class="home-cta-banner-content">
+        <h2>Explore Stories</h2>
+        <a href="/blog" class="hero-btn hero-btn-primary">Discover Stories</a>
     </div>
 </div>
 
@@ -219,7 +237,8 @@
 
     var selectors = [
         '.reveal',
-        '.reveal-pop'
+        '.reveal-pop',
+        '.reveal-rise'
     ].join(',');
 
     var elements = document.querySelectorAll(selectors);

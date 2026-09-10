@@ -5,8 +5,8 @@ import {
   Globe,
   ArrowLeft,
   Send,
-  Smile,
-  Paperclip,
+  ImagePlus,
+  X,
   Volume2,
   VolumeX,
   Hash,
@@ -16,8 +16,6 @@ import { UserAvatar } from './UserAvatar';
 import { RoleBadge } from './RoleBadge';
 import { MessageBubble } from './MessageBubble';
 import type { ChatUser } from '../types';
-
-const QUICK_EMOJIS = ['👋', '🔥', '❤️', '👏', '🎉', '💡', '🚀', '✨', '👍', '😊'];
 
 type SidebarTab = 'conversations' | 'directory';
 
@@ -49,17 +47,23 @@ export const ChatPage: React.FC = () => {
 
   // Global chat input
   const [globalInputVal, setGlobalInputVal] = useState('');
-  const [showGlobalEmoji, setShowGlobalEmoji] = useState(false);
   const globalMessagesEndRef = useRef<HTMLDivElement>(null);
   const globalScrollRef = useRef<HTMLDivElement>(null);
 
   // Direct chat input
   const [directInputVal, setDirectInputVal] = useState('');
-  const [showDirectEmoji, setShowDirectEmoji] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const directMessagesEndRef = useRef<HTMLDivElement>(null);
-  const directFileInputRef = useRef<HTMLInputElement>(null);
+  const globalInputRef = useRef<HTMLTextAreaElement>(null);
+  const directInputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guards send-with-preview against re-entry while an upload is in flight
+  const isUploadSenderRef = useRef(false);
+
+  // Photo preview (shared — only one chat view is active at a time)
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Fetch directory users
   useEffect(() => {
@@ -156,17 +160,97 @@ export const ChatPage: React.FC = () => {
     directMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeChatHistory]);
 
-  // --- Global Chat Handlers ---
-  const handleGlobalSend = () => {
-    const trimmed = globalInputVal.trim();
-    if (!trimmed) return;
-    sendGlobalMessage(trimmed);
+  // Auto-resize textarea: grows up to 3 lines then scrolls
+  const autoResize = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    const lineHeight = 24; // approx line-height for text-sm
+    const maxH = lineHeight * 3;
+    el.style.height = Math.min(el.scrollHeight, maxH) + 'px';
+    el.style.overflowY = el.scrollHeight > maxH ? 'auto' : 'hidden';
+  };
+
+  const handleGlobalInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setGlobalInputVal(e.target.value);
+    autoResize(e.target);
+  };
+
+  const resetGlobalInput = () => {
     setGlobalInputVal('');
-    setShowGlobalEmoji(false);
+    if (globalInputRef.current) {
+      globalInputRef.current.style.height = 'auto';
+      globalInputRef.current.style.overflowY = 'hidden';
+    }
+  };
+
+  // --- Photo preview helpers ---
+  const clearPreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Only allow images for preview
+    if (!file.type.startsWith('image/')) {
+      alert('Only image files can be previewed.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+    clearPreview();
+    const url = URL.createObjectURL(file);
+    setPreviewFile(file);
+    setPreviewUrl(url);
+  };
+
+  const handleSendWithPreview = async (text: string) => {
+    if (!previewFile || isUploadSenderRef.current) return;
+    isUploadSenderRef.current = true;
+    try {
+      setIsUploading(true);
+      const res = await uploadFile(previewFile);
+      if (activeRecipient) {
+        sendPrivateMessage(activeRecipient.id, res.url);
+        // Also send the text as a follow-up message if present
+        if (text) {
+          sendPrivateMessage(activeRecipient.id, text);
+        }
+      } else if (showGlobalChat) {
+        sendGlobalMessage(res.url);
+        if (text) {
+          sendGlobalMessage(text);
+        }
+      }
+      clearPreview();
+    } catch (err: any) {
+      alert(err.message || 'Image upload failed');
+    } finally {
+      setIsUploading(false);
+      isUploadSenderRef.current = false;
+    }
+  };
+
+  // --- Global Chat Handlers ---
+  const handleGlobalSend = async () => {
+    const trimmed = globalInputVal.trim();
+    if (previewFile) {
+      await handleSendWithPreview(trimmed);
+    } else {
+      if (!trimmed) return;
+      // Clear input FIRST so the send button disables immediately
+      resetGlobalInput();
+      sendGlobalMessage(trimmed);
+      setTimeout(() => globalMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+      return;
+    }
+    resetGlobalInput();
     setTimeout(() => globalMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
   };
 
-  const handleGlobalKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleGlobalKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleGlobalSend();
@@ -174,23 +258,38 @@ export const ChatPage: React.FC = () => {
   };
 
   // --- Direct Chat Handlers ---
-  const handleDirectSend = () => {
+  const handleDirectSend = async () => {
     const trimmed = directInputVal.trim();
-    if (!trimmed || !activeRecipient) return;
-    sendPrivateMessage(activeRecipient.id, trimmed);
-    sendTypingStatus(activeRecipient.id, false);
-    setDirectInputVal('');
-    setShowDirectEmoji(false);
+    if (previewFile) {
+      await handleSendWithPreview(trimmed);
+    } else {
+      if (!trimmed || !activeRecipient) return;
+      // Clear input FIRST so the send button disables immediately and
+      // prevents double-click from sending the same text twice.
+      resetDirectInput();
+      sendPrivateMessage(activeRecipient.id, trimmed);
+      sendTypingStatus(activeRecipient.id, false);
+      return; // already called resetDirectInput above
+    }
+    resetDirectInput();
   };
 
-  const handleDirectKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const resetDirectInput = () => {
+    setDirectInputVal('');
+    if (directInputRef.current) {
+      directInputRef.current.style.height = 'auto';
+      directInputRef.current.style.overflowY = 'hidden';
+    }
+  };
+
+  const handleDirectKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleDirectSend();
     }
   };
 
-  const handleDirectInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDirectInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDirectInputVal(e.target.value);
     if (activeRecipient) {
       sendTypingStatus(activeRecipient.id, true);
@@ -198,21 +297,6 @@ export const ChatPage: React.FC = () => {
       typingTimerRef.current = setTimeout(() => {
         sendTypingStatus(activeRecipient.id, false);
       }, 2000);
-    }
-  };
-
-  const handleDirectFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !activeRecipient) return;
-    try {
-      setIsUploading(true);
-      const res = await uploadFile(file);
-      sendPrivateMessage(activeRecipient.id, res.url);
-    } catch (err: any) {
-      alert(err.message || 'File upload failed');
-    } finally {
-      setIsUploading(false);
-      if (directFileInputRef.current) directFileInputRef.current.value = '';
     }
   };
 
@@ -235,13 +319,14 @@ export const ChatPage: React.FC = () => {
 
   // --- Render ---
   return (
-    <div className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-40 flex bg-page text-primary overflow-hidden flex-col sm:flex-row">
+    <div className="fixed inset-x-0 bottom-0 top-[var(--navbar-height)] z-40 flex bg-page text-primary overflow-hidden flex-col sm:flex-row"
+         style={{ marginTop: 0 }}>
       {/* ===== Sidebar (always visible on desktop) ===== */}
       <aside className={`${
-        activeRecipient || showGlobalChat ? 'hidden md:flex' : 'flex'
-      } w-full md:w-80 lg:w-[340px] flex-1 min-h-0 md:flex-none flex flex-col border-r border-subtle bg-card`}>
+        activeRecipient || showGlobalChat ? 'hidden show-on-desktop' : 'flex'
+      } w-full md:w-[20rem] lg:w-[340px] flex-1 min-h-0 md:flex-none flex flex-col border-r border-subtle bg-card`}>
         {/* Sidebar Header */}
-        <div className="px-4 pt-5 pb-3">
+        <div className="px-4 pt-4 pb-3">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-blossom-600 shadow-sm">
@@ -418,31 +503,31 @@ export const ChatPage: React.FC = () => {
       </aside>
 
       {/* ===== Main Chat Area ===== */}
-      <main className={`${
-        activeRecipient || showGlobalChat ? 'flex' : 'hidden md:flex'
+      <div className={`${
+        activeRecipient || showGlobalChat ? 'flex' : 'hidden show-on-desktop'
       } flex-1 min-h-0 flex-col min-w-0 bg-page`}>
         {showGlobalChat ? (
           /* ---- Global Chat View ---- */
           <>
             {/* Global Header */}
-            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-subtle bg-card">
-              <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-b border-subtle bg-card">
+              <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => {
                     setShowGlobalChat(false);
                   }}
                   className="p-2 rounded-lg text-muted hover:text-primary hover:bg-elevated transition-colors"
                 >
-                  <ArrowLeft className="w-5 h-5" />
+                  <ArrowLeft className="w-4.5 h-4.5" />
                 </button>
-                <div className="p-2 rounded-xl bg-green-500/20">
-                  <Globe className="w-4.5 h-4.5 text-green-400" />
+                <div className="p-1.5 rounded-xl bg-green-500/20">
+                  <Globe className="w-4 h-4 text-green-400" />
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-primary">Global Chat</h2>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse-dot" />
-                    <span className="text-[11px] text-muted">{onlineCount} online</span>
+                    <span className="text-[10px] text-muted">{onlineCount} online</span>
                   </div>
                 </div>
               </div>
@@ -451,8 +536,9 @@ export const ChatPage: React.FC = () => {
             {/* Global Messages */}
             <div
               ref={globalScrollRef}
-              className="flex-1 overflow-y-auto min-w-0 px-4 py-4 sm:px-5 sm:py-5 scroller-thin space-y-4"
+              className="flex-1 overflow-y-auto min-w-0 py-4 sm:py-5 scroller-thin"
             >
+              <div className="px-6 sm:px-10 space-y-4">
               {globalMessages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
                   <div className="p-4 rounded-2xl bg-elevated mb-4">
@@ -481,51 +567,60 @@ export const ChatPage: React.FC = () => {
                 })
               )}
               <div ref={globalMessagesEndRef} />
+              </div>
             </div>
 
             {/* Global Input */}
             <div className="px-4 py-3 border-t border-subtle bg-card">
-              {showGlobalEmoji && (
-                <div className="mb-2 px-2 py-1.5 flex items-center gap-1 overflow-x-auto scroller-thin">
-                  {QUICK_EMOJIS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      onClick={() => {
-                        setGlobalInputVal((p) => p + emoji);
-                        setShowGlobalEmoji(false);
-                      }}
-                      className="p-1.5 text-xl hover:bg-hover rounded-lg transition-colors"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+              {previewUrl && (
+                <div className="mb-2 relative inline-block">
+                  <img src={previewUrl} alt="Preview" className="h-16 rounded-lg object-cover border border-subtle" />
+                  <button onClick={clearPreview} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors shadow-sm">
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowGlobalEmoji(!showGlobalEmoji)}
-                  className="p-2.5 rounded-xl text-muted hover:text-blossom-400 hover:bg-elevated transition-colors"
-                >
-                  <Smile className="w-5 h-5" />
-                </button>
+              <div className="flex items-end gap-2">
                 <input
-                  type="text"
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-muted hover:text-blossom-400 hover:bg-elevated disabled:opacity-30 transition-all flex-shrink-0"
+                >
+                  <ImagePlus className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
+                </button>
+                <textarea
+                  ref={globalInputRef}
+                  rows={1}
                   value={globalInputVal}
-                  onChange={(e) => setGlobalInputVal(e.target.value)}
+                  onChange={handleGlobalInputChange}
                   onKeyDown={handleGlobalKeyDown}
                   placeholder={
                     currentUser
                       ? `Message as ${currentUser.name}...`
                       : 'Join the conversation...'
                   }
-                  className="flex-1 bg-elevated text-primary px-4 py-2.5 rounded-xl text-sm border border-subtle focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-muted transition-all"
+                  className="flex-1 bg-elevated text-primary px-5 py-2.5 rounded-xl text-sm border border-subtle focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-muted transition-all resize-none overflow-hidden leading-6"
+                  style={{ minHeight: '42px', maxHeight: '72px' }}
                 />
                 <button
                   onClick={handleGlobalSend}
-                  disabled={!globalInputVal.trim()}
-                  className="p-2.5 rounded-xl bg-blossom-600 text-inverse hover:bg-blossom-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                  disabled={isUploading || (!globalInputVal.trim() && !previewFile)}
+                  className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+                  style={{
+                    background: (globalInputVal.trim() || previewFile)
+                      ? 'linear-gradient(135deg, #C77B91 0%, #a2526b 100%)'
+                      : undefined,
+                    backgroundColor: (globalInputVal.trim() || previewFile) ? undefined : 'var(--bg-elevated)',
+                  }}
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4.5 h-4.5 sm:w-5 sm:h-5" style={{ color: (globalInputVal.trim() || previewFile) ? '#F2F1ED' : 'var(--text-muted)' }} />
                 </button>
               </div>
             </div>
@@ -534,13 +629,13 @@ export const ChatPage: React.FC = () => {
           /* ---- Direct Chat View ---- */
           <>
             {/* Direct Chat Header */}
-            <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-subtle bg-card">
-              <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-b border-subtle bg-card">
+              <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => setActiveRecipient(null)}
                   className="p-2 rounded-lg text-muted hover:text-primary hover:bg-elevated transition-colors"
                 >
-                  <ArrowLeft className="w-5 h-5" />
+                  <ArrowLeft className="w-4.5 h-4.5" />
                 </button>
                 <a
                   href={`/profile/${activeRecipient.id}`}
@@ -568,7 +663,8 @@ export const ChatPage: React.FC = () => {
             </div>
 
             {/* Direct Messages */}
-            <div className="flex-1 overflow-y-auto min-w-0 px-4 py-4 sm:px-5 sm:py-5 scroller-thin space-y-4">
+            <div className="flex-1 overflow-y-auto min-w-0 py-4 sm:py-5 scroller-thin">
+              <div className="px-6 sm:px-10 space-y-4">
               {activeChatHistory.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
                   <UserAvatar
@@ -617,61 +713,56 @@ export const ChatPage: React.FC = () => {
               )}
 
               <div ref={directMessagesEndRef} />
+              </div>
             </div>
 
             {/* Direct Input */}
             <div className="px-4 py-3 border-t border-subtle bg-card">
-              {showDirectEmoji && (
-                <div className="mb-2 px-2 py-1.5 flex items-center gap-1 overflow-x-auto scroller-thin">
-                  {QUICK_EMOJIS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      onClick={() => {
-                        setDirectInputVal((p) => p + emoji);
-                        setShowDirectEmoji(false);
-                      }}
-                      className="p-1.5 text-xl hover:bg-hover rounded-lg transition-colors"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+              {previewUrl && (
+                <div className="mb-2 relative inline-block">
+                  <img src={previewUrl} alt="Preview" className="h-16 rounded-lg object-cover border border-subtle" />
+                  <button onClick={clearPreview} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors shadow-sm">
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-end gap-2">
                 <input
-                  ref={directFileInputRef}
+                  ref={fileInputRef}
                   type="file"
                   className="hidden"
-                  accept="image/*,.pdf,.txt,.zip"
-                  onChange={handleDirectFileUpload}
+                  accept="image/*"
+                  onChange={handleFileSelect}
                 />
                 <button
-                  onClick={() => directFileInputRef.current?.click()}
+                  onClick={() => fileInputRef.current?.click()}
                   disabled={isUploading}
-                  className="p-2.5 rounded-xl text-muted hover:text-blossom-400 hover:bg-elevated disabled:opacity-30 transition-colors"
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-muted hover:text-blossom-400 hover:bg-elevated disabled:opacity-30 transition-all flex-shrink-0"
                 >
-                  <Paperclip className="w-5 h-5" />
+                  <ImagePlus className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                 </button>
-                <button
-                  onClick={() => setShowDirectEmoji(!showDirectEmoji)}
-                  className="p-2.5 rounded-xl text-muted hover:text-blossom-400 hover:bg-elevated transition-colors"
-                >
-                  <Smile className="w-5 h-5" />
-                </button>
-                <input
-                  type="text"
+                <textarea
+                  ref={directInputRef}
+                  rows={1}
                   value={directInputVal}
-                  onChange={handleDirectInputChange}
+                  onChange={(e) => { handleDirectInputChange(e); autoResize(e.target); }}
                   onKeyDown={handleDirectKeyDown}
                   placeholder={`Message ${activeRecipient.name}...`}
-                  className="flex-1 bg-elevated text-primary px-4 py-2.5 rounded-xl text-sm border border-subtle focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-muted transition-all"
+                  className="flex-1 bg-elevated text-primary px-5 py-2.5 rounded-xl text-sm border border-subtle focus:outline-none focus:border-blossom-500/50 focus:ring-1 focus:ring-blossom-500/25 placeholder:text-muted transition-all resize-none overflow-hidden leading-6"
+                  style={{ minHeight: '42px', maxHeight: '72px' }}
                 />
                 <button
                   onClick={handleDirectSend}
-                  disabled={!directInputVal.trim()}
-                  className="p-2.5 rounded-xl bg-blossom-600 text-inverse hover:bg-blossom-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                  disabled={isUploading || (!directInputVal.trim() && !previewFile)}
+                  className="flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
+                  style={{
+                    background: (directInputVal.trim() || previewFile)
+                      ? 'linear-gradient(135deg, #C77B91 0%, #a2526b 100%)'
+                      : undefined,
+                    backgroundColor: (directInputVal.trim() || previewFile) ? undefined : 'var(--bg-elevated)',
+                  }}
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4.5 h-4.5 sm:w-5 sm:h-5" style={{ color: (directInputVal.trim() || previewFile) ? '#F2F1ED' : 'var(--text-muted)' }} />
                 </button>
               </div>
             </div>
@@ -697,7 +788,7 @@ export const ChatPage: React.FC = () => {
             </button>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };

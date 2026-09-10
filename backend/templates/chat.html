@@ -3,9 +3,30 @@
 {% block title %}Chat - Lumora{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Chat page: the ChatPage component uses position:fixed to fill the
+       viewport below the navbar, so the base template's <main> padding,
+       width constraint, and the footer are all unnecessary — hide them to
+       prevent dead space and the gap below the navbar. */
+    main {
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        min-height: 0 !important;
+    }
+    .footer {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- The chat UI is rendered client-side by the chat bundle (ChatPage). -->
 {% endblock %}
+
+{% block footer %}{% endblock %}
 
 {% block scripts %}
 <script type="module" src="{{ url_for('static', path='js/index.js') }}?v=20260908"></script>

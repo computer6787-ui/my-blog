@@ -42,10 +42,54 @@
     transform: scale(1);
 }
 
+/* Rise-in — smooth transition for stacked feature banners (Explore Stories).
+   Complements the Become an Author pop above: the banner rises from below,
+   the background image slowly settles into place (subtle Ken Burns zoom),
+   and the text layers in with a soft stagger — like a gentle page turn. */
+.reveal-rise {
+    opacity: 0;
+    transform: translateY(44px);
+    transition:
+        opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-rise img {
+    transform: scale(1.12);
+    transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.reveal-rise .home-cta-banner-content {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+        opacity 0.9s ease 0.15s,
+        transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+
+.reveal-rise.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-rise.visible img {
+    transform: scale(1);
+}
+
+.reveal-rise.visible .home-cta-banner-content {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
     .reveal,
-    .reveal-pop {
+    .reveal-pop,
+    .reveal-rise,
+    .reveal-rise img,
+    .reveal-rise .home-cta-banner-content {
         opacity: 1;
         transform: none;
         transition: none;

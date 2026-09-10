@@ -53,12 +53,20 @@
         grid-template-columns: 1fr;
     }
 
-    .photo-cta,
-    .home-author-cta {
+    .photo-cta {
         border-radius: 0;
         margin-left: calc(-1 * clamp(1.2rem, 3vw, 2.5rem));
         margin-right: calc(-1 * clamp(1.2rem, 3vw, 2.5rem));
         width: calc(100% + 2 * clamp(1.2rem, 3vw, 2.5rem));
+    }
+
+    /* Homepage CTAs stay inset on mobile — a slim gap on each side
+       (aligned with the page's content column) instead of stretching
+       edge-to-edge. */
+    .home-cta-banner {
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
     }
 
     /* Single blog reader */

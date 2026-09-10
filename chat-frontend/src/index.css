@@ -324,6 +324,13 @@
 .border-subtle { border-color: var(--border-subtle); }
 .border-glass { border-color: var(--border-glass); }
 
+/* Desktop chat panel visibility — forces display:flex on md+ screens
+   regardless of other utility classes (e.g. Tailwind's `hidden`).
+   Used so the sidebar and main area are always side-by-side on desktop. */
+@media (min-width: 768px) {
+  .show-on-desktop { display: flex !important; }
+}
+
 /* Kinetic typing indicator bounce */
 @keyframes typing-bounce {
   0%, 60%, 100% {

@@ -37,6 +37,21 @@ interface WebSocketContextType {
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
+// Mirrors the backend's sanitize_text() so the optimistic message body and the
+// pending-reconciliation key exactly match what the server echoes back.
+// (html.escape + strip + 4000 char cap). If these differ — whitespace, & < > "
+// — the echo can't be matched and the message renders twice for the sender.
+function sanitizeMessageText(text: string): string {
+  if (!text) return '';
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+  return escaped.trim().slice(0, 4000);
+}
+
 function playNotificationChime() {
   try {
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -92,6 +107,18 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const heartbeatWatchdogRef = useRef<any>(null);
   const lastPongRef = useRef<number>(Date.now());
   const reconnectInProgressRef = useRef(false);
+  // Guard against double-click duplicate sends: maps "recipientId:text" → timestamp
+  const lastSendKeyRef = useRef<Map<string, number>>(new Map());
+  // Tracks optimistic messages that have been sent but not yet acknowledged by the
+  // server echo.  Maps "senderId:recipientId:text" → temp message ID.  When the
+  // server echo arrives we replace the optimistic entry, which is more reliable than
+  // matching by text+timestamp (which breaks if client/server clocks drift).
+  const pendingOptimisticsRef = useRef<Map<string, number>>(new Map());
+  // Monotonic counter for unique NEGATIVE temp IDs.  A timestamp alone
+  // (`-Date.now()`) collides when two messages go out in the same millisecond
+  // (image + follow-up text), and two list items sharing an ID breaks both the
+  // React key and the `findIndex`-by-id reconciliation.
+  const tempIdSeqRef = useRef(0);
 
   // Keep refs in sync with the latest state so the long-lived WebSocket
   // message handler never reads stale values from a captured closure.
@@ -393,19 +420,40 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 // Deduplicate by real ID (incoming echo)
                 if (prev.some((m) => m.id === newMsg.id)) return prev;
 
-                // Reconcile: if sender, replace the temporary optimistic message
-                // (matched by sender_id + message_body + ~same timestamp)
+                // Reconcile: if sender, replace the temporary optimistic message.
+                // Primary lookup: use the pending-optimistics map which is keyed by
+                // "senderId:recipientId:text" → tempId.  This is reliable regardless
+                // of clock drift between client and server.
                 const me = currentUserRef.current;
                 if (me && newMsg.sender_id === me.id) {
-                  const tempIdx = prev.findIndex((m) =>
-                    m.sender_id === me.id &&
-                    m.message_body === newMsg.message_body &&
-                    // match within 2 seconds to avoid false positives
-                    Math.abs(new Date(m.created_at).getTime() - new Date(newMsg.created_at).getTime()) < 2000
-                  );
+                  const lookupKey = `${me.id}:${newMsg.receiver_id}:${newMsg.message_body}`;
+                  const pendingTempId = pendingOptimisticsRef.current.get(lookupKey);
+
+                  let tempIdx = -1;
+                  if (pendingTempId !== undefined) {
+                    tempIdx = prev.findIndex((m) => m.id === pendingTempId);
+                  }
+
+                  // Fallback: match any optimistic temp entry from this sender with
+                  // identical body (covers races where the pending map entry was
+                  // already consumed by an earlier mis-reconcile)
+                  if (tempIdx < 0) {
+                    tempIdx = prev.findIndex((m) =>
+                      m.id < 0 &&
+                      m.sender_id === me.id &&
+                      m.message_body === newMsg.message_body
+                    );
+                  }
+
                   if (tempIdx >= 0) {
                     const updated = [...prev];
                     updated[tempIdx] = newMsg; // replace temp with real message
+                    // Only clear the pending entry once the temp message has actually
+                    // been found+replaced.  If the echo raced past React's state
+                    // flush, keep the entry so a later re-render can still reconcile.
+                    if (pendingTempId !== undefined && prev[tempIdx]?.id === pendingTempId) {
+                      pendingOptimisticsRef.current.delete(lookupKey);
+                    }
                     return updated;
                   }
                 }
@@ -569,28 +617,59 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const sendPrivateMessage = useCallback((recipientId: number, text: string) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
 
+    // Double-click guard: suppress duplicate sends of the same text to the same
+    // recipient within 800 ms.  This is the primary defence against accidental
+    // double-clicks — React state batching means the input may not have cleared
+    // yet when the second click fires.
+    const sendKey = `${recipientId}:${text}`;
+    const now = Date.now();
+    const lastSent = lastSendKeyRef.current.get(sendKey) ?? 0;
+    if (now - lastSent < 800) return;
+    lastSendKeyRef.current.set(sendKey, now);
+    // Evict stale entries after 5 s to avoid unbounded growth
+    for (const [k, t] of lastSendKeyRef.current) {
+      if (now - t > 5000) lastSendKeyRef.current.delete(k);
+    }
+
+    // Sanitize exactly like the backend so the optimistic body matches the echo.
+    // If these differ (whitespace, & < > "), the echo can't be reconciled and the
+    // sender sees the message twice.
+    const cleanText = sanitizeMessageText(text);
+
     // Optimistically add the message to the sender's chat history immediately
     // so they see it without waiting for the backend echo.
     const me = currentUserRef.current;
-    if (me) {
-      const tempId = -Date.now(); // negative temp ID to avoid collision with real DB IDs
+    if (me && cleanText) {
+      // Unique per call — even for image + text sent in the same millisecond.
+      tempIdSeqRef.current += 1;
+      const tempId = -tempIdSeqRef.current;
       const optimisticMsg: PrivateMessage = {
         id: tempId,
         sender_id: me.id,
         receiver_id: recipientId,
-        message_body: text,
+        message_body: cleanText,
         is_read: false,
         created_at: new Date().toISOString(),
         sender_name: me.name,
         sender_avatar: me.profile_picture_url,
       };
 
+      // Register so the echo handler can reliably find and replace this entry.
+      pendingOptimisticsRef.current.set(`${me.id}:${recipientId}:${cleanText}`, tempId);
+
       // Only add if the active chat matches this recipient
       const active = activeRecipientRef.current;
       if (active && active.id === recipientId) {
         setActiveChatHistory((prev) => {
-          // Avoid duplicate if echo arrives almost instantly
-          if (prev.some((m) => m.message_body === text && m.sender_id === me.id && Math.abs(new Date().getTime() - new Date(m.created_at).getTime()) < 500)) return prev;
+          // Avoid duplicates WITHOUT depending on the wall clock (server/client
+          // clocks can be skewed, which breaks timestamp-windowed checks):
+          // 1) the echo already landed as a real DB message → don't add optimistic
+          // 2) an optimistic temp with the same body is already queued → don't add
+          if (
+            prev.some((m) => m.sender_id === me.id && m.message_body === cleanText)
+          ) {
+            return prev;
+          }
           return [...prev, optimisticMsg];
         });
       }
@@ -601,7 +680,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (existingIdx >= 0) {
           const updated = [...prev];
           const conv = { ...updated[existingIdx] };
-          conv.last_message = text;
+          conv.last_message = cleanText;
           conv.last_message_time = optimisticMsg.created_at;
           conv.last_sender_id = me.id;
           updated.splice(existingIdx, 1);

@@ -313,23 +313,27 @@
     white-space: nowrap;
 }
 
-/* ---------- Become an Author CTA ---------- */
+/* ---------- Homepage Banner CTAs (Become an Author / Explore Stories) ---------- */
 
-/* ---------- Become an Author CTA ---------- */
-
-.home-author-cta {
+.home-cta-banner {
     position: relative;
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
     height: clamp(280px, 35vw, 400px);
     overflow: hidden;
+    border-radius: clamp(0.6rem, 1.2vw, 1rem);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.home-author-cta img {
+/* Breathing room between stacked featured banners */
+.home-cta-banner + .home-cta-banner {
+    margin-top: clamp(1.2rem, 3vw, 2.5rem);
+}
+
+.home-cta-banner img {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -338,7 +342,7 @@
     filter: brightness(0.4) saturate(0.5);
 }
 
-.home-author-cta-content {
+.home-cta-banner-content {
     position: relative;
     z-index: 2;
     text-align: center;
@@ -346,7 +350,7 @@
     padding: 1.5rem;
 }
 
-.home-author-cta-content h2 {
+.home-cta-banner-content h2 {
     font-family: 'Bodoni Moda', 'Playfair Display', Georgia, serif;
     font-size: clamp(1.6rem, 3.5vw, 2.2rem);
     font-weight: 400;
@@ -354,14 +358,53 @@
     color: #F2F1ED;
 }
 
-.home-author-cta-content .hero-btn {
+.home-cta-banner-content .hero-btn {
     background: var(--accent);
     color: #F2F1ED !important;
     border: none;
 }
 
-.home-author-cta-content .hero-btn:hover {
+.home-cta-banner-content .hero-btn:hover {
     background: var(--accent-strong);
+}
+
+/* ---------- OR divider between stacked CTA banners ---------- */
+/* A handwritten "OR" between the two CTAs — bold, black, cursive,
+   wrapped in a rough hand-drawn calligraphy ring (SVG). */
+
+.home-cta-separator {
+    align-self: center;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: clamp(0.9rem, 2.5vw, 1.6rem) auto;
+    padding: 0.05em 0.15em 0.1em;
+    font-family: 'Dancing Script', 'Pacifico', cursive;
+    font-size: clamp(2rem, 3.6vw, 2.7rem);
+    font-weight: 700;
+    line-height: 1;
+    color: #000000;
+}
+
+.home-cta-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 2.4em;
+    height: 1.75em;
+    pointer-events: none;
+}
+
+/* Night mode: swap the black "OR" + ring for a warm cream so it stays
+   legible on the dark plum background (light mode stays plain black). */
+body.dark-mode .home-cta-separator {
+    color: #F3EAE4;
+}
+
+body.dark-mode .home-cta-ring path {
+    stroke: #F3EAE4;
 }
 
 /* ===== SHARED HERO COMPONENTS (for other pages) ===== */
