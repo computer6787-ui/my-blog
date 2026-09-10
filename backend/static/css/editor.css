@@ -263,24 +263,78 @@ body.dark-mode .tt-btn.is-active {
     flex-shrink: 0;
 }
 
-/* Heading select */
-.editor-format-select {
+/* Format block-type selector — custom dropdown (replaces native <select>) */
+.format-select-wrap {
+    position: relative;
+}
+
+.format-select-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     height: 30px;
-    border: none;
+    padding: 0 10px 0 8px;
+    border: 1px solid var(--line);
     background: transparent;
     color: var(--text);
     font-size: 0.82rem;
     font-weight: 600;
     border-radius: 2px;
-    padding: 0 20px 0 6px;
     cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237A6F75' stroke-width='1.5' stroke-linecap='round'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 4px center;
+    position: relative;
+    white-space: nowrap;
+    transition: background 0.12s ease, border-color 0.12s ease;
 }
 
-.editor-format-select:focus { outline: none; background-color: var(--primary-soft); }
+.format-select-trigger:hover { background: var(--primary-soft); border-color: var(--card-border-hover); }
+.format-select-trigger:focus { outline: none; background: var(--primary-soft); border-color: var(--accent); }
+
+/* Menu is portalled to <body> via JS — position: fixed, not absolute */
+.format-select-menu {
+    min-width: 160px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    box-shadow: 0 8px 28px rgba(20, 12, 16, 0.14);
+    z-index: 9999;
+    padding: 0.2rem;
+}
+
+.format-select-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem 0.65rem;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    font-size: 0.84rem;
+    font-weight: 500;
+    text-align: left;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background 0.1s ease;
+    white-space: nowrap;
+}
+
+.format-select-option:last-child { border-bottom: none; }
+
+.format-select-option:hover { background: var(--primary-soft); }
+
+.format-select-option.is-active {
+    background: var(--primary-soft);
+    color: var(--accent-strong);
+    font-weight: 700;
+}
+
+.format-select-option.is-active::before {
+    content: "✓";
+    font-size: 0.72rem;
+    margin-left: auto;
+    opacity: 0.7;
+}
 
 /* -------- Editor prose: the writing surface -------- */
 
@@ -288,6 +342,7 @@ body.dark-mode .tt-btn.is-active {
     min-height: 340px;
     outline: none;
     margin-top: 1.5rem;
+    scroll-margin-top: calc(var(--navbar-height) + 60px);
 }
 
 .editor-prose:focus,

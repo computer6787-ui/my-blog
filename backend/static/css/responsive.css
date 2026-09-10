@@ -342,10 +342,10 @@
         height: 13px;
     }
 
-    .editor-format-select {
+    .format-select-trigger {
         font-size: 0.78rem;
-        padding-right: 18px;
-        background-size: 10px;
+        padding: 0 16px 0 6px;
+        height: 28px;
     }
 
     .cover-preview {
@@ -471,17 +471,30 @@
 
     .editor-topbar-actions .btn-editor-primary { padding: 0 0.7rem; }
 
-    /* -------- Toolbar: compact, primary controls first, internal scroll -------- */
+    /* -------- Toolbar: compact, primary controls first, horizontal scroll -------- */
     .editor-toolbar {
-        margin: 1rem 0 1.4rem;
-        overscroll-behavior-x: contain;     /* swiping the toolbar must not drag the page */
+        position: static;                    /* NOT sticky on mobile — don't block content */
+        width: 100%;                         /* lock to parent width so overflow-x works */
+        max-width: 100%;
+        margin: 0.8rem 0 1rem;
+        overscroll-behavior-x: contain;      /* swiping the toolbar must not drag the page */
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;              /* invisible scrollbar, flat editorial look */
-    }
-
-    .editor-toolbar::-webkit-scrollbar {
-        display: none;
-        height: 0;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;                  /* NO vertical scroll — only horizontal */
+        /* Right-edge fade: visible cue that more controls sit off-screen */
+        mask-image: linear-gradient(
+            to right,
+            black 0,
+            black calc(100% - 28px),
+            transparent
+        );
+        -webkit-mask-image: linear-gradient(
+            to right,
+            black 0,
+            black calc(100% - 28px),
+            transparent
+        );
     }
 
     /* Secondary alignment group (and its divider) moves to the END of the
@@ -496,6 +509,13 @@
         min-width: 30px;
         height: 30px;
         padding: 0 4px;
+    }
+
+    /* Format dropdown — compact on mobile */
+    .format-select-trigger {
+        height: 30px;
+        padding: 0 16px 0 6px;
+        font-size: 0.78rem;
     }
 
     /* -------- Writing canvas: content stays the hero, tighten gaps -------- */
@@ -520,9 +540,16 @@
         padding-bottom: 1.1rem;
     }
 
-    .editor-prose {
-        margin-top: 1rem;
-        min-height: 300px;
+    .editor-prose,
+    .editor-prose .ProseMirror {
+        margin-top: 1rem !important;
+        min-height: 200px !important;
+        max-height: clamp(300px, 40vh, 420px) !important;
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 
     .editor-preview {
@@ -536,4 +563,29 @@
     .link-dialog-actions .publish-button { flex: 1; justify-content: center; min-height: 40px; }
     .link-dialog-actions .btn-cancel { min-height: 40px; }
     .btn-link-remove { min-height: 40px; }
+
+    /* ------------------------------------------------------------------
+       EDITOR IMAGES — ensure inserted media never overflows the content
+       column on narrow screens.  Reinforces the editorial-content.css
+       rules with explicit figure-level constraints.
+       ------------------------------------------------------------------ */
+    .editor-prose figure {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .editor-prose figure img {
+        width: 100%;
+        height: auto;
+        max-width: 100%;
+        display: block;
+    }
+
+    /* Wide figures — never wider than the viewport on mobile */
+    .editor-prose figure[data-width="wide"] {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
 }

@@ -360,11 +360,22 @@ function refreshToolbar() {
         if (cmd === "undo" || cmd === "redo") return;
         btn.classList.toggle("is-active", !!active);
     });
-    // Format select
-    const sel = $("editor-format-select");
-    if (sel) {
+    // Format select — custom dropdown
+    const _fmtTrig = document.getElementById("editor-format-trigger");
+    const _fmtMnu = document.getElementById("editor-format-menu");
+    if (_fmtTrig && _fmtMnu) {
         const activeLevel = [1, 2, 3].find((l) => editor.isActive("heading", { level: l }));
-        sel.value = activeLevel ? `h${activeLevel}` : (editor.isActive("bulletList") || editor.isActive("orderedList") ? "list" : "p");
+        const activeValue = activeLevel ? `h${activeLevel}` : (editor.isActive("bulletList") || editor.isActive("orderedList") ? "list" : "p");
+        _fmtMnu.querySelectorAll(".format-select-option").forEach((opt) => {
+            const isActive = opt.dataset.value === activeValue;
+            opt.classList.toggle("is-active", isActive);
+            opt.setAttribute("aria-selected", String(isActive));
+        });
+        const activeOpt = _fmtMnu.querySelector(`.format-select-option[data-value="${activeValue}"]`);
+        if (activeOpt) {
+            const lbl = _fmtTrig.querySelector(".format-select-label");
+            if (lbl) lbl.textContent = activeOpt.textContent;
+        }
     }
 }
 
@@ -945,6 +956,9 @@ function renderPreview() {
     const json = editor.getJSON();
     const html = renderTiptapToHTML(json, { dropcap: true });
     el.preview.innerHTML = html;
+    // Ensure preview inherits all editorial styles (lists, hr, images, etc.)
+    // by carrying the same prose class the reader page uses.
+    el.preview.classList.add("article-prose");
 }
 
 /* Simple JSON→HTML renderer for the editor preview (mirrors reader.js) */
@@ -1127,13 +1141,76 @@ function setupToolbar() {
     document.querySelectorAll("#editor-toolbar [data-cmd]").forEach((btn) => {
         btn.addEventListener("click", () => runCmd(btn));
     });
-    const sel = $("editor-format-select");
-    if (sel) {
-        sel.addEventListener("change", () => {
-            if (!editor) return;
-            const v = sel.value;
-            if (v === "p") editor.chain().focus().setParagraph().run();
-            else if (v.match(/^h[123]$/)) editor.chain().focus().toggleHeading({ level: Number(v.slice(1)) }).run();
+
+    /* --- Custom format dropdown (replaces native <select>) --- */
+    const fmtTrigger = document.getElementById("editor-format-trigger");
+    const fmtMenu = document.getElementById("editor-format-menu");
+    if (fmtTrigger && fmtMenu) {
+        // Move menu to body so no ancestor overflow can clip it
+        document.body.appendChild(fmtMenu);
+
+        function openFormatMenu() {
+            fmtMenu.classList.remove("hidden");
+            fmtTrigger.setAttribute("aria-expanded", "true");
+            // Position relative to trigger
+            const r = fmtTrigger.getBoundingClientRect();
+            fmtMenu.style.position = "fixed";
+            fmtMenu.style.top = (r.bottom + 4) + "px";
+            fmtMenu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 180)) + "px";
+        }
+
+        function closeFormatMenu() {
+            fmtMenu.classList.add("hidden");
+            fmtMenu.style.position = "";
+            fmtMenu.style.top = "";
+            fmtMenu.style.left = "";
+            fmtTrigger.setAttribute("aria-expanded", "false");
+        }
+
+        // Toggle on trigger click
+        fmtTrigger.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!fmtMenu.classList.contains("hidden")) {
+                closeFormatMenu();
+            } else {
+                openFormatMenu();
+            }
+        });
+
+        // Option selection
+        var fmtOptions = fmtMenu.querySelectorAll(".format-select-option");
+        for (var i = 0; i < fmtOptions.length; i++) {
+            (function (opt) {
+                opt.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!editor) return;
+                    var v = opt.getAttribute("data-value");
+                    if (v === "p") editor.chain().focus().setParagraph().run();
+                    else if (v === "h1") editor.chain().focus().toggleHeading({ level: 1 }).run();
+                    else if (v === "h2") editor.chain().focus().toggleHeading({ level: 2 }).run();
+                    else if (v === "h3") editor.chain().focus().toggleHeading({ level: 3 }).run();
+                    closeFormatMenu();
+                });
+            })(fmtOptions[i]);
+        }
+
+        // Close on outside click
+        document.addEventListener("click", function (e) {
+            if (!fmtMenu.classList.contains("hidden")) {
+                if (!fmtMenu.contains(e.target) && e.target !== fmtTrigger) {
+                    closeFormatMenu();
+                }
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && !fmtMenu.classList.contains("hidden")) {
+                closeFormatMenu();
+                fmtTrigger.focus();
+            }
         });
     }
 }
