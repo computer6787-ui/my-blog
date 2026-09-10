@@ -178,9 +178,11 @@
         <span id="global-loader-text">Loading...</span>
     </div>
 
+    {% block footer %}
     <footer>
         {% include "partials/footer.html" %}
     </footer>
+    {% endblock %}
 
     {% block scripts %}
     {% endblock %}

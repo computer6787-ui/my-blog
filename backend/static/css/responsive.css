@@ -147,8 +147,7 @@
 
     .editor-toolbar {
         top: calc(var(--navbar-height) + 0.4rem);
-        overflow-x: auto;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         padding: 0.4rem 0.6rem;
         gap: 1px;
     }
@@ -299,30 +298,6 @@
         padding-bottom: 3rem;
     }
 
-    .editor-topbar-actions {
-        gap: 0.3rem;
-    }
-
-    .editor-stat {
-        display: none;
-    }
-
-    .editor-view-toggle button {
-        padding: 0 0.5rem;
-        font-size: 0.78rem;
-    }
-
-    .btn-editor {
-        min-height: 32px;
-        padding: 0 0.7rem;
-        font-size: 0.8rem;
-    }
-
-    .btn-editor-primary {
-        padding-left: 0.9rem;
-        padding-right: 0.9rem;
-    }
-
     .editor-title-input {
         font-size: clamp(1.4rem, 5vw, 1.8rem);
     }
@@ -424,94 +399,72 @@
 
 @media (max-width: 600px) {
 
-    /* -------- Top bar: clean two-row layout, actions never wrap -------- */
+    /* -------- Top bar: clean two-row layout -------- */
     .editor-topbar {
+        flex-wrap: wrap;
         padding: 0.75rem 0 0.55rem;
         margin-bottom: 1.1rem;
     }
 
+    /* Row 1: back link + status */
     .editor-topbar-left {
         width: 100%;
     }
 
+    /* Row 2: Write/Preview toggle + Save Draft + Publish/Save Changes */
     .editor-topbar-actions {
         width: 100%;
-        justify-content: flex-end;
+        display: flex;
         align-items: center;
         flex-wrap: nowrap;
-        gap: 0.4rem;
+        justify-content: flex-end;
+        gap: 0.35rem;
     }
 
-    /* View toggle stays left; Save / Publish group right. Gap left by
-       margin-right:auto absorbs slack instead of wrapping a button out of
-       the row on narrow screens (esp. edit mode's longer "Save Changes"). */
+    .editor-topbar-actions .editor-stat {
+        display: none;                  /* word count hidden on mobile to save space */
+    }
+
     .editor-topbar-actions .editor-view-toggle {
-        margin-right: auto;
-        flex-shrink: 0;                /* hold natural width so "Preview" never clips */
+        margin-right: auto;             /* push Save/Publish to the right */
+        flex-shrink: 0;
     }
 
     .editor-topbar-actions .editor-view-toggle button {
-        min-height: 40px;
-        padding: 0 0.55rem;
+        height: 34px;
+        padding: 0 0.5rem;
         font-size: 0.76rem;
         white-space: nowrap;
     }
 
     .editor-topbar-actions .btn-editor {
-        flex: 0 1 auto;                 /* allow shrink on narrow screens so the row
-                                           never overflows the viewport */
-        min-height: 40px;
+        flex: 0 1 auto;                 /* allow shrink on narrow screens */
+        height: 34px;
         min-width: 0;
-        padding: 0 0.6rem;
-        font-size: 0.78rem;
+        padding: 0.4rem;
+        font-size: 0.76rem;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
-    .editor-topbar-actions .btn-editor-primary { padding: 0 0.7rem; }
+    .editor-topbar-actions .btn-editor-primary {
+        padding: 0.4rem 0.6rem;
+    }
 
-    /* -------- Toolbar: compact, primary controls first, horizontal scroll -------- */
+    /* -------- Toolbar: compact, wraps to second row on narrow screens -------- */
     .editor-toolbar {
         position: static;                    /* NOT sticky on mobile — don't block content */
-        width: 100%;                         /* lock to parent width so overflow-x works */
+        width: 100%;
         max-width: 100%;
         margin: 0.8rem 0 1rem;
-        overscroll-behavior-x: contain;      /* swiping the toolbar must not drag the page */
-        -webkit-overflow-scrolling: touch;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;                  /* NO vertical scroll — only horizontal */
-        /* Right-edge fade: visible cue that more controls sit off-screen */
-        mask-image: linear-gradient(
-            to right,
-            black 0,
-            black calc(100% - 28px),
-            transparent
-        );
-        -webkit-mask-image: linear-gradient(
-            to right,
-            black 0,
-            black calc(100% - 28px),
-            transparent
-        );
+        flex-wrap: wrap;
     }
 
-    /* Secondary alignment group (and its divider) moves to the END of the
-       scroll row so the essentials stay visible first: Bold/Italic/Underline
-       → block type → lists/quote → link/image → undo/redo → align. */
-    .editor-toolbar > :nth-child(7) { order: 10; }  /* align-left/center/right */
-    .editor-toolbar > :nth-child(8) { order: 11; }  /* separator after align */
-
-    /* Slightly larger touch targets than the 26px cutdown, still a single
-       compact row — no growth in toolbar height. */
     .editor-toolbar .tt-btn {
         min-width: 30px;
         height: 30px;
         padding: 0 4px;
     }
 
-    /* Format dropdown — compact on mobile */
     .format-select-trigger {
         height: 30px;
         padding: 0 16px 0 6px;
@@ -521,15 +474,10 @@
     /* -------- Writing canvas: content stays the hero, tighten gaps -------- */
     .editor-main,
     .editor-canvas {
-        min-width: 0;                       /* break the flex min-content chain so the
-                                               toolbar's overflow-x:auto can take over and
-                                               the page never scrolls horizontally */
+        min-width: 0;                       /* prevent flex min-content blowout */
     }
 
     .editor-main {
-        overflow-x: clip;                   /* belt-and-suspenders: never a page-level
-                                               horizontal scroll, without breaking the
-                                               toolbar's position:sticky (unlike hidden) */
         padding-bottom: 2.5rem;             /* less dead space above the footer */
     }
 
@@ -542,6 +490,10 @@
 
     .editor-prose,
     .editor-prose .ProseMirror {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
         margin-top: 1rem !important;
         min-height: 200px !important;
         max-height: clamp(300px, 40vh, 420px) !important;
@@ -550,6 +502,8 @@
         overflow-x: hidden !important;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
+        overflow-wrap: break-word;
+        word-break: break-word;
     }
 
     .editor-preview {
@@ -587,5 +541,31 @@
         max-width: 100%;
         margin-left: 0;
         margin-right: 0;
+    }
+}
+
+/* Extra-compact: 320px–340px phones (iPhone SE, older Androids).
+   Tighter padding + smaller buttons so the row 2 action bar never
+   overflows even with edit mode's longer "Save Changes" label. */
+@media (max-width: 340px) {
+    main {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .editor-topbar-actions .editor-view-toggle button {
+        height: 30px;
+        padding: 0 0.35rem;
+        font-size: 0.72rem;
+    }
+
+    .editor-topbar-actions .btn-editor {
+        height: 30px;
+        padding: 0.3rem;
+        font-size: 0.72rem;
+    }
+
+    .editor-topbar-actions .btn-editor-primary {
+        padding: 0.3rem 0.45rem;
     }
 }
