@@ -168,6 +168,18 @@
                         <span>✨</span>
                         <span>No cover image — one will be generated on publish</span>
                     </div>
+                    <!-- AI cover loader → fills the cover preview slot while the image renders -->
+                    <div id="ai-cover-loader" class="ai-cover-loader hidden" aria-live="polite" role="status">
+                        <div class="ai-loader-frame">
+                            <div class="ai-loader-sun"></div>
+                            <div class="ai-loader-range"></div>
+                            <div class="ai-loader-shimmer"></div>
+                        </div>
+                        <div class="ai-loader-caption">
+                            <p class="ai-loader-title">Dreaming up your cover</p>
+                            <p class="ai-loader-prompt-text" id="ai-loader-prompt-text"></p>
+                        </div>
+                    </div>
                     <div class="cover-actions">
                         <button type="button" id="btn-upload-img" class="btn-editor">📷 Upload</button>
                         <button type="button" id="btn-adjust-img" class="btn-editor hidden">✂️ Adjust</button>
@@ -249,7 +261,7 @@
 </main>
 
 <!-- Lumora editor (self-contained Tiptap module) -->
-<script type="module" src="{{ url_for('static', path='js/editor.js') }}?v=20260915h"></script>
+<script type="module" src="{{ url_for('static', path='js/editor.js') }}?v=20260918k"></script>
 
 {% endblock %}
 

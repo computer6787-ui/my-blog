@@ -22,7 +22,7 @@ import Link from "https://cdn.jsdelivr.net/npm/@tiptap/extension-link@2.14.0/dis
 import TiptapImage from "https://cdn.jsdelivr.net/npm/@tiptap/extension-image@2.14.0/dist/index.js";
 import TextAlign from "https://cdn.jsdelivr.net/npm/@tiptap/extension-text-align@2.14.0/dist/index.js";
 import Placeholder from "https://cdn.jsdelivr.net/npm/@tiptap/extension-placeholder@2.14.0/dist/index.js";
-import { showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260902";
+import { showLoading, hideLoading, notify, confirmDialog, IMAGE_MODEL } from "./config.js?v=20260918";
 
 const API_URL = "";
 
@@ -183,12 +183,12 @@ function generateSmartCoverImage(title, body, customPrompt, useRandomSeed) {
     const cleanTitle = (title || "beautiful cover").replace(/[{}()]/g, "").slice(0, 60);
     const prompt = customPrompt
         ? customPrompt.slice(0, 300)
-        : `digital art illustration for an article titled "${cleanTitle}": ${keywordsStr}, vibrant colors, cinematic lighting, high quality, 4k, no text`;
+        : `editorial magazine cover photograph for an article titled "${cleanTitle}": ${keywordsStr}, photorealistic, natural lighting, strong composition, subtle cinematic photography, tasteful color grading, realistic textures, clean layout with calm negative space for a headline overlay, no text, no watermark, no excessive glow, no oversaturated colors, tonally natural premium editorial quality`;
     const seed = useRandomSeed
         ? Math.floor(Math.random() * 2147483647)
         : hashString(customPrompt ? customPrompt : `${cleanTitle} ${keywordsStr}`);
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1200&height=630&seed=${seed}&nologo=true`;
-    return { url, theme: detectTheme(title, body) };
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1200&height=630&seed=${seed}&nologo=true&model=${IMAGE_MODEL}`;
+    return { url, query: prompt, theme: detectTheme(title, body) };
 }
 
 /* --------------------------------------------------------------------------
@@ -616,11 +616,50 @@ function handleEditorTransaction() {
 let pendingImageSource = "";
 let pendingImageFile = null;
 
+/* ==========================================================================
+   AI cover generation loader — fills the cover preview slot + button lock
+   ========================================================================== */
+let aiCoverGenerating = false;
+
+function showCoverLoader(promptText, btn) {
+    aiCoverGenerating = true;
+
+    // Block accidental clicks and make the button say "Generating…"
+    if (btn) {
+        btn.dataset.original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "🎲 Generating…";
+    }
+
+    const box = document.getElementById("ai-cover-loader");
+    if (!box) return;
+    const promptTextEl = document.getElementById("ai-loader-prompt-text");
+    if (promptTextEl) promptTextEl.textContent = promptText || "";
+
+    // The loader takes the preview/placeholder slot while the image renders,
+    // so the animation appears exactly where the cover preview will be.
+    if (el.coverPreview) el.coverPreview.classList.add("hidden");
+    if (el.coverPlaceholder) el.coverPlaceholder.classList.add("hidden");
+    box.classList.remove("hidden");
+}
+
+function hideCoverLoader() {
+    aiCoverGenerating = false;
+    if (el.surpriseBtn && el.surpriseBtn.dataset.original) {
+        el.surpriseBtn.disabled = false;
+        el.surpriseBtn.textContent = el.surpriseBtn.dataset.original;
+        delete el.surpriseBtn.dataset.original;
+    }
+    const box = document.getElementById("ai-cover-loader");
+    if (box) box.classList.add("hidden");
+}
+
 function updateCoverPreview(url) {
     const clean = (url || "").trim();
     if (clean) {
         el.coverPreviewImg.src = clean;
         el.coverPreviewImg.onload = () => {
+            hideCoverLoader();
             if (el.coverPreview) { el.coverPreview.classList.remove("hidden"); }
             if (el.coverPlaceholder) el.coverPlaceholder.classList.add("hidden");
             if (el.clearImgBtn) el.clearImgBtn.classList.remove("hidden");
@@ -628,8 +667,12 @@ function updateCoverPreview(url) {
             else if (el.adjustBtn) el.adjustBtn.classList.add("hidden");
         };
         el.coverPreviewImg.onerror = () => {
+            if (aiCoverGenerating) {
+                notify({ type: "warning", title: "Couldn't generate cover", text: "The AI cover failed on its first attempt. Try the Surprise button again or upload a photo." });
+            }
             if (el.coverPreview) el.coverPreview.classList.add("hidden");
             if (el.coverPlaceholder) el.coverPlaceholder.classList.remove("hidden");
+            hideCoverLoader();
         };
     } else {
         if (el.coverPreview) el.coverPreview.classList.add("hidden");
@@ -752,11 +795,13 @@ function wireCoverFlow() {
     if (el.clearImgBtn) el.clearImgBtn.addEventListener("click", resetCoverState);
     if (el.surpriseBtn) {
         el.surpriseBtn.addEventListener("click", () => {
+            if (aiCoverGenerating) return; // block accidental double-clicks
             const title = (el.title && el.title.value) || "";
             const body = editor ? editor.getText() : "";
             const customPrompt = el.aiCoverPrompt ? el.aiCoverPrompt.value.trim() : "";
             const cover = generateSmartCoverImage(title, body, customPrompt || undefined, true);
             if (el.imageUrl) el.imageUrl.value = cover.url;
+            showCoverLoader(cover.query, el.surpriseBtn);
             updateCoverPreview(cover.url);
         });
     }
@@ -857,6 +902,7 @@ async function submitArticle(published) {
             const cover = generateSmartCoverImage(title, editor ? editor.getText() : "", el.aiCoverPrompt ? el.aiCoverPrompt.value.trim() : "");
             image_url = cover.url;
             if (el.imageUrl) el.imageUrl.value = cover.url;
+            showCoverLoader(cover.query);
             updateCoverPreview(cover.url);
         }
 

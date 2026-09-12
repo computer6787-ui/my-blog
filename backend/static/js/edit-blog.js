@@ -1,4 +1,4 @@
-﻿import { API_URL, ROUTES, showLoading, hideLoading, notify, confirmDialog } from "./config.js?v=20260818";
+﻿import { API_URL, ROUTES, showLoading, hideLoading, notify, confirmDialog, IMAGE_MODEL } from "./config.js?v=20260918";
 import { setupMentionAutocomplete } from "./mention-autocomplete.js?v=20260909";
 
 const id = window.location.pathname.split("/").pop();
@@ -118,14 +118,9 @@ function extractContentKeywords(title, body, max = 6) {
     return sorted.slice(0, max);
 }
 
-// Generate smart cover image using Pollination AI (free, no API key required)
-// It "reads" the blog post by extracting content keywords from the title/body
-// and feeds them to Pollination so the cover reflects the actual story. If the
-// user provides a custom prompt via the UI, that prompt is used directly (and
-// also becomes the deterministic seed source). By default the seed is
-// deterministic — identical content + prompt always yields the same cover.
-// Pass useRandomSeed=true (e.g. when the user clicks "Surprise Image") to get
-// a fresh, different image on every click.
+
+
+
 function generateSmartCoverImage(title, body, customPrompt, useRandomSeed) {
     const contentKeywords = extractContentKeywords(title, body);
     const keywordsStr = contentKeywords.length
@@ -136,10 +131,11 @@ function generateSmartCoverImage(title, body, customPrompt, useRandomSeed) {
     const cleanTitle = (title || "beautiful cover").replace(/[{}()]/g, "").slice(0, 60);
 
     // If user supplied a custom prompt, it fully drives the generation;
-    // otherwise craft a prompt that reads the story's content keywords.
+    // otherwise craft an editorial-quality prompt that reads the story's
+    // content keywords and encourages a premium magazine-cover result.
     const prompt = customPrompt
         ? customPrompt.slice(0, 300)
-        : `digital art illustration for an article titled "${cleanTitle}": ${keywordsStr}, vibrant colors, cinematic lighting, high quality, 4k, no text`;
+        : `editorial magazine cover photograph for an article titled "${cleanTitle}": ${keywordsStr}, photorealistic, natural lighting, strong composition, subtle cinematic photography, tasteful color grading, realistic textures, clean layout with calm negative space for a headline overlay, no text, no watermark, no excessive glow, no oversaturated colors, tonally natural premium editorial quality`;
 
     // Deterministic seed by default (same content => same cover). When the user
     // explicitly requests regeneration (Surprise button), use a fresh random
@@ -148,7 +144,7 @@ function generateSmartCoverImage(title, body, customPrompt, useRandomSeed) {
         ? Math.floor(Math.random() * 2147483647)
         : hashString(customPrompt ? customPrompt : `${cleanTitle} ${keywordsStr}`);
 
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1200&height=630&seed=${seed}&nologo=true`;
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1200&height=630&seed=${seed}&nologo=true&model=${IMAGE_MODEL}`;
 
     return { url, query: prompt, theme: detectTheme(title, body) };
 }

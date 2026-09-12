@@ -4,6 +4,13 @@
 // was loaded via 127.0.0.1 (different hostname → cross-origin).
 export const API_URL = "";
 
+// AI model for automatic blog-cover generation (image.pollinations.ai).
+// Verified 2026-09-12 against the live endpoint: /models returns ["sana"],
+// and passing model=zimage / flux / turbo / flux-pro all respond with header
+// "x-model-used: sana" (the param is ignored — only "sana" is honored today).
+// Centralized here so the model can be changed in exactly one place.
+export const IMAGE_MODEL = "sana";
+
 export const ROUTES = {
     HOME: "/",
     LOGIN: "/login",
